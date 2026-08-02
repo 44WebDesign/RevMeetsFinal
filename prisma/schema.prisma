@@ -1,0 +1,167 @@
+// RevMeet — Prisma schema
+// Uses SQLite for zero-config local dev. To switch to Postgres, change the
+// datasource provider to "postgresql" and point DATABASE_URL at your server.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: SQLite does not support native enums. The following fields use String
+// and are constrained in the application layer (see src/lib/enums.ts + Zod):
+//   Role:        ENTHUSIAST | ORGANISER | VENUE | ADMIN
+//   EventType:   CAR_SHOW | TRACK_DAY | NIGHT_CRUISE | DRIFT_EVENT | STANCE_MEET
+//                | JDM_MEET | CLASSIC_CARS | SUPERCAR_MEET | MEET
+//   EventStatus: DRAFT | PUBLISHED | CANCELLED
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("ENTHUSIAST")
+  bio          String?
+  avatarColor  String   @default("#FF5F1F")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  club          Club?
+  venue         Venue?
+  events        Event[]        @relation("EventOrganiser")
+  registrations Registration[]
+  clubFollows   ClubFollow[]
+  venueFollows  VenueFollow[]
+  reviews       Review[]
+}
+
+// Organiser / car club profile (one per organiser account)
+model Club {
+  id          String   @id @default(cuid())
+  ownerId     String   @unique
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String   @unique
+  description String
+  location    String
+  region      String?
+  imageUrl    String?
+  website     String?
+  categories  String   @default("") // comma-separated tags
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events  Event[]
+  follows ClubFollow[]
+}
+
+// Venue profile — a place that promotes itself as a location for meets/events
+model Venue {
+  id          String   @id @default(cuid())
+  ownerId     String   @unique
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String   @unique
+  description String
+  address     String
+  city        String
+  postcode    String?
+  lat         Float
+  lng         Float
+  imageUrl    String?
+  website     String?
+  capacity    Int?
+  amenities   String   @default("") // comma-separated
+  categories  String   @default("") // comma-separated
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events  Event[]
+  follows VenueFollow[]
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  description String
+  type        String
+  status      String   @default("PUBLISHED")
+  startsAt    DateTime
+  endsAt      DateTime?
+  city        String
+  region      String?
+  address     String?
+  lat         Float
+  lng         Float
+  imageUrl    String?
+  capacity    Int?
+  priceInfo   String? // e.g. "Free" or "£15 on the gate"
+
+  organiserId String
+  organiser   User    @relation("EventOrganiser", fields: [organiserId], references: [id], onDelete: Cascade)
+
+  clubId String?
+  club   Club?   @relation(fields: [clubId], references: [id], onDelete: SetNull)
+
+  venueId String?
+  venue   Venue?  @relation(fields: [venueId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  registrations Registration[]
+  reviews       Review[]
+
+  @@index([type])
+  @@index([startsAt])
+}
+
+model Registration {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventId])
+}
+
+model ClubFollow {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, clubId])
+}
+
+model VenueFollow {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, venueId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int // 1-5
+  body      String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventId])
+}
