@@ -17,7 +17,7 @@ days, night cruises, drift events and meetups. Built for three audiences:
 | ---------- | -------------------------------------------------- |
 | Framework  | **Next.js 15** (App Router, React 18, TypeScript)  |
 | Styling    | Tailwind CSS + a small custom design system (CSS)  |
-| Database   | **Prisma ORM** with SQLite (swap to Postgres easily) |
+| Database   | **Prisma ORM** with PostgreSQL (Neon / Vercel Postgres) |
 | Auth       | Session cookies via **JWT (jose)** + bcrypt hashing |
 | Maps       | **Leaflet** with a dark CARTO basemap              |
 | Validation | **Zod** on every API boundary                      |
@@ -26,15 +26,41 @@ Everything lives in one full-stack codebase — no separate API server.
 
 ## Getting started
 
+RevMeet uses **PostgreSQL**. The easiest local database is a free
+[Neon](https://neon.tech) project (no install) — create one and copy its
+connection string. A local Postgres works too.
+
 ```bash
-npm install          # installs deps + generates the Prisma client
-npm run db:push      # create the SQLite schema (dev.db)
-npm run db:seed      # load demo clubs, venues and UK-wide events
-npm run dev          # http://localhost:3000
+cp .env.example .env         # then paste your DATABASE_URL + a JWT_SECRET
+npm install                  # installs deps + generates the Prisma client
+npm run db:push              # create the tables
+npm run db:seed              # load demo clubs, venues and UK-wide events
+npm run dev                  # http://localhost:3000
 ```
 
-> The committed `.env` holds development-only defaults so the app runs out of
-> the box. **Generate a real `JWT_SECRET` before deploying** (`openssl rand -base64 32`).
+> Generate a real `JWT_SECRET` with `openssl rand -base64 32`.
+
+## Deploying to Vercel
+
+1. **Push this repo to GitHub** (already done if you're reading this there).
+2. In Vercel: **Add New → Project → import the repo**. It auto-detects Next.js.
+3. **Add a database:** in the project, go to **Storage → Create Database →
+   Postgres** (Neon-backed). Vercel adds the connection env vars automatically.
+4. **Set environment variables** (Project → Settings → Environment Variables):
+   - `DATABASE_URL` — your Postgres **pooled** connection string (from step 3,
+     or a Neon pooled URL).
+   - `JWT_SECRET` — run `openssl rand -base64 32` and paste the result.
+   - *(optional)* `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` for Google login,
+     with redirect URI `https://<your-domain>/api/auth/google/callback`.
+5. **Deploy.** Vercel runs `prisma generate && next build`.
+6. **Create the tables + demo data once** (from your machine, pointing at the
+   production DB — use the **non-pooling** URL for this step):
+   ```bash
+   DATABASE_URL="<prod-non-pooling-url>" npx prisma db push
+   DATABASE_URL="<prod-non-pooling-url>" npm run db:seed   # optional demo data
+   ```
+
+That's it — your app is live at the Vercel URL.
 
 ### Demo logins
 
@@ -83,14 +109,6 @@ src/
   components/        # UI (cards, map, forms, nav)
   lib/               # prisma client, auth, validation (zod), queries, enums, utils
 ```
-
-## Switching to Postgres
-
-1. In `prisma/schema.prisma` change the datasource `provider` to `"postgresql"`.
-2. Point `DATABASE_URL` at your Postgres instance.
-3. `npm run db:push && npm run db:seed`.
-
-The app code is database-agnostic; only the datasource block changes.
 
 ## Notes & next steps
 

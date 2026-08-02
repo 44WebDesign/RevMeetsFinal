@@ -19,14 +19,15 @@ function eventWhere(filters: EventFilters) {
   const where: Record<string, unknown> = { status: "PUBLISHED" };
   const and: unknown[] = [];
 
+  const ci = "insensitive" as const;
   if (filters.type) where.type = filters.type;
-  if (filters.city) where.city = { contains: filters.city };
+  if (filters.city) where.city = { contains: filters.city, mode: ci };
   if (filters.q) {
     and.push({
       OR: [
-        { title: { contains: filters.q } },
-        { description: { contains: filters.q } },
-        { city: { contains: filters.q } },
+        { title: { contains: filters.q, mode: ci } },
+        { description: { contains: filters.q, mode: ci } },
+        { city: { contains: filters.q, mode: ci } },
       ],
     });
   }
@@ -124,9 +125,9 @@ export async function getClubs(q?: string): Promise<ClubCardData[]> {
     where: q
       ? {
           OR: [
-            { name: { contains: q } },
-            { description: { contains: q } },
-            { location: { contains: q } },
+            { name: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+            { location: { contains: q, mode: "insensitive" } },
           ],
         }
       : undefined,
@@ -153,9 +154,9 @@ export async function getVenues(q?: string): Promise<VenueCardData[]> {
     where: q
       ? {
           OR: [
-            { name: { contains: q } },
-            { description: { contains: q } },
-            { city: { contains: q } },
+            { name: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+            { city: { contains: q, mode: "insensitive" } },
           ],
         }
       : undefined,

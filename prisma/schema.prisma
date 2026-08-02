@@ -1,18 +1,18 @@
 // RevMeet — Prisma schema
-// Uses SQLite for zero-config local dev. To switch to Postgres, change the
-// datasource provider to "postgresql" and point DATABASE_URL at your server.
+// PostgreSQL (works on Vercel/Neon and any Postgres). Point DATABASE_URL at
+// your database. Locally you can use a free Neon database or local Postgres.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// NOTE: SQLite does not support native enums. The following fields use String
-// and are constrained in the application layer (see src/lib/enums.ts + Zod):
+// Enum-like values are stored as String and constrained in the application
+// layer (see src/lib/enums.ts + Zod):
 //   Role:        ENTHUSIAST | ORGANISER | VENUE | ADMIN
 //   EventType:   CAR_SHOW | TRACK_DAY | NIGHT_CRUISE | DRIFT_EVENT | STANCE_MEET
 //                | JDM_MEET | CLASSIC_CARS | SUPERCAR_MEET | MEET

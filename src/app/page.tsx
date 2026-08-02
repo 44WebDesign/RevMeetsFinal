@@ -13,6 +13,9 @@ import {
 } from "@/lib/queries";
 import { EVENT_TYPE_COLORS } from "@/lib/enums";
 
+// Rendered per-request so the build never needs a live database connection.
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [events, clubs, venues, stats, mapPoints] = await Promise.all([
     getEvents({ take: 4 }),
