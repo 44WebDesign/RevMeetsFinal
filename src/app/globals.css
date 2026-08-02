@@ -5,6 +5,7 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
+  /* --font-bebas / --font-inter are injected by next/font (see layout.tsx). */
   --or: #ff5f1f;
   --ord: #e04e10;
   --bg: #080808;

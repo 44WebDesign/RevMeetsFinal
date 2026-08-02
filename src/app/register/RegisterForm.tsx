@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { GoogleButton, OrDivider } from "@/components/GoogleButton";
 
 const ROLE_OPTIONS = [
   { value: "ENTHUSIAST", label: "Car Enthusiast", icon: "fa-user", blurb: "Find & attend events" },
@@ -10,7 +11,7 @@ const ROLE_OPTIONS = [
   { value: "VENUE", label: "Venue", icon: "fa-warehouse", blurb: "Promote your location" },
 ] as const;
 
-export function RegisterForm() {
+export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
   const sp = useSearchParams();
   const initialRole = (sp.get("role") as string) || "ENTHUSIAST";
@@ -75,6 +76,13 @@ export function RegisterForm() {
           </button>
         ))}
       </div>
+
+      {googleEnabled && (
+        <>
+          <GoogleButton role={role} label="Sign up with Google" />
+          <OrDivider />
+        </>
+      )}
 
       <div style={{ marginBottom: "1rem" }}>
         <label className="field-label">Full name</label>

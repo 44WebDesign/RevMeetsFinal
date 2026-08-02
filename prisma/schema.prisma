@@ -21,11 +21,13 @@ datasource db {
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
-  passwordHash String
+  passwordHash String? // null for accounts that only sign in via Google
+  googleId     String?  @unique
   name         String
   role         String   @default("ENTHUSIAST")
   bio          String?
   avatarColor  String   @default("#FF5F1F")
+  avatarUrl    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

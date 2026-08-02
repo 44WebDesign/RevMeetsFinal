@@ -9,7 +9,10 @@ export const POST = handle(async (req: Request) => {
   const data = loginSchema.parse(body);
 
   const user = await prisma.user.findUnique({ where: { email: data.email.toLowerCase() } });
-  if (!user || !(await verifyPassword(data.password, user.passwordHash))) {
+  if (user && !user.passwordHash) {
+    return fail("This account uses Google sign-in — use the Google button instead.", 401);
+  }
+  if (!user || !user.passwordHash || !(await verifyPassword(data.password, user.passwordHash))) {
     return fail("Invalid email or password", 401);
   }
 

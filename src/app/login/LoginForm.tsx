@@ -3,15 +3,25 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { GoogleButton, OrDivider } from "@/components/GoogleButton";
 
-export function LoginForm() {
+const OAUTH_ERRORS: Record<string, string> = {
+  google_not_configured: "Google sign-in isn't configured on this server yet.",
+  google_denied: "Google sign-in was cancelled.",
+  google_failed: "Google sign-in failed. Please try again.",
+};
+
+export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
   const sp = useSearchParams();
   const next = sp.get("next") || "/dashboard";
+  const oauthError = sp.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    oauthError ? OAUTH_ERRORS[oauthError] ?? "Sign-in failed." : null,
+  );
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -35,6 +45,12 @@ export function LoginForm() {
 
   return (
     <form onSubmit={submit} className="card-surface" style={{ padding: "2rem" }}>
+      {googleEnabled && (
+        <>
+          <GoogleButton next={next} label="Sign in with Google" />
+          <OrDivider />
+        </>
+      )}
       <div style={{ marginBottom: "1rem" }}>
         <label className="field-label">Email</label>
         <input type="email" className="field-input" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" />

@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import { RegisterForm } from "./RegisterForm";
+import { googleConfigured } from "@/lib/google";
 
 export const metadata = { title: "Sign Up — RevMeet" };
 
 export default function RegisterPage() {
+  const googleEnabled = googleConfigured();
   return (
     <section className="section" style={{ background: "var(--bg)", minHeight: "calc(100vh - 64px)" }}>
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
@@ -12,7 +14,7 @@ export default function RegisterPage() {
           <div className="sec-title" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>CREATE YOUR ACCOUNT</div>
         </div>
         <Suspense fallback={<div className="card-surface" style={{ padding: "2rem" }}>Loading…</div>}>
-          <RegisterForm />
+          <RegisterForm googleEnabled={googleEnabled} />
         </Suspense>
       </div>
     </section>

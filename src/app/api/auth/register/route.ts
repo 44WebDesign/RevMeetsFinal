@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, createSession } from "@/lib/auth";
 import { registerSchema } from "@/lib/validation";
 import { handle, ok, fail } from "@/lib/api";
-import { uniqueSlug } from "@/lib/utils";
+import { bootstrapProfileForRole } from "@/lib/profile";
 
 const AVATAR_COLORS = ["#FF5F1F", "#E040FB", "#00BCD4", "#4CAF50", "#FFD700", "#2196F3"];
 
@@ -26,30 +26,7 @@ export const POST = handle(async (req: Request) => {
   });
 
   // Bootstrap an empty club or venue profile so hosts/venues can fill it in.
-  if (data.role === "ORGANISER") {
-    await prisma.club.create({
-      data: {
-        ownerId: user.id,
-        name: `${data.name}'s Club`,
-        slug: uniqueSlug(`${data.name}-club`),
-        description: "Tell the community about your club and the events you run.",
-        location: "United Kingdom",
-      },
-    });
-  } else if (data.role === "VENUE") {
-    await prisma.venue.create({
-      data: {
-        ownerId: user.id,
-        name: `${data.name}`,
-        slug: uniqueSlug(data.name),
-        description: "Describe your venue and why it's great for car meets and events.",
-        address: "",
-        city: "United Kingdom",
-        lat: 52.5,
-        lng: -1.9,
-      },
-    });
-  }
+  await bootstrapProfileForRole(user.id, data.role, data.name);
 
   await createSession({
     sub: user.id,
