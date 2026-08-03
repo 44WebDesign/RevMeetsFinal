@@ -7,8 +7,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // Pooled connection for the app at runtime (serverless-friendly).
+  url       = env("DATABASE_URL")
+  // Direct (unpooled) connection used for schema changes / `db push`.
+  // Neon's Vercel integration provides DATABASE_URL_UNPOOLED automatically.
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // Enum-like values are stored as String and constrained in the application
