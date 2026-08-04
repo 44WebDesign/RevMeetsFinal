@@ -3,7 +3,12 @@ import { getVenues } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Venues — RevMeet" };
+export const metadata = {
+  title: "Venues",
+  description:
+    "Discover venues across the UK offering themselves up for car meets, shows and track days.",
+  alternates: { canonical: "/venues" },
+};
 
 export default async function VenuesPage({
   searchParams,

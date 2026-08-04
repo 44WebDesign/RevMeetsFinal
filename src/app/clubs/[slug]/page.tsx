@@ -1,20 +1,17 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
+import { JsonLd } from "@/components/JsonLd";
+import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-export default async function ClubDetail({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const session = await getSession();
-
-  const club = await prisma.club.findUnique({
+const getClub = cache((slug: string) =>
+  prisma.club.findUnique({
     where: { slug },
     include: {
       _count: { select: { follows: true } },
@@ -24,7 +21,44 @@ export default async function ClubDetail({
         include: { _count: { select: { registrations: true } } },
       },
     },
-  });
+  }),
+);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const club = await getClub(slug);
+  if (!club) return { title: "Club not found" };
+
+  const desc =
+    club.description.length > 155 ? `${club.description.slice(0, 152)}…` : club.description;
+
+  return {
+    title: `${club.name} — Car Club in ${club.location}`,
+    description: desc,
+    alternates: { canonical: `/clubs/${club.slug}` },
+    openGraph: {
+      type: "profile",
+      title: club.name,
+      description: desc,
+      url: absoluteUrl(`/clubs/${club.slug}`),
+      ...(club.imageUrl ? { images: [{ url: club.imageUrl }] } : {}),
+    },
+  };
+}
+
+export default async function ClubDetail({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const session = await getSession();
+
+  const club = await getClub(slug);
 
   if (!club) notFound();
 
@@ -37,8 +71,26 @@ export default async function ClubDetail({
   const cats = club.categories.split(",").map((c) => c.trim()).filter(Boolean);
   const fallback = "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=80";
 
+  const clubLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: club.name,
+    description: club.description,
+    url: absoluteUrl(`/clubs/${club.slug}`),
+    ...(club.imageUrl ? { logo: club.imageUrl, image: club.imageUrl } : {}),
+    ...(club.website ? { sameAs: [club.website] } : {}),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: club.location,
+      addressRegion: club.region || undefined,
+      addressCountry: "GB",
+    },
+    knowsAbout: cats,
+  };
+
   return (
     <>
+      <JsonLd data={clubLd} />
       <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={club.imageUrl || fallback} alt={club.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(.4)" }} />

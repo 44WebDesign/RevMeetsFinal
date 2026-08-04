@@ -4,7 +4,7 @@ import { VenueForm } from "@/components/VenueForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Edit Venue — RevMeet" };
+export const metadata = { title: "Edit Venue", robots: { index: false } };
 
 export default async function VenueProfilePage() {
   const user = await getCurrentUser();

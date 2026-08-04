@@ -8,6 +8,14 @@ import { eventTypeLabel } from "@/lib/enums";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Browse Car Events",
+  description:
+    "Search the UK's car event calendar — car shows, track days, night cruises, drift events and meets. Filter by location, date and type, or explore on the map.",
+  // Filtered variants (?type/?city) canonicalise here to avoid duplicate content.
+  alternates: { canonical: "/events" },
+};
+
 type SearchParams = Promise<{
   q?: string;
   city?: string;

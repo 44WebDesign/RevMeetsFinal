@@ -4,7 +4,7 @@ import { ClubForm } from "@/components/ClubForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Edit Club — RevMeet" };
+export const metadata = { title: "Edit Club", robots: { index: false } };
 
 export default async function ClubProfilePage() {
   const user = await getCurrentUser();

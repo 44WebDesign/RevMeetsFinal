@@ -4,7 +4,7 @@ import { EventForm } from "@/components/EventForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Create Event — RevMeet" };
+export const metadata = { title: "Create Event", robots: { index: false } };
 
 export default async function NewEventPage() {
   const user = await getCurrentUser();

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { LoginForm } from "./LoginForm";
 import { googleConfigured } from "@/lib/google";
 
-export const metadata = { title: "Log In — RevMeet" };
+export const metadata = { title: "Log In", robots: { index: false, follow: true } };
 
 export default function LoginPage() {
   const googleEnabled = googleConfigured();

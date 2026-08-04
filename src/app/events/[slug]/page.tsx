@@ -1,13 +1,70 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { MapView } from "@/components/MapView";
 import { AttendButton } from "@/components/AttendButton";
+import { JsonLd } from "@/components/JsonLd";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDateTime } from "@/lib/utils";
+import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
+
+// Cached so generateMetadata and the page share a single query per request.
+const getEvent = cache((slug: string) =>
+  prisma.event.findUnique({
+    where: { slug },
+    include: {
+      club: true,
+      venue: true,
+      organiser: { select: { name: true, avatarColor: true } },
+      _count: { select: { registrations: true } },
+    },
+  }),
+);
+
+const FALLBACK_EVENT_IMG =
+  "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const event = await getEvent(slug);
+  if (!event) return { title: "Event not found" };
+
+  const when = formatDateTime(event.startsAt);
+  const desc =
+    event.description.length > 155
+      ? `${event.description.slice(0, 152)}…`
+      : event.description;
+  const url = absoluteUrl(`/events/${event.slug}`);
+  const image = event.imageUrl || FALLBACK_EVENT_IMG;
+
+  return {
+    title: `${event.title} — ${event.city}, ${when}`,
+    description: desc,
+    alternates: { canonical: `/events/${event.slug}` },
+    openGraph: {
+      type: "article",
+      title: event.title,
+      description: desc,
+      url,
+      images: [{ url: image }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.title,
+      description: desc,
+      images: [image],
+    },
+  };
+}
 
 export default async function EventDetail({
   params,
@@ -17,15 +74,7 @@ export default async function EventDetail({
   const { slug } = await params;
   const session = await getSession();
 
-  const event = await prisma.event.findUnique({
-    where: { slug },
-    include: {
-      club: true,
-      venue: true,
-      organiser: { select: { name: true, avatarColor: true } },
-      _count: { select: { registrations: true } },
-    },
-  });
+  const event = await getEvent(slug);
 
   if (!event) notFound();
 
@@ -37,11 +86,65 @@ export default async function EventDetail({
 
   const color = eventTypeColor(event.type);
   const full = !!event.capacity && event._count.registrations >= event.capacity;
-  const fallbackImg =
-    "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80";
+  const fallbackImg = FALLBACK_EVENT_IMG;
+
+  // Schema.org Event — powers Google's event rich results.
+  const priceMatch = event.priceInfo?.match(/([\d]+(?:\.\d{1,2})?)/);
+  const isFree = /free/i.test(event.priceInfo ?? "");
+  const offers =
+    isFree || priceMatch
+      ? {
+          "@type": "Offer",
+          price: isFree ? 0 : Number(priceMatch![1]),
+          priceCurrency: "GBP",
+          availability: full
+            ? "https://schema.org/SoldOut"
+            : "https://schema.org/InStock",
+          url: absoluteUrl(`/events/${event.slug}`),
+        }
+      : undefined;
+
+  const eventLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description,
+    startDate: event.startsAt.toISOString(),
+    ...(event.endsAt ? { endDate: event.endsAt.toISOString() } : {}),
+    eventStatus:
+      event.status === "CANCELLED"
+        ? "https://schema.org/EventCancelled"
+        : "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    image: [event.imageUrl || fallbackImg],
+    url: absoluteUrl(`/events/${event.slug}`),
+    location: {
+      "@type": "Place",
+      name: event.venue?.name || `${event.city}${event.region ? `, ${event.region}` : ""}`,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: event.address || undefined,
+        addressLocality: event.city,
+        addressRegion: event.region || undefined,
+        addressCountry: "GB",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: event.lat,
+        longitude: event.lng,
+      },
+    },
+    organizer: {
+      "@type": "Organization",
+      name: event.club?.name || event.organiser.name,
+      ...(event.club ? { url: absoluteUrl(`/clubs/${event.club.slug}`) } : {}),
+    },
+    ...(offers ? { offers } : {}),
+  };
 
   return (
     <>
+      <JsonLd data={eventLd} />
       {/* Hero image */}
       <div style={{ position: "relative", height: 360, overflow: "hidden" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

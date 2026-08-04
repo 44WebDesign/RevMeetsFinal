@@ -1,21 +1,18 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { MapView } from "@/components/MapView";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
+import { JsonLd } from "@/components/JsonLd";
+import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-export default async function VenueDetail({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const session = await getSession();
-
-  const venue = await prisma.venue.findUnique({
+const getVenue = cache((slug: string) =>
+  prisma.venue.findUnique({
     where: { slug },
     include: {
       _count: { select: { follows: true } },
@@ -25,7 +22,44 @@ export default async function VenueDetail({
         include: { _count: { select: { registrations: true } }, club: { select: { name: true } } },
       },
     },
-  });
+  }),
+);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const venue = await getVenue(slug);
+  if (!venue) return { title: "Venue not found" };
+
+  const desc =
+    venue.description.length > 155 ? `${venue.description.slice(0, 152)}…` : venue.description;
+
+  return {
+    title: `${venue.name} — Car Event Venue in ${venue.city}`,
+    description: desc,
+    alternates: { canonical: `/venues/${venue.slug}` },
+    openGraph: {
+      type: "profile",
+      title: venue.name,
+      description: desc,
+      url: absoluteUrl(`/venues/${venue.slug}`),
+      ...(venue.imageUrl ? { images: [{ url: venue.imageUrl }] } : {}),
+    },
+  };
+}
+
+export default async function VenueDetail({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const session = await getSession();
+
+  const venue = await getVenue(slug);
 
   if (!venue) notFound();
 
@@ -39,8 +73,33 @@ export default async function VenueDetail({
   const amenities = venue.amenities.split(",").map((c) => c.trim()).filter(Boolean);
   const fallback = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80";
 
+  const venueLd = {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    name: venue.name,
+    description: venue.description,
+    url: absoluteUrl(`/venues/${venue.slug}`),
+    ...(venue.imageUrl ? { image: venue.imageUrl } : {}),
+    ...(venue.website ? { sameAs: [venue.website] } : {}),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: venue.address || undefined,
+      addressLocality: venue.city,
+      postalCode: venue.postcode || undefined,
+      addressCountry: "GB",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: venue.lat,
+      longitude: venue.lng,
+    },
+    ...(venue.capacity ? { maximumAttendeeCapacity: venue.capacity } : {}),
+    ...(amenities.length ? { amenityFeature: amenities.map((a) => ({ "@type": "LocationFeatureSpecification", name: a, value: true })) } : {}),
+  };
+
   return (
     <>
+      <JsonLd data={venueLd} />
       <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={venue.imageUrl || fallback} alt={venue.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(.4)" }} />

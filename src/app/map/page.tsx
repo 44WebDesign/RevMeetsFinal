@@ -4,8 +4,9 @@ import { getEventMapPoints, getVenueMapPoints } from "@/lib/queries";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Interactive Map — RevMeet",
+  title: "Interactive Map",
   description: "Explore every car event and venue across the UK on one interactive map.",
+  alternates: { canonical: "/map" },
 };
 
 export default async function MapPage() {

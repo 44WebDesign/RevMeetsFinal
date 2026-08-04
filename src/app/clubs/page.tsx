@@ -3,7 +3,12 @@ import { getClubs } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Car Clubs — RevMeet" };
+export const metadata = {
+  title: "Car Clubs",
+  description:
+    "Find and follow active UK car clubs organising meets, shows and track days near you.",
+  alternates: { canonical: "/clubs" },
+};
 
 export default async function ClubsPage({
   searchParams,

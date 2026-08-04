@@ -5,7 +5,7 @@ import { EventForm, type EventFormValues } from "@/components/EventForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Manage Event — RevMeet" };
+export const metadata = { title: "Manage Event", robots: { index: false } };
 
 function toLocalInput(date: Date | null): string {
   if (!date) return "";

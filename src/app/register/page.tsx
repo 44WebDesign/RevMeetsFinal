@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { RegisterForm } from "./RegisterForm";
 import { googleConfigured } from "@/lib/google";
 
-export const metadata = { title: "Sign Up — RevMeet" };
+export const metadata = { title: "Sign Up", robots: { index: false, follow: true } };
 
 export default function RegisterPage() {
   const googleEnabled = googleConfigured();
