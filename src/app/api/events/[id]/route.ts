@@ -39,6 +39,7 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
       ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl || null } : {}),
       ...(data.capacity !== undefined ? { capacity: data.capacity || null } : {}),
       ...(data.priceInfo !== undefined ? { priceInfo: data.priceInfo || null } : {}),
+      ...(data.amenities !== undefined ? { amenities: data.amenities || "" } : {}),
       ...(data.venueId !== undefined ? { venueId: data.venueId || null } : {}),
     },
   });

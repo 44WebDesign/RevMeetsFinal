@@ -12,6 +12,9 @@ export type VenueCardData = {
   categories: string;
   followers: number;
   capacity?: number | null;
+  amenities?: string;
+  lat?: number;
+  lng?: number;
 };
 
 const FALLBACK =

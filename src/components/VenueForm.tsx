@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LocationPicker } from "./LocationPicker";
 import { ImageField } from "./ImageField";
+import { AmenityPicker } from "./AmenityPicker";
+import { amenityKeys, serializeAmenities } from "@/lib/amenities";
 
 export type VenueFormValues = {
   name: string;
@@ -103,8 +105,11 @@ export function VenueForm({ initial }: { initial: VenueFormValues }) {
         </div>
       </div>
       <div>
-        <label className="field-label">Amenities (comma separated)</label>
-        <input className="field-input" value={v.amenities} onChange={(e) => set("amenities", e.target.value)} placeholder="Parking, Toilets, Catering, Floodlights" />
+        <label className="field-label">Amenities — select everything your venue offers</label>
+        <AmenityPicker
+          value={amenityKeys(v.amenities)}
+          onChange={(keys) => set("amenities", serializeAmenities(keys))}
+        />
       </div>
       <ImageField label="Photo (optional)" value={v.imageUrl} onChange={(url) => set("imageUrl", url)} />
       <div>

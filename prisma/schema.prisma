@@ -106,6 +106,9 @@ model Event {
   imageUrl    String?
   capacity    Int?
   priceInfo   String? // e.g. "Free" or "£15 on the gate"
+  // Comma-separated amenity keys (see src/lib/amenities.ts). Defaults from the
+  // selected venue at creation; editable per event.
+  amenities   String  @default("")
 
   organiserId String
   organiser   User    @relation("EventOrganiser", fields: [organiserId], references: [id], onDelete: Cascade)

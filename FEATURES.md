@@ -35,6 +35,8 @@
 - ✅ Event statuses: Published / Draft (hidden) / Cancelled
 - ✅ Event fields: title, description, type, start/end time, city, region, address, price info, capacity, cover image, exact map location
 - ✅ **Click-to-pin location picker** (draggable marker) in the event form
+- ✅ **Venue selector** in the event form — linking a venue pulls through its amenities and drops the pin at its location
+- ✅ **Per-event amenities with icons** ("What's There" block on the event page): defaults from the selected venue, individually add/removable per event; included in the event's structured data
 - ✅ Search & filters: keyword, city, event type, date range (case-insensitive)
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
@@ -60,6 +62,7 @@
 ## 6. Venues
 
 - ✅ Venues promote themselves as event locations: description, address, capacity, amenities, categories, photo, website, exact map pin
+- ✅ **Amenity catalog with icons** (22 options: parking, hot food, alcoholic drinks, kids area, smoking area, EV charging, track access, dyno…) — venues tick what they offer; shown as an icon block on the venue page
 - ✅ Venue directory (`/venues`) with search
 - ✅ **Follow / unfollow** venues
 - ✅ Events held at a venue listed on its profile
@@ -119,6 +122,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `5f2e2aa` | Amenity catalog with icons: venue amenity picker, venue selector in the event form (pulls amenities + location through), per-event amenity add/remove, icon blocks on venue + event pages, amenities in structured data |
 | 2026-08-04 | `a28419f` | Image optimization (`next/image`), category + city SEO landing pages, email notifications (confirmations, follower alerts, reminder cron), event reviews & ratings with `AggregateRating`, direct image uploads (Vercel Blob) |
 | 2026-08-04 | `bf31f9e` | SEO layer: per-page metadata, Schema.org JSON-LD (Event/Organization/Place/WebSite), dynamic sitemap, robots.txt, favicon, noindex on private pages |
 | 2026-08-03 | `a0da6a0` | Guarded one-time demo-data seed endpoint (`/api/dev/seed`) |

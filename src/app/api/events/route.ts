@@ -32,13 +32,16 @@ export const POST = handle(async (req: Request) => {
 
   // If a venueId is supplied, make sure it exists.
   let venueId: string | null = null;
+  let venueAmenities = "";
   if (data.venueId) {
     const venue = await prisma.venue.findUnique({ where: { id: data.venueId } });
     if (!venue) return fail("Selected venue not found", 400);
     venueId = venue.id;
+    venueAmenities = venue.amenities;
   } else if (user.venue) {
     // A venue account defaults its own events to its venue.
     venueId = user.venue.id;
+    venueAmenities = user.venue.amenities;
   }
 
   const event = await prisma.event.create({
@@ -58,6 +61,8 @@ export const POST = handle(async (req: Request) => {
       imageUrl: data.imageUrl || null,
       capacity: data.capacity || null,
       priceInfo: data.priceInfo || null,
+      // Explicit selection wins; otherwise inherit the venue's amenities.
+      amenities: data.amenities ?? venueAmenities,
       organiserId: user.id,
       clubId,
       venueId,

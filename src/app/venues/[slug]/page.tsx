@@ -7,8 +7,10 @@ import { getSession } from "@/lib/auth";
 import { MapView } from "@/components/MapView";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
+import { AmenityList } from "@/components/AmenityList";
 import { JsonLd } from "@/components/JsonLd";
 import { absoluteUrl } from "@/lib/site";
+import { parseAmenities } from "@/lib/amenities";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +73,7 @@ export default async function VenueDetail({
     : false;
 
   const cats = venue.categories.split(",").map((c) => c.trim()).filter(Boolean);
-  const amenities = venue.amenities.split(",").map((c) => c.trim()).filter(Boolean);
+  const amenities = parseAmenities(venue.amenities);
   const fallback = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80";
 
   const venueLd = {
@@ -95,7 +97,7 @@ export default async function VenueDetail({
       longitude: venue.lng,
     },
     ...(venue.capacity ? { maximumAttendeeCapacity: venue.capacity } : {}),
-    ...(amenities.length ? { amenityFeature: amenities.map((a) => ({ "@type": "LocationFeatureSpecification", name: a, value: true })) } : {}),
+    ...(amenities.length ? { amenityFeature: amenities.map((a) => ({ "@type": "LocationFeatureSpecification", name: a.label, value: true })) } : {}),
   };
 
   return (
@@ -133,13 +135,7 @@ export default async function VenueDetail({
               {amenities.length > 0 && (
                 <>
                   <h2 className="hd" style={{ fontSize: "1.5rem", margin: "2rem 0 1rem" }}>Amenities</h2>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: ".5rem" }}>
-                    {amenities.map((a) => (
-                      <span key={a} className="tag" style={{ cursor: "default" }}>
-                        <i className="fas fa-check" style={{ color: "#00BCD4", marginRight: 5 }} /> {a}
-                      </span>
-                    ))}
-                  </div>
+                  <AmenityList amenities={venue.amenities} />
                 </>
               )}
 

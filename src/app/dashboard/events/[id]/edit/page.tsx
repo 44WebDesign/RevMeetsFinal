@@ -42,6 +42,8 @@ export default async function EditEventPage({
     lat: event.lat,
     lng: event.lng,
     status: event.status,
+    venueId: event.venueId ?? "",
+    amenities: event.amenities ?? "",
   };
 
   return (

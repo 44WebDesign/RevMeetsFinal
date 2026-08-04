@@ -33,6 +33,7 @@ export const eventSchema = z.object({
   capacity: z.coerce.number().int().positive().optional().nullable(),
   priceInfo: z.string().max(80).optional().nullable(),
   venueId: z.string().optional().nullable(),
+  amenities: z.string().max(600).optional().nullable(),
   status: z.enum(["DRAFT", "PUBLISHED", "CANCELLED"]).optional(),
 });
 

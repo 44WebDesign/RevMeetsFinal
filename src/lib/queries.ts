@@ -174,6 +174,9 @@ export async function getVenues(q?: string): Promise<VenueCardData[]> {
     categories: v.categories,
     followers: v._count.follows,
     capacity: v.capacity,
+    amenities: v.amenities,
+    lat: v.lat,
+    lng: v.lng,
   }));
 }
 

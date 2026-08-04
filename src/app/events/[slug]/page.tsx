@@ -8,7 +8,9 @@ import { getSession } from "@/lib/auth";
 import { MapView } from "@/components/MapView";
 import { AttendButton } from "@/components/AttendButton";
 import { ReviewSection } from "@/components/ReviewSection";
+import { AmenityList } from "@/components/AmenityList";
 import { JsonLd } from "@/components/JsonLd";
+import { parseAmenities } from "@/lib/amenities";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDateTime } from "@/lib/utils";
 import { absoluteUrl } from "@/lib/site";
@@ -114,6 +116,11 @@ export default async function EventDetail({
   const full = !!event.capacity && event._count.registrations >= event.capacity;
   const fallbackImg = FALLBACK_EVENT_IMG;
 
+  // Event's own amenity selection; events created before this feature fall
+  // back to their venue's amenities.
+  const amenitiesStr = event.amenities || event.venue?.amenities || "";
+  const amenityItems = parseAmenities(amenitiesStr);
+
   // Schema.org Event — powers Google's event rich results.
   const priceMatch = event.priceInfo?.match(/([\d]+(?:\.\d{1,2})?)/);
   const isFree = /free/i.test(event.priceInfo ?? "");
@@ -159,6 +166,15 @@ export default async function EventDetail({
         latitude: event.lat,
         longitude: event.lng,
       },
+      ...(amenityItems.length
+        ? {
+            amenityFeature: amenityItems.map((a) => ({
+              "@type": "LocationFeatureSpecification",
+              name: a.label,
+              value: true,
+            })),
+          }
+        : {}),
     },
     organizer: {
       "@type": "Organization",
@@ -233,6 +249,15 @@ export default async function EventDetail({
               <p style={{ color: "rgba(245,245,245,.82)", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
                 {event.description}
               </p>
+
+              {amenityItems.length > 0 && (
+                <>
+                  <h2 className="hd" style={{ fontSize: "1.75rem", margin: "2.5rem 0 1rem" }}>
+                    What&apos;s There
+                  </h2>
+                  <AmenityList amenities={amenitiesStr} accent={color} />
+                </>
+              )}
 
               {event.address && (
                 <>

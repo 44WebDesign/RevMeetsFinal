@@ -1,10 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LocationPicker } from "./LocationPicker";
 import { ImageField } from "./ImageField";
+import { AmenityPicker } from "./AmenityPicker";
+import { amenityKeys, serializeAmenities } from "@/lib/amenities";
 import { EVENT_TYPES, EVENT_TYPE_LABELS } from "@/lib/enums";
+
+type VenueOption = {
+  id: string;
+  name: string;
+  city: string;
+  amenities?: string;
+  lat?: number;
+  lng?: number;
+};
 
 export type EventFormValues = {
   title: string;
@@ -21,6 +32,8 @@ export type EventFormValues = {
   lat: number;
   lng: number;
   status: string;
+  venueId: string;
+  amenities: string;
 };
 
 const EMPTY: EventFormValues = {
@@ -38,6 +51,8 @@ const EMPTY: EventFormValues = {
   lat: 52.4862,
   lng: -1.8904,
   status: "PUBLISHED",
+  venueId: "",
+  amenities: "",
 };
 
 export function EventForm({
@@ -51,11 +66,36 @@ export function EventForm({
 }) {
   const router = useRouter();
   const [v, setV] = useState<EventFormValues>({ ...EMPTY, ...initial });
+  const [venues, setVenues] = useState<VenueOption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  useEffect(() => {
+    fetch("/api/venues")
+      .then((r) => r.json())
+      .then((d) => setVenues(d.venues ?? []))
+      .catch(() => {});
+  }, []);
+
   function set<K extends keyof EventFormValues>(key: K, value: EventFormValues[K]) {
     setV((prev) => ({ ...prev, [key]: value }));
+  }
+
+  // Selecting a venue pulls its amenities through as the starting selection
+  // (still fully editable below) and drops the pin at the venue's location.
+  function selectVenue(venueId: string) {
+    const venue = venues.find((x) => x.id === venueId);
+    setV((prev) => ({
+      ...prev,
+      venueId,
+      ...(venue
+        ? {
+            amenities: venue.amenities ?? prev.amenities,
+            ...(venue.lat != null && venue.lng != null ? { lat: venue.lat, lng: venue.lng } : {}),
+            city: prev.city || venue.city,
+          }
+        : {}),
+    }));
   }
 
   async function submit(e: React.FormEvent) {
@@ -78,6 +118,8 @@ export function EventForm({
       lat: v.lat,
       lng: v.lng,
       status: v.status,
+      venueId: v.venueId || null,
+      amenities: v.amenities || "",
     };
 
     const res = await fetch(mode === "create" ? "/api/events" : `/api/events/${eventId}`, {
@@ -162,6 +204,29 @@ export function EventForm({
       <Field label="Address / meeting point (optional)" full>
         <input className="field-input" value={v.address} onChange={(e) => set("address", e.target.value)} placeholder="Full address or landmark" />
       </Field>
+
+      <div>
+        <label className="field-label">Venue (optional)</label>
+        <select className="field-select" value={v.venueId} onChange={(e) => selectVenue(e.target.value)}>
+          <option value="">No venue — custom location</option>
+          {venues.map((venue) => (
+            <option key={venue.id} value={venue.id}>
+              {venue.name} — {venue.city}
+            </option>
+          ))}
+        </select>
+        <p style={{ fontSize: ".72rem", color: "var(--mut)", marginTop: ".35rem" }}>
+          Picking a venue links it on the event page and pulls in its amenities and location — adjust either below.
+        </p>
+      </div>
+
+      <div>
+        <label className="field-label">Amenities at this event</label>
+        <AmenityPicker
+          value={amenityKeys(v.amenities)}
+          onChange={(keys) => set("amenities", serializeAmenities(keys))}
+        />
+      </div>
 
       <Row>
         <Field label="Entry / price info (optional)">
