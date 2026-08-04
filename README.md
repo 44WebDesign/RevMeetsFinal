@@ -11,6 +11,9 @@ days, night cruises, drift events and meetups. Built for three audiences:
 - **Venues** publish a profile pinned on the map to promote themselves as a
   location for meets and events.
 
+> 📋 **[FEATURES.md](./FEATURES.md)** — the full, always-current feature
+> inventory and changelog. Updated with every change.
+
 ## Tech stack
 
 | Layer      | Choice                                             |
