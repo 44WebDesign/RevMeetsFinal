@@ -66,9 +66,11 @@ export function Footer() {
           links={[
             ["Browse Events", "/events"],
             ["Interactive Map", "/map"],
-            ["Car Shows", "/events?type=CAR_SHOW"],
-            ["Track Days", "/events?type=TRACK_DAY"],
-            ["Night Cruises", "/events?type=NIGHT_CRUISE"],
+            ["Car Shows", "/events/type/car-shows"],
+            ["Track Days", "/events/type/track-days"],
+            ["Night Cruises", "/events/type/night-cruises"],
+            ["Drift Events", "/events/type/drift-events"],
+            ["Car Meets", "/events/type/car-meets"],
           ]}
         />
         <FooterCol

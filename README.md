@@ -110,9 +110,27 @@ src/
   lib/               # prisma client, auth, validation (zod), queries, enums, utils
 ```
 
+## Optional integrations
+
+Each of these is off by default and degrades gracefully until configured:
+
+| Feature | Enable by |
+| --- | --- |
+| Google login | `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` (Google Cloud OAuth client) |
+| Email notifications (registration confirmations, follower alerts, reminders) | `RESEND_API_KEY` from [resend.com](https://resend.com); optional `EMAIL_FROM` |
+| Daily reminder cron | Deployed via `vercel.json`; set `CRON_SECRET` to lock it down |
+| Image uploads | Vercel **Storage → Blob** (sets `BLOB_READ_WRITE_TOKEN`) |
+| Demo data | `SEED_TOKEN`, then visit `/api/dev/seed?token=…` once |
+
+## SEO
+
+Every event/club/venue page ships unique metadata, canonical URLs, Open Graph
+cards and Schema.org JSON-LD (Event with offers + aggregate ratings,
+Organization, Place). Category landing pages live at `/events/type/<category>`
+and `/events/in/<city>`, and everything is listed in the dynamic
+`/sitemap.xml`. Submit that sitemap in Google Search Console after deploying.
+
 ## Notes & next steps
 
-Natural extensions on top of this foundation: image uploads (currently image
-URLs), email notifications and reminders, ticketing/payments, event reviews
-(the schema already includes a `Review` model), and geocoding so hosts can type
-an address instead of pinning a point.
+Natural extensions: ticketing/payments, geocoding (type an address instead of
+pinning the map), messaging between attendees and organisers, and native apps.

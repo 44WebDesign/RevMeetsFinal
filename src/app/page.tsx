@@ -118,13 +118,13 @@ export default async function HomePage() {
               Popular:
             </span>
             {[
-              ["Car Shows", "CAR_SHOW"],
-              ["Track Days", "TRACK_DAY"],
-              ["JDM Meets", "JDM_MEET"],
-              ["Drift Events", "DRIFT_EVENT"],
-              ["Cruises", "NIGHT_CRUISE"],
-            ].map(([label, type]) => (
-              <Link key={type} href={`/events?type=${type}`} className="tag">
+              ["Car Shows", "car-shows"],
+              ["Track Days", "track-days"],
+              ["JDM Meets", "jdm-meets"],
+              ["Drift Events", "drift-events"],
+              ["Cruises", "night-cruises"],
+            ].map(([label, slug]) => (
+              <Link key={slug} href={`/events/type/${slug}`} className="tag">
                 {label}
               </Link>
             ))}

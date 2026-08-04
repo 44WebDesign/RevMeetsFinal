@@ -45,6 +45,24 @@ export const EVENT_TYPE_COLORS: Record<EventType, string> = {
   MEET: "#4CAF50",
 };
 
+// URL slugs for category landing pages (/events/type/<slug>).
+export const EVENT_TYPE_SLUGS: Record<EventType, string> = {
+  CAR_SHOW: "car-shows",
+  TRACK_DAY: "track-days",
+  NIGHT_CRUISE: "night-cruises",
+  DRIFT_EVENT: "drift-events",
+  STANCE_MEET: "stance-meets",
+  JDM_MEET: "jdm-meets",
+  CLASSIC_CARS: "classic-car-events",
+  SUPERCAR_MEET: "supercar-meets",
+  MEET: "car-meets",
+};
+
+export function eventTypeFromSlug(slug: string): EventType | null {
+  const entry = Object.entries(EVENT_TYPE_SLUGS).find(([, s]) => s === slug);
+  return (entry?.[0] as EventType) ?? null;
+}
+
 export function eventTypeLabel(type: string): string {
   return EVENT_TYPE_LABELS[type as EventType] ?? type;
 }

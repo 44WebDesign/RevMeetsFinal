@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 
@@ -34,16 +35,12 @@ export function EventCard({ event }: { event: EventCardData }) {
       }}
     >
       <div style={{ height: 180, position: "relative", overflow: "hidden" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={event.imageUrl || FALLBACK_IMG}
           alt={event.title}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            filter: "brightness(.85)",
-          }}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
+          style={{ objectFit: "cover", filter: "brightness(.85)" }}
         />
         <span
           className="pill"

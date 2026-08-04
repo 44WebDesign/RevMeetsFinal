@@ -10,6 +10,11 @@ export function slugify(input: string): string {
     .slice(0, 80);
 }
 
+// "London" → "london" for /events/in/<city> URLs.
+export function citySlug(city: string): string {
+  return city.toLowerCase().trim().replace(/\s+/g, "-");
+}
+
 // Ensure uniqueness by appending a short random suffix.
 export function uniqueSlug(input: string): string {
   const base = slugify(input) || "item";

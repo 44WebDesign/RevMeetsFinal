@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LocationPicker } from "./LocationPicker";
+import { ImageField } from "./ImageField";
 import { EVENT_TYPES, EVENT_TYPE_LABELS } from "@/lib/enums";
 
 export type EventFormValues = {
@@ -171,9 +172,7 @@ export function EventForm({
         </Field>
       </Row>
 
-      <Field label="Cover image URL (optional)" full>
-        <input className="field-input" value={v.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://…" />
-      </Field>
+      <ImageField label="Cover image (optional)" value={v.imageUrl} onChange={(url) => set("imageUrl", url)} />
 
       <div>
         <label className="field-label">Pin the location</label>

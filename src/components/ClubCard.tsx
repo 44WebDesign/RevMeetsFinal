@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export type ClubCardData = {
   id: string;
@@ -34,12 +35,13 @@ export function ClubCard({ club }: { club: ClubCardData }) {
         color: "inherit",
       }}
     >
-      <div style={{ width: 130, flexShrink: 0, overflow: "hidden" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div style={{ width: 130, flexShrink: 0, overflow: "hidden", position: "relative" }}>
+        <Image
           src={club.imageUrl || FALLBACK}
           alt={club.name}
-          style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(.8)" }}
+          fill
+          sizes="130px"
+          style={{ objectFit: "cover", filter: "brightness(.8)" }}
         />
       </div>
       <div style={{ padding: "1.25rem", flex: 1 }}>

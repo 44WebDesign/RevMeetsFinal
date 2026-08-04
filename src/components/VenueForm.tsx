@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LocationPicker } from "./LocationPicker";
+import { ImageField } from "./ImageField";
 
 export type VenueFormValues = {
   name: string;
@@ -105,15 +106,10 @@ export function VenueForm({ initial }: { initial: VenueFormValues }) {
         <label className="field-label">Amenities (comma separated)</label>
         <input className="field-input" value={v.amenities} onChange={(e) => set("amenities", e.target.value)} placeholder="Parking, Toilets, Catering, Floodlights" />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-        <div>
-          <label className="field-label">Photo URL (optional)</label>
-          <input className="field-input" value={v.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://…" />
-        </div>
-        <div>
-          <label className="field-label">Website (optional)</label>
-          <input className="field-input" value={v.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" />
-        </div>
+      <ImageField label="Photo (optional)" value={v.imageUrl} onChange={(url) => set("imageUrl", url)} />
+      <div>
+        <label className="field-label">Website (optional)</label>
+        <input className="field-input" value={v.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" />
       </div>
 
       <div>

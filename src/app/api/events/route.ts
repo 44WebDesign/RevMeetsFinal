@@ -3,7 +3,9 @@ import { requireUser } from "@/lib/auth";
 import { eventSchema } from "@/lib/validation";
 import { handle, ok, fail } from "@/lib/api";
 import { getEvents } from "@/lib/queries";
-import { uniqueSlug } from "@/lib/utils";
+import { uniqueSlug, formatDateTime } from "@/lib/utils";
+import { sendEmail, emailShell, eventButton, emailConfigured } from "@/lib/email";
+import { absoluteUrl } from "@/lib/site";
 
 export const GET = handle(async (req: Request) => {
   const { searchParams } = new URL(req.url);
@@ -61,6 +63,28 @@ export const POST = handle(async (req: Request) => {
       venueId,
     },
   });
+
+  // Alert club followers when a new event goes straight to published.
+  if (event.status === "PUBLISHED" && clubId && emailConfigured()) {
+    const follows = await prisma.clubFollow.findMany({
+      where: { clubId },
+      include: { user: { select: { email: true } }, club: { select: { name: true } } },
+      take: 500,
+    });
+    const url = absoluteUrl(`/events/${event.slug}`);
+    for (const f of follows) {
+      await sendEmail({
+        to: f.user.email,
+        subject: `New event from ${f.club.name}: ${event.title}`,
+        html: emailShell(
+          `${f.club.name} just announced an event`,
+          `<p style="margin:0 0 8px"><strong>${event.title}</strong></p>
+           <p style="margin:0;color:#aaa">📅 ${formatDateTime(event.startsAt)}<br/>📍 ${event.city}</p>
+           ${eventButton(url)}`,
+        ),
+      });
+    }
+  }
 
   return ok({ id: event.id, slug: event.slug }, 201);
 });

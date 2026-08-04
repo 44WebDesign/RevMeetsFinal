@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ImageField } from "./ImageField";
 
 export type ClubFormValues = {
   name: string;
@@ -80,15 +81,10 @@ export function ClubForm({ initial }: { initial: ClubFormValues }) {
         <label className="field-label">Categories (comma separated)</label>
         <input className="field-input" value={v.categories} onChange={(e) => set("categories", e.target.value)} placeholder="Track Days, Meets, JDM" />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-        <div>
-          <label className="field-label">Logo / cover image URL (optional)</label>
-          <input className="field-input" value={v.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://…" />
-        </div>
-        <div>
-          <label className="field-label">Website (optional)</label>
-          <input className="field-input" value={v.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" />
-        </div>
+      <ImageField label="Logo / cover image (optional)" value={v.imageUrl} onChange={(url) => set("imageUrl", url)} />
+      <div>
+        <label className="field-label">Website (optional)</label>
+        <input className="field-input" value={v.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" />
       </div>
 
       {error && (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export type VenueCardData = {
   id: string;
@@ -35,12 +36,13 @@ export function VenueCard({ venue }: { venue: VenueCardData }) {
         color: "inherit",
       }}
     >
-      <div style={{ width: 130, flexShrink: 0, overflow: "hidden" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div style={{ width: 130, flexShrink: 0, overflow: "hidden", position: "relative" }}>
+        <Image
           src={venue.imageUrl || FALLBACK}
           alt={venue.name}
-          style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(.8)" }}
+          fill
+          sizes="130px"
+          style={{ objectFit: "cover", filter: "brightness(.8)" }}
         />
       </div>
       <div style={{ padding: "1.25rem", flex: 1 }}>

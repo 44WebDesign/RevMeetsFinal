@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { MapView } from "@/components/MapView";
 import { AttendButton } from "@/components/AttendButton";
+import { ReviewSection } from "@/components/ReviewSection";
 import { JsonLd } from "@/components/JsonLd";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDateTime } from "@/lib/utils";
@@ -84,6 +86,30 @@ export default async function EventDetail({
       }))
     : false;
 
+  // Reviews (list + the caller's own, for the form's initial state)
+  const reviewRows = await prisma.review.findMany({
+    where: { eventId: event.id },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    include: { user: { select: { name: true, avatarColor: true } } },
+  });
+  const reviews = reviewRows.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    body: r.body,
+    author: r.user.name,
+    avatarColor: r.user.avatarColor,
+    createdAt: r.createdAt.toISOString(),
+  }));
+  const avgRating =
+    reviews.length > 0
+      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+      : null;
+  const myRating = session
+    ? reviewRows.find((r) => r.userId === session.sub)?.rating ?? null
+    : null;
+  const eventStarted = event.startsAt <= new Date();
+
   const color = eventTypeColor(event.type);
   const full = !!event.capacity && event._count.registrations >= event.capacity;
   const fallbackImg = FALLBACK_EVENT_IMG;
@@ -140,6 +166,17 @@ export default async function EventDetail({
       ...(event.club ? { url: absoluteUrl(`/clubs/${event.club.slug}`) } : {}),
     },
     ...(offers ? { offers } : {}),
+    ...(avgRating !== null
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(avgRating.toFixed(1)),
+            reviewCount: reviews.length,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
 
   return (
@@ -147,11 +184,13 @@ export default async function EventDetail({
       <JsonLd data={eventLd} />
       {/* Hero image */}
       <div style={{ position: "relative", height: 360, overflow: "hidden" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={event.imageUrl || fallbackImg}
           alt={event.title}
-          style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(.45)" }}
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover", filter: "brightness(.45)" }}
         />
         <div
           style={{
@@ -224,6 +263,16 @@ export default async function EventDetail({
                   height={320}
                 />
               </div>
+
+              <ReviewSection
+                eventId={event.id}
+                reviews={reviews}
+                average={avgRating}
+                canReview={registered}
+                myRating={myRating}
+                loggedIn={!!session}
+                eventStarted={eventStarted}
+              />
             </div>
 
             {/* Sidebar */}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cache } from "react";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -101,8 +102,7 @@ export default async function VenueDetail({
     <>
       <JsonLd data={venueLd} />
       <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={venue.imageUrl || fallback} alt={venue.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(.4)" }} />
+        <Image src={venue.imageUrl || fallback} alt={venue.name} fill priority sizes="100vw" style={{ objectFit: "cover", filter: "brightness(.4)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,8,8,.2), var(--bg))" }} />
       </div>
 

@@ -177,6 +177,18 @@ export async function getVenues(q?: string): Promise<VenueCardData[]> {
   }));
 }
 
+// Distinct cities with published events — powers the city landing pages.
+export async function getEventCities(): Promise<string[]> {
+  const rows = await prisma.event.groupBy({
+    by: ["city"],
+    where: { status: "PUBLISHED" },
+    _count: { city: true },
+    orderBy: { _count: { city: "desc" } },
+    take: 50,
+  });
+  return rows.map((r) => r.city);
+}
+
 export async function getStats() {
   const [events, users, clubs, venues] = await Promise.all([
     prisma.event.count({ where: { status: "PUBLISHED" } }),
