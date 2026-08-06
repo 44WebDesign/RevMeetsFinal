@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
+import { AmenityIcons } from "./AmenityIcons";
 
 export type EventCardData = {
   id: string;
@@ -14,6 +15,7 @@ export type EventCardData = {
   imageUrl?: string | null;
   attendees: number;
   clubName?: string | null;
+  amenities?: string;
 };
 
 const FALLBACK_IMG =
@@ -89,6 +91,7 @@ export function EventCard({ event }: { event: EventCardData }) {
         >
           {event.description}
         </p>
+        <AmenityIcons amenities={event.amenities} />
         <div
           style={{
             display: "flex",

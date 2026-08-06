@@ -151,6 +151,7 @@ export default async function ClubDetail({
                     imageUrl: e.imageUrl,
                     attendees: e._count.registrations,
                     clubName: club.name,
+                    amenities: e.amenities,
                   }}
                 />
               ))}

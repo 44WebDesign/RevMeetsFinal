@@ -39,6 +39,7 @@
 - ✅ **Per-event amenities with icons** ("What's There" block on the event page): defaults from the selected venue, individually add/removable per event; included in the event's structured data
 - ✅ Search & filters: keyword, city, event type, date range (case-insensitive)
 - ✅ **Amenity filtering** in event search (collapsible icon-chip panel; matches events offering *all* selected amenities, including those inherited from a venue)
+- ✅ Amenity icon strip on event cards (and venue cards) across list, search and profile views
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
@@ -48,6 +49,7 @@
 
 - ✅ Full-page **map explorer** (`/map`): every event + venue, live keyword filter, per-type toggles, event/venue layer toggles, synced results list
 - ✅ **Amenity filtering on the map** — icon chips filter both event and venue pins live
+- ✅ **"Near me" geolocation** — one-tap browser location with a distance radius (5–100 km or any), a "you are here" marker, nearest-first results and per-result distance badges
 - ✅ Colour-coded pins by event type (matching the design's legend), venue pins in cyan
 - ✅ Rich dark-themed popups with type badge, date, city and a link to the page
 - ✅ Embedded maps on: home page, events list (fits to results), event detail, venue detail
@@ -125,6 +127,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD4` | Amenity icon strips on event/venue cards; "near me" geolocation on the map explorer (distance radius, you-are-here marker, nearest-first sorting, distance badges) |
 | 2026-08-04 | `5617f5c` | Amenity filtering: collapsible chip panel in event search, live chips on the map explorer (events + venues), instant filter on the venues directory; `amenities` param on the events/venues APIs |
 | 2026-08-04 | `9721b02` | Demo amenities: all 10 seed events now ship amenity sets; seed endpoint gained `&mode=amenities` to backfill amenities onto existing demo data safely |
 | 2026-08-04 | `23fdbf2` | Amenity catalog with icons: venue amenity picker, venue selector in the event form (pulls amenities + location through), per-event amenity add/remove, icon blocks on venue + event pages, amenities in structured data |

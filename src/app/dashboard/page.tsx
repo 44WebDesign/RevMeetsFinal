@@ -179,6 +179,7 @@ async function EnthusiastDashboard({ userId }: { userId: string }) {
                 imageUrl: e.imageUrl,
                 attendees: e._count.registrations,
                 clubName: e.club?.name ?? null,
+                amenities: e.amenities,
               }}
             />
           ))}

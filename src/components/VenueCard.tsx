@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { AmenityIcons } from "./AmenityIcons";
 
 export type VenueCardData = {
   id: string;
@@ -90,6 +91,7 @@ export function VenueCard({ venue }: { venue: VenueCardData }) {
         >
           {venue.description}
         </p>
+        <AmenityIcons amenities={venue.amenities} max={6} />
         <div
           style={{
             display: "flex",

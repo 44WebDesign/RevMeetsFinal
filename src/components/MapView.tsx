@@ -23,6 +23,10 @@ type Props = {
   zoom?: number;
   height?: number | string;
   fitToPoints?: boolean;
+  // Fly the map to this location when it changes (e.g. "near me").
+  focus?: { lat: number; lng: number; zoom?: number } | null;
+  // Renders a "you are here" marker.
+  userLocation?: { lat: number; lng: number } | null;
 };
 
 export function MapView({
@@ -31,10 +35,13 @@ export function MapView({
   zoom = 6,
   height = 500,
   fitToPoints = false,
+  focus = null,
+  userLocation = null,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<CircleMarker[]>([]);
+  const userMarkerRef = useRef<CircleMarker | null>(null);
 
   // Initialise the map once.
   useEffect(() => {
@@ -87,6 +94,41 @@ export function MapView({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [points]);
+
+  // Fly to a requested focus point (map is ready by the time a user clicks).
+  useEffect(() => {
+    if (focus && mapRef.current) {
+      mapRef.current.flyTo([focus.lat, focus.lng], focus.zoom ?? 10, { duration: 0.8 });
+    }
+  }, [focus]);
+
+  // Maintain the "you are here" marker.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const L = (await import("leaflet")).default;
+      if (cancelled || !mapRef.current) return;
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+      if (userLocation) {
+        userMarkerRef.current = L.circleMarker([userLocation.lat, userLocation.lng], {
+          radius: 8,
+          fillColor: "#2196F3",
+          color: "#fff",
+          weight: 3,
+          opacity: 1,
+          fillOpacity: 1,
+        })
+          .addTo(mapRef.current)
+          .bindPopup("You are here");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userLocation]);
 
   function renderMarkers(
     L: typeof import("leaflet"),

@@ -63,6 +63,7 @@ export async function getEvents(filters: EventFilters = {}): Promise<EventCardDa
     take: filters.take ?? 60,
     include: {
       club: { select: { name: true } },
+      venue: { select: { amenities: true } },
       _count: { select: { registrations: true } },
     },
   });
@@ -78,6 +79,7 @@ export async function getEvents(filters: EventFilters = {}): Promise<EventCardDa
     imageUrl: e.imageUrl,
     attendees: e._count.registrations,
     clubName: e.club?.name ?? null,
+    amenities: e.amenities || e.venue?.amenities || "",
   }));
 }
 

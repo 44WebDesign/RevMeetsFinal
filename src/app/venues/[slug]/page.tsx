@@ -188,6 +188,7 @@ export default async function VenueDetail({
                     imageUrl: e.imageUrl,
                     attendees: e._count.registrations,
                     clubName: e.club?.name ?? null,
+                    amenities: e.amenities || venue.amenities,
                   }}
                 />
               ))}
