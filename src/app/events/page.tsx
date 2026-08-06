@@ -5,6 +5,7 @@ import { EventCard } from "@/components/EventCard";
 import { MapView } from "@/components/MapView";
 import { getEvents, getEventMapPoints } from "@/lib/queries";
 import { eventTypeLabel } from "@/lib/enums";
+import { parseAmenityParam } from "@/lib/amenities";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ type SearchParams = Promise<{
   type?: string;
   from?: string;
   to?: string;
+  amenities?: string;
 }>;
 
 export default async function EventsPage({ searchParams }: { searchParams: SearchParams }) {
@@ -32,6 +34,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Searc
     type: params.type,
     from: params.from,
     to: params.to,
+    amenities: parseAmenityParam(params.amenities),
   };
 
   const [events, points] = await Promise.all([

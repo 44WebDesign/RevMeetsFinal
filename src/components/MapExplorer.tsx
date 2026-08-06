@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { MapView, type MapPoint } from "./MapView";
+import { AmenityFilter } from "./AmenityFilter";
+import { hasAllAmenities } from "@/lib/amenities";
 import { EVENT_TYPES, EVENT_TYPE_LABELS, EVENT_TYPE_COLORS } from "@/lib/enums";
 
 export function MapExplorer({
@@ -14,6 +16,7 @@ export function MapExplorer({
 }) {
   const [query, setQuery] = useState("");
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
+  const [amenities, setAmenities] = useState<string[]>([]);
   const [showVenues, setShowVenues] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
 
@@ -44,8 +47,11 @@ export function MapExplorer({
           (p.subtitle ?? "").toLowerCase().includes(q),
       );
     }
+    if (amenities.length) {
+      list = list.filter((p) => hasAllAmenities(p.amenities, amenities));
+    }
     return list;
-  }, [query, activeTypes, showVenues, showEvents, eventPoints, venuePoints]);
+  }, [query, activeTypes, amenities, showVenues, showEvents, eventPoints, venuePoints]);
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "1.25rem" }} className="map-explorer">
@@ -95,6 +101,15 @@ export function MapExplorer({
               );
             })}
           </div>
+        </div>
+
+        <div>
+          <label className="field-label" style={{ marginBottom: ".5rem" }}>
+            Amenities{amenities.length > 0 && (
+              <span style={{ color: "var(--or)" }}> · {amenities.length} selected</span>
+            )}
+          </label>
+          <AmenityFilter value={amenities} onChange={setAmenities} />
         </div>
 
         <div style={{ borderTop: "1px solid var(--bdr)", paddingTop: ".75rem" }}>

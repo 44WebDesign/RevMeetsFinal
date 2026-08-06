@@ -14,6 +14,7 @@ export type MapPoint = {
   subtitle?: string;
   href: string;
   kind: "event" | "venue";
+  amenities?: string; // comma-separated amenity keys (for filtering)
 };
 
 type Props = {

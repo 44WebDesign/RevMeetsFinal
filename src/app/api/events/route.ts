@@ -6,6 +6,7 @@ import { getEvents } from "@/lib/queries";
 import { uniqueSlug, formatDateTime } from "@/lib/utils";
 import { sendEmail, emailShell, eventButton, emailConfigured } from "@/lib/email";
 import { absoluteUrl } from "@/lib/site";
+import { parseAmenityParam } from "@/lib/amenities";
 
 export const GET = handle(async (req: Request) => {
   const { searchParams } = new URL(req.url);
@@ -15,6 +16,7 @@ export const GET = handle(async (req: Request) => {
     city: searchParams.get("city") ?? undefined,
     from: searchParams.get("from") ?? undefined,
     to: searchParams.get("to") ?? undefined,
+    amenities: parseAmenityParam(searchParams.get("amenities")),
   });
   return ok({ events });
 });

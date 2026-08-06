@@ -75,3 +75,19 @@ export function serializeAmenities(keys: string[]): string {
 export function amenityLabels(stored: string | null | undefined): string[] {
   return parseAmenities(stored).map((a) => a.label);
 }
+
+// Does the stored amenity string include ALL of the given keys? (Client-side
+// filtering; empty selection matches everything.)
+export function hasAllAmenities(
+  stored: string | null | undefined,
+  keys: string[],
+): boolean {
+  if (keys.length === 0) return true;
+  const have = new Set(amenityKeys(stored));
+  return keys.every((k) => have.has(k));
+}
+
+// Sanitize an `?amenities=A,B` query param down to known catalog keys.
+export function parseAmenityParam(param: string | null | undefined): string[] {
+  return amenityKeys(param ?? "");
+}

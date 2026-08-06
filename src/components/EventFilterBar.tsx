@@ -3,6 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { EVENT_TYPES, EVENT_TYPE_LABELS } from "@/lib/enums";
+import { parseAmenityParam } from "@/lib/amenities";
+import { AmenityFilter } from "./AmenityFilter";
 
 export function EventFilterBar() {
   const router = useRouter();
@@ -12,6 +14,8 @@ export function EventFilterBar() {
   const [type, setType] = useState(sp.get("type") ?? "");
   const [from, setFrom] = useState(sp.get("from") ?? "");
   const [to, setTo] = useState(sp.get("to") ?? "");
+  const [amenities, setAmenities] = useState<string[]>(parseAmenityParam(sp.get("amenities")));
+  const [showAmenities, setShowAmenities] = useState(amenities.length > 0);
 
   function apply(e: React.FormEvent) {
     e.preventDefault();
@@ -21,6 +25,7 @@ export function EventFilterBar() {
     if (type) params.set("type", type);
     if (from) params.set("from", from);
     if (to) params.set("to", to);
+    if (amenities.length) params.set("amenities", amenities.join(","));
     router.push(`/events?${params.toString()}`);
   }
 
@@ -30,6 +35,7 @@ export function EventFilterBar() {
     setType("");
     setFrom("");
     setTo("");
+    setAmenities([]);
     router.push("/events");
   }
 
@@ -79,6 +85,30 @@ export function EventFilterBar() {
         <button type="button" onClick={clear} className="btn-ghost" style={{ height: 46 }}>
           Clear
         </button>
+      </div>
+
+      <div style={{ gridColumn: "1 / -1" }}>
+        <button
+          type="button"
+          onClick={() => setShowAmenities((s) => !s)}
+          className="btn-ghost"
+          aria-expanded={showAmenities}
+        >
+          <i className={`fas ${showAmenities ? "fa-chevron-up" : "fa-sliders"}`} /> Amenities
+          {amenities.length > 0 && (
+            <span style={{ color: "var(--or)", marginLeft: 6, fontWeight: 700 }}>
+              {amenities.length} selected
+            </span>
+          )}
+        </button>
+        {showAmenities && (
+          <div style={{ marginTop: ".75rem" }}>
+            <AmenityFilter value={amenities} onChange={setAmenities} />
+            <p style={{ fontSize: ".72rem", color: "var(--mut)", marginTop: ".5rem" }}>
+              Shows events offering <strong>all</strong> selected amenities. Hit search to apply.
+            </p>
+          </div>
+        )}
       </div>
       <style jsx>{`
         @media (max-width: 900px) {

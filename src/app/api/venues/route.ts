@@ -3,10 +3,14 @@ import { requireUser } from "@/lib/auth";
 import { venueSchema } from "@/lib/validation";
 import { handle, ok, fail } from "@/lib/api";
 import { getVenues } from "@/lib/queries";
+import { parseAmenityParam } from "@/lib/amenities";
 
 export const GET = handle(async (req: Request) => {
   const { searchParams } = new URL(req.url);
-  const venues = await getVenues(searchParams.get("q") ?? undefined);
+  const venues = await getVenues(
+    searchParams.get("q") ?? undefined,
+    parseAmenityParam(searchParams.get("amenities")),
+  );
   return ok({ venues });
 });
 

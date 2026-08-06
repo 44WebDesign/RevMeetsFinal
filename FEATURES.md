@@ -38,6 +38,7 @@
 - ✅ **Venue selector** in the event form — linking a venue pulls through its amenities and drops the pin at its location
 - ✅ **Per-event amenities with icons** ("What's There" block on the event page): defaults from the selected venue, individually add/removable per event; included in the event's structured data
 - ✅ Search & filters: keyword, city, event type, date range (case-insensitive)
+- ✅ **Amenity filtering** in event search (collapsible icon-chip panel; matches events offering *all* selected amenities, including those inherited from a venue)
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
@@ -46,6 +47,7 @@
 ## 4. Interactive Map (core discovery feature)
 
 - ✅ Full-page **map explorer** (`/map`): every event + venue, live keyword filter, per-type toggles, event/venue layer toggles, synced results list
+- ✅ **Amenity filtering on the map** — icon chips filter both event and venue pins live
 - ✅ Colour-coded pins by event type (matching the design's legend), venue pins in cyan
 - ✅ Rich dark-themed popups with type badge, date, city and a link to the page
 - ✅ Embedded maps on: home page, events list (fits to results), event detail, venue detail
@@ -63,7 +65,7 @@
 
 - ✅ Venues promote themselves as event locations: description, address, capacity, amenities, categories, photo, website, exact map pin
 - ✅ **Amenity catalog with icons** (22 options: parking, hot food, alcoholic drinks, kids area, smoking area, EV charging, track access, dyno…) — venues tick what they offer; shown as an icon block on the venue page
-- ✅ Venue directory (`/venues`) with search
+- ✅ Venue directory (`/venues`) with search and **instant amenity filtering** (icon chips, URL-shareable)
 - ✅ **Follow / unfollow** venues
 - ✅ Events held at a venue listed on its profile
 - ✅ Venue accounts' events default to their own venue location
@@ -123,6 +125,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD3` | Amenity filtering: collapsible chip panel in event search, live chips on the map explorer (events + venues), instant filter on the venues directory; `amenities` param on the events/venues APIs |
 | 2026-08-04 | `9721b02` | Demo amenities: all 10 seed events now ship amenity sets; seed endpoint gained `&mode=amenities` to backfill amenities onto existing demo data safely |
 | 2026-08-04 | `23fdbf2` | Amenity catalog with icons: venue amenity picker, venue selector in the event form (pulls amenities + location through), per-event amenity add/remove, icon blocks on venue + event pages, amenities in structured data |
 | 2026-08-04 | `a28419f` | Image optimization (`next/image`), category + city SEO landing pages, email notifications (confirmations, follower alerts, reminder cron), event reviews & ratings with `AggregateRating`, direct image uploads (Vercel Blob) |

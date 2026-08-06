@@ -11,6 +11,7 @@ export type EventFilters = {
   city?: string;
   from?: string;
   to?: string;
+  amenities?: string[]; // canonical keys; event must have ALL of them
   take?: number;
 };
 
@@ -30,6 +31,18 @@ function eventWhere(filters: EventFilters) {
         { city: { contains: filters.q, mode: ci } },
       ],
     });
+  }
+  // Each selected amenity must be on the event itself OR its linked venue
+  // (events created before the amenity feature inherit from their venue).
+  if (filters.amenities?.length) {
+    for (const key of filters.amenities) {
+      and.push({
+        OR: [
+          { amenities: { contains: key } },
+          { venue: { amenities: { contains: key } } },
+        ],
+      });
+    }
   }
   const startsAt: Record<string, Date> = {};
   if (filters.from) startsAt.gte = new Date(filters.from);
@@ -82,6 +95,8 @@ export async function getEventMapPoints(filters: EventFilters = {}): Promise<Map
       lat: true,
       lng: true,
       startsAt: true,
+      amenities: true,
+      venue: { select: { amenities: true } },
     },
   });
 
@@ -92,6 +107,7 @@ export async function getEventMapPoints(filters: EventFilters = {}): Promise<Map
     lng: e.lng,
     title: e.title,
     type: e.type,
+    amenities: e.amenities || e.venue?.amenities || "",
     color: eventTypeColor(e.type),
     subtitle: `${e.city} · ${e.startsAt.toLocaleDateString("en-GB", {
       day: "numeric",
@@ -104,7 +120,7 @@ export async function getEventMapPoints(filters: EventFilters = {}): Promise<Map
 
 export async function getVenueMapPoints(): Promise<MapPoint[]> {
   const venues = await prisma.venue.findMany({
-    select: { id: true, slug: true, name: true, city: true, lat: true, lng: true },
+    select: { id: true, slug: true, name: true, city: true, lat: true, lng: true, amenities: true },
   });
   return venues.map((v) => ({
     id: v.id,
@@ -113,6 +129,7 @@ export async function getVenueMapPoints(): Promise<MapPoint[]> {
     lng: v.lng,
     title: v.name,
     type: "VENUE",
+    amenities: v.amenities,
     color: "#00BCD4",
     subtitle: v.city,
     href: `/venues/${v.slug}`,
@@ -149,17 +166,22 @@ export async function getClubs(q?: string): Promise<ClubCardData[]> {
   }));
 }
 
-export async function getVenues(q?: string): Promise<VenueCardData[]> {
+export async function getVenues(q?: string, amenities?: string[]): Promise<VenueCardData[]> {
+  const and: Record<string, unknown>[] = [];
+  if (q) {
+    and.push({
+      OR: [
+        { name: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+        { city: { contains: q, mode: "insensitive" } },
+      ],
+    });
+  }
+  for (const key of amenities ?? []) {
+    and.push({ amenities: { contains: key } });
+  }
   const venues = await prisma.venue.findMany({
-    where: q
-      ? {
-          OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { description: { contains: q, mode: "insensitive" } },
-            { city: { contains: q, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
+    where: and.length ? { AND: and } : undefined,
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { follows: true } } },
   });
