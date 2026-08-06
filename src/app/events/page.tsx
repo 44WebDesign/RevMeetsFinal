@@ -1,9 +1,5 @@
-import { Suspense } from "react";
-import Link from "next/link";
-import { EventFilterBar } from "@/components/EventFilterBar";
-import { EventCard } from "@/components/EventCard";
-import { MapView } from "@/components/MapView";
-import { getEvents, getEventMapPoints } from "@/lib/queries";
+import { EventsExplorer } from "@/components/EventsExplorer";
+import { getExplorerEvents } from "@/lib/queries";
 import { eventTypeLabel } from "@/lib/enums";
 import { parseAmenityParam } from "@/lib/amenities";
 
@@ -12,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Browse Car Events",
   description:
-    "Search the UK's car event calendar — car shows, track days, night cruises, drift events and meets. Filter by location, date and type, or explore on the map.",
+    "Search the UK's car event calendar — car shows, track days, night cruises, drift events and meets. Explore on the interactive map or switch to a list.",
   // Filtered variants (?type/?city) canonicalise here to avoid duplicate content.
   alternates: { canonical: "/events" },
 };
@@ -28,80 +24,35 @@ type SearchParams = Promise<{
 
 export default async function EventsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const filters = {
-    q: params.q,
-    city: params.city,
-    type: params.type,
-    from: params.from,
-    to: params.to,
-    amenities: parseAmenityParam(params.amenities),
-  };
-
-  const [events, points] = await Promise.all([
-    getEvents(filters),
-    getEventMapPoints(filters),
-  ]);
+  const events = await getExplorerEvents();
 
   const activeType = params.type ? eventTypeLabel(params.type) : null;
 
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
-      <div className="container">
-        <div className="sec-label">Browse</div>
-        <div className="sec-title">
-          {activeType ? `${activeType.toUpperCase()} EVENTS` : "ALL CAR EVENTS"}
+    <section style={{ padding: "1.5rem 1.25rem 2.5rem", background: "var(--bg)" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+        <div style={{ marginBottom: "1rem" }}>
+          <div className="sec-label">Browse</div>
+          <h1 className="sec-title" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>
+            {activeType ? `${activeType.toUpperCase()} EVENTS` : "EXPLORE CAR EVENTS"}
+          </h1>
+          <p className="sec-sub">
+            Discover events on the interactive map, or switch to a list. Filter by
+            location, date, type, amenities — or find what&apos;s near you.
+          </p>
         </div>
-        <div className="sec-sub" style={{ marginBottom: "1.5rem" }}>
-          Search the UK&apos;s car event calendar. Filter by location, date and type — or explore on the map.
-        </div>
 
-        <Suspense fallback={<div className="card-surface" style={{ padding: "1.25rem" }}>Loading filters…</div>}>
-          <EventFilterBar />
-        </Suspense>
-
-        {points.length > 0 && (
-          <div style={{ marginTop: "1.5rem" }}>
-            <MapView points={points} height={340} fitToPoints />
-          </div>
-        )}
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            margin: "2rem 0 1rem",
+        <EventsExplorer
+          events={events}
+          initial={{
+            q: params.q,
+            city: params.city,
+            type: params.type,
+            from: params.from,
+            to: params.to,
+            amenities: parseAmenityParam(params.amenities),
           }}
-        >
-          <span style={{ color: "var(--mut)", fontSize: ".9rem" }}>
-            {events.length} {events.length === 1 ? "event" : "events"} found
-          </span>
-          <Link href="/map" className="btn-ghost">
-            <i className="fas fa-map" /> Full Map View
-          </Link>
-        </div>
-
-        {events.length === 0 ? (
-          <div
-            className="card-surface"
-            style={{ padding: "3rem", textAlign: "center", color: "var(--mut)" }}
-          >
-            <i className="fas fa-magnifying-glass" style={{ fontSize: "1.5rem", display: "block", marginBottom: ".75rem" }} />
-            No events match your search. Try widening your filters.
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))",
-              gap: "1.5rem",
-            }}
-          >
-            {events.map((e) => (
-              <EventCard key={e.id} event={e} />
-            ))}
-          </div>
-        )}
+        />
       </div>
     </section>
   );

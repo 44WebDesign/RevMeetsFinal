@@ -83,6 +83,38 @@ export async function getEvents(filters: EventFilters = {}): Promise<EventCardDa
   }));
 }
 
+// Full event rows (card data + coordinates) for the client-side events
+// explorer, which filters and maps from a single fetched set.
+export type ExplorerEvent = EventCardData & { lat: number; lng: number };
+
+export async function getExplorerEvents(): Promise<ExplorerEvent[]> {
+  const events = await prisma.event.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { startsAt: "asc" },
+    take: 500,
+    include: {
+      club: { select: { name: true } },
+      venue: { select: { amenities: true } },
+      _count: { select: { registrations: true } },
+    },
+  });
+  return events.map((e) => ({
+    id: e.id,
+    slug: e.slug,
+    title: e.title,
+    description: e.description,
+    type: e.type,
+    city: e.city,
+    startsAt: e.startsAt.toISOString(),
+    imageUrl: e.imageUrl,
+    attendees: e._count.registrations,
+    clubName: e.club?.name ?? null,
+    amenities: e.amenities || e.venue?.amenities || "",
+    lat: e.lat,
+    lng: e.lng,
+  }));
+}
+
 export async function getEventMapPoints(filters: EventFilters = {}): Promise<MapPoint[]> {
   const events = await prisma.event.findMany({
     where: eventWhere(filters),

@@ -37,7 +37,8 @@
 - ✅ **Click-to-pin location picker** (draggable marker) in the event form
 - ✅ **Venue selector** in the event form — linking a venue pulls through its amenities and drops the pin at its location
 - ✅ **Per-event amenities with icons** ("What's There" block on the event page): defaults from the selected venue, individually add/removable per event; included in the event's structured data
-- ✅ Search & filters: keyword, city, event type, date range (case-insensitive)
+- ✅ **`/events` is a map-first explorer** — sidebar filters on the left drive a full-height interactive map, with a prominent **Map / List** toggle to switch to the card grid; both views share one filter set
+- ✅ Explorer filters: keyword, city, near-me (geolocation + distance radius), date range, event type, amenities — all applied live client-side; deep-links (`?type=`, `?city=`, `?amenities=`) seed the initial state
 - ✅ **Amenity filtering** in event search (collapsible icon-chip panel; matches events offering *all* selected amenities, including those inherited from a venue)
 - ✅ Amenity icon strip on event cards (and venue cards) across list, search and profile views
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
@@ -127,6 +128,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD5` | Reworked `/events` into a map-first explorer: sidebar filters drive a full-height map with a prominent Map/List toggle sharing one filter set (keyword, city, near-me radius, date, type, amenities); removed the old top filter-bar + fixed map layout |
 | 2026-08-04 | `4178d95` | Amenity icon strips on event/venue cards; "near me" geolocation on the map explorer (distance radius, you-are-here marker, nearest-first sorting, distance badges) |
 | 2026-08-04 | `5617f5c` | Amenity filtering: collapsible chip panel in event search, live chips on the map explorer (events + venues), instant filter on the venues directory; `amenities` param on the events/venues APIs |
 | 2026-08-04 | `9721b02` | Demo amenities: all 10 seed events now ship amenity sets; seed endpoint gained `&mode=amenities` to backfill amenities onto existing demo data safely |
