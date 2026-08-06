@@ -125,7 +125,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-08-04 | `TBD3` | Amenity filtering: collapsible chip panel in event search, live chips on the map explorer (events + venues), instant filter on the venues directory; `amenities` param on the events/venues APIs |
+| 2026-08-04 | `5617f5c` | Amenity filtering: collapsible chip panel in event search, live chips on the map explorer (events + venues), instant filter on the venues directory; `amenities` param on the events/venues APIs |
 | 2026-08-04 | `9721b02` | Demo amenities: all 10 seed events now ship amenity sets; seed endpoint gained `&mode=amenities` to backfill amenities onto existing demo data safely |
 | 2026-08-04 | `23fdbf2` | Amenity catalog with icons: venue amenity picker, venue selector in the event form (pulls amenities + location through), per-event amenity add/remove, icon blocks on venue + event pages, amenities in structured data |
 | 2026-08-04 | `a28419f` | Image optimization (`next/image`), category + city SEO landing pages, email notifications (confirmations, follower alerts, reminder cron), event reviews & ratings with `AggregateRating`, direct image uploads (Vercel Blob) |
