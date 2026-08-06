@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { seedDemoData } from "@/lib/demoSeed";
+import { seedDemoData, backfillDemoAmenities } from "@/lib/demoSeed";
 import { handle, ok, fail } from "@/lib/api";
 
 // One-time demo-data loader.
@@ -19,9 +19,22 @@ export const GET = handle(async (req: Request) => {
     return fail("Seeding is disabled. Set the SEED_TOKEN environment variable to enable it.", 403);
   }
 
-  const provided = new URL(req.url).searchParams.get("token");
+  const url = new URL(req.url);
+  const provided = url.searchParams.get("token");
   if (provided !== token) {
     return fail("Invalid or missing token.", 401);
+  }
+
+  // mode=amenities: backfill amenity data onto demo rows seeded before the
+  // amenity catalog existed. Safe on a live database — only touches demo
+  // accounts' venues/events plus empty venue-linked events.
+  if (url.searchParams.get("mode") === "amenities") {
+    const result = await backfillDemoAmenities(prisma);
+    return ok({
+      mode: "amenities",
+      ...result,
+      message: "Demo amenities backfilled. Existing user selections were not touched.",
+    });
   }
 
   const existingUsers = await prisma.user.count();

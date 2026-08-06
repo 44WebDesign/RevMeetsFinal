@@ -32,6 +32,65 @@ export type SeedSummary = {
   events: number;
 };
 
+// One-off backfill for databases seeded before the amenity catalog existed.
+// Only touches demo rows (owned by @revmeet.test accounts) plus the generic
+// case of venue-linked events that have no amenities yet — never overwrites
+// amenity selections real users have made.
+export async function backfillDemoAmenities(prisma: PrismaClient) {
+  const venueSets: Record<string, string> = {
+    "Harewood Speed Hillclimb": "PARKING,TOILETS,FOOD,COFFEE,PADDOCK,TRACK_ACCESS,FIRST_AID",
+    "RiverSide Events Arena": "PARKING,TOILETS,FOOD,DRINKS,COFFEE,FLOODLIGHTS,INDOOR,ACCESSIBLE,WIFI",
+  };
+  const eventSets: Record<string, string> = {
+    "London Supercar Show 2025": "PARKING,FOOD,DRINKS,COFFEE,TOILETS,KIDS_AREA,TRADE_STANDS,LIVE_MUSIC,ACCESSIBLE,FIRST_AID",
+    "Manchester Night Cruise": "PARKING,COFFEE,SMOKING",
+    "Yorkshire Track Day Open": "PARKING,TOILETS,FOOD,COFFEE,PADDOCK,TRACK_ACCESS,FIRST_AID",
+    "South West Stance & Style": "PARKING,FOOD,DRINKS,TOILETS,TRADE_STANDS,LIVE_MUSIC,KIDS_AREA",
+    "Newcastle Drift Championship": "PARKING,FOOD,TOILETS,TRACK_ACCESS,PADDOCK,FIRST_AID,SECURITY",
+    "Glasgow Car Culture Meet": "PARKING,FOOD,COFFEE,TOILETS,PET_FRIENDLY",
+    "Cardiff JDM Showcase": "PARKING,FOOD,DRINKS,TOILETS,TRADE_STANDS,LIVE_MUSIC",
+    "Midlands Tuner Festival": "PARKING,FOOD,DRINKS,TOILETS,INDOOR,TRADE_STANDS,LIVE_MUSIC,DYNO,SMOKING",
+    "Bournemouth Coastal Cruise": "PARKING,COFFEE,TOILETS,PET_FRIENDLY",
+    "Classic & Vintage Sunday": "PARKING,FOOD,COFFEE,TOILETS,KIDS_AREA,ACCESSIBLE,PET_FRIENDLY,TRADE_STANDS",
+  };
+
+  let venuesUpdated = 0;
+  for (const [name, amenities] of Object.entries(venueSets)) {
+    const res = await prisma.venue.updateMany({
+      where: { name, owner: { email: { endsWith: "@revmeet.test" } } },
+      data: { amenities },
+    });
+    venuesUpdated += res.count;
+  }
+
+  let eventsUpdated = 0;
+  for (const [title, amenities] of Object.entries(eventSets)) {
+    const res = await prisma.event.updateMany({
+      where: { title, organiser: { email: { endsWith: "@revmeet.test" } } },
+      data: { amenities },
+    });
+    eventsUpdated += res.count;
+  }
+
+  // Any remaining venue-linked event with no amenities inherits its venue's.
+  const inheritable = await prisma.event.findMany({
+    where: { amenities: "", venueId: { not: null } },
+    select: { id: true, venue: { select: { amenities: true } } },
+  });
+  let inherited = 0;
+  for (const e of inheritable) {
+    if (e.venue?.amenities) {
+      await prisma.event.update({
+        where: { id: e.id },
+        data: { amenities: e.venue.amenities },
+      });
+      inherited++;
+    }
+  }
+
+  return { venuesUpdated, eventsUpdated, inherited };
+}
+
 export async function seedDemoData(
   prisma: PrismaClient,
   opts: { reset?: boolean } = {},
@@ -201,15 +260,15 @@ export async function seedDemoData(
 
   const eventSeed = [
     { title: "London Supercar Show 2025", type: "SUPERCAR_MEET", city: "London", region: "Greater London", lat: 51.5074, lng: -0.1278, days: 12, cap: 600, price: "£25", club: 0, amen: "PARKING,FOOD,DRINKS,COFFEE,TOILETS,KIDS_AREA,TRADE_STANDS,LIVE_MUSIC,ACCESSIBLE,FIRST_AID", img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80", desc: "Europe's most exclusive supercar gathering. 200+ vehicles expected with full-day entertainment, food trucks and live commentary." },
-    { title: "Manchester Night Cruise", type: "NIGHT_CRUISE", city: "Manchester", region: "Greater Manchester", lat: 53.4808, lng: -2.2426, days: 6, cap: 150, price: "Free", club: 0, img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "Start your engines at midnight. A city-wide cruise through Manchester with 100+ cars. All welcome, sensible driving only." },
+    { title: "Manchester Night Cruise", type: "NIGHT_CRUISE", city: "Manchester", region: "Greater Manchester", lat: 53.4808, lng: -2.2426, days: 6, cap: 150, price: "Free", club: 0, amen: "PARKING,COFFEE,SMOKING", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "Start your engines at midnight. A city-wide cruise through Manchester with 100+ cars. All welcome, sensible driving only." },
     { title: "Yorkshire Track Day Open", type: "TRACK_DAY", city: "Leeds", region: "Yorkshire", lat: 53.9008, lng: -1.5342, days: 20, cap: 80, price: "£120", club: 1, amen: "PARKING,TOILETS,FOOD,COFFEE,PADDOCK,TRACK_ACCESS,FIRST_AID", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80", desc: "Open track day at Harewood. All cars welcome. Instruction available for novices, timed runs in the afternoon." },
-    { title: "South West Stance & Style", type: "STANCE_MEET", city: "Bristol", region: "South West", lat: 51.4545, lng: -2.5879, days: 27, cap: 400, price: "£8 on the gate", club: 2, img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80", desc: "The South West's biggest stance and modified car show. Judged categories, prizes, trade stands and a live DJ." },
-    { title: "Newcastle Drift Championship", type: "DRIFT_EVENT", city: "Newcastle", region: "North East", lat: 54.9783, lng: -1.6178, days: 34, cap: 200, price: "£15", club: 1, img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80", desc: "Round 3 of the Northern Drift Championship. Pro and semi-pro classes, tandem battles and a lively spectator area." },
-    { title: "Glasgow Car Culture Meet", type: "MEET", city: "Glasgow", region: "Scotland", lat: 55.8642, lng: -4.2518, days: 9, cap: 250, price: "Free", club: 2, img: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80", desc: "Monthly community meet in the heart of Glasgow. Bring anything with an engine — everyone's welcome." },
-    { title: "Cardiff JDM Showcase", type: "JDM_MEET", city: "Cardiff", region: "Wales", lat: 51.4816, lng: -3.1791, days: 40, cap: 300, price: "£10", club: 2, img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=800&q=80", desc: "The best of Japanese performance and culture. Skylines, Supras, rotaries and more, with a dedicated show-and-shine area." },
+    { title: "South West Stance & Style", type: "STANCE_MEET", city: "Bristol", region: "South West", lat: 51.4545, lng: -2.5879, days: 27, cap: 400, price: "£8 on the gate", club: 2, amen: "PARKING,FOOD,DRINKS,TOILETS,TRADE_STANDS,LIVE_MUSIC,KIDS_AREA", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80", desc: "The South West's biggest stance and modified car show. Judged categories, prizes, trade stands and a live DJ." },
+    { title: "Newcastle Drift Championship", type: "DRIFT_EVENT", city: "Newcastle", region: "North East", lat: 54.9783, lng: -1.6178, days: 34, cap: 200, price: "£15", club: 1, amen: "PARKING,FOOD,TOILETS,TRACK_ACCESS,PADDOCK,FIRST_AID,SECURITY", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80", desc: "Round 3 of the Northern Drift Championship. Pro and semi-pro classes, tandem battles and a lively spectator area." },
+    { title: "Glasgow Car Culture Meet", type: "MEET", city: "Glasgow", region: "Scotland", lat: 55.8642, lng: -4.2518, days: 9, cap: 250, price: "Free", club: 2, amen: "PARKING,FOOD,COFFEE,TOILETS,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80", desc: "Monthly community meet in the heart of Glasgow. Bring anything with an engine — everyone's welcome." },
+    { title: "Cardiff JDM Showcase", type: "JDM_MEET", city: "Cardiff", region: "Wales", lat: 51.4816, lng: -3.1791, days: 40, cap: 300, price: "£10", club: 2, amen: "PARKING,FOOD,DRINKS,TOILETS,TRADE_STANDS,LIVE_MUSIC", img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=800&q=80", desc: "The best of Japanese performance and culture. Skylines, Supras, rotaries and more, with a dedicated show-and-shine area." },
     { title: "Midlands Tuner Festival", type: "CAR_SHOW", city: "Birmingham", region: "West Midlands", lat: 52.4862, lng: -1.8904, days: 18, cap: 800, price: "£12", club: 0, amen: "PARKING,FOOD,DRINKS,TOILETS,INDOOR,TRADE_STANDS,LIVE_MUSIC,DYNO,SMOKING", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80", desc: "A huge indoor and outdoor festival of modified cars, dyno competitions, trade village and evening after-party." },
-    { title: "Bournemouth Coastal Cruise", type: "NIGHT_CRUISE", city: "Bournemouth", region: "South West", lat: 50.726, lng: -1.8795, days: 47, cap: 180, price: "Free", club: 2, img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "A scenic evening cruise along the Dorset coast finishing at the seafront for a relaxed meet." },
-    { title: "Classic & Vintage Sunday", type: "CLASSIC_CARS", city: "Oxford", region: "South East", lat: 51.752, lng: -1.2577, days: 25, cap: 350, price: "£6", club: 0, img: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80", desc: "A relaxed gathering of classic and vintage motors on the green. Concours judging, picnic area and vintage traders." },
+    { title: "Bournemouth Coastal Cruise", type: "NIGHT_CRUISE", city: "Bournemouth", region: "South West", lat: 50.726, lng: -1.8795, days: 47, cap: 180, price: "Free", club: 2, amen: "PARKING,COFFEE,TOILETS,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "A scenic evening cruise along the Dorset coast finishing at the seafront for a relaxed meet." },
+    { title: "Classic & Vintage Sunday", type: "CLASSIC_CARS", city: "Oxford", region: "South East", lat: 51.752, lng: -1.2577, days: 25, cap: 350, price: "£6", club: 0, amen: "PARKING,FOOD,COFFEE,TOILETS,KIDS_AREA,ACCESSIBLE,PET_FRIENDLY,TRADE_STANDS", img: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80", desc: "A relaxed gathering of classic and vintage motors on the green. Concours judging, picnic area and vintage traders." },
   ];
 
   let events = 0;

@@ -111,6 +111,7 @@
 - ✅ Vercel deployment (production branch `main`) with Neon Postgres
 - ✅ **Auto schema sync on deploy** — `vercel-build` runs `prisma db push` (idempotent; direct connection via `directUrl`, pooled at runtime)
 - ✅ **One-time demo-data seed endpoint** `/api/dev/seed?token=…` — triple-guarded (token env var, token match, refuses on non-empty DB); demo data also loadable via `npm run db:seed`
+- ✅ Seed endpoint `&mode=amenities` — safe backfill of amenity data onto demo rows for databases seeded before the amenity catalog (never touches real users' selections)
 - ✅ REST API under `/api/*` with shared error handling (Zod → 422, auth → 401/403)
 - ✅ `.env.example` documenting every variable; all integrations optional and gracefully degrading
 
@@ -122,6 +123,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD2` | Demo amenities: all 10 seed events now ship amenity sets; seed endpoint gained `&mode=amenities` to backfill amenities onto existing demo data safely |
 | 2026-08-04 | `23fdbf2` | Amenity catalog with icons: venue amenity picker, venue selector in the event form (pulls amenities + location through), per-event amenity add/remove, icon blocks on venue + event pages, amenities in structured data |
 | 2026-08-04 | `a28419f` | Image optimization (`next/image`), category + city SEO landing pages, email notifications (confirmations, follower alerts, reminder cron), event reviews & ratings with `AggregateRating`, direct image uploads (Vercel Blob) |
 | 2026-08-04 | `bf31f9e` | SEO layer: per-page metadata, Schema.org JSON-LD (Event/Organization/Place/WebSite), dynamic sitemap, robots.txt, favicon, noindex on private pages |
