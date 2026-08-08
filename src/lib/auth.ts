@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { createHash } from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
@@ -88,5 +89,40 @@ export class AuthError extends Error {
   constructor(message: string, status = 401) {
     super(message);
     this.status = status;
+  }
+}
+
+// ---- Password reset tokens (stateless) ----
+// A signed, 1-hour token whose fingerprint is derived from the current
+// password hash, so it becomes invalid the moment the password changes
+// (single practical use) — no DB table required.
+function pwFingerprint(passwordHash: string | null): string {
+  return createHash("sha256").update(passwordHash ?? "no-password").digest("hex").slice(0, 16);
+}
+
+export async function createPasswordResetToken(user: {
+  id: string;
+  passwordHash: string | null;
+}): Promise<string> {
+  return new SignJWT({ purpose: "pwreset", fp: pwFingerprint(user.passwordHash) })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(user.id)
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(getSecret());
+}
+
+export async function verifyPasswordResetToken(
+  token: string,
+): Promise<{ userId: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    if (payload.purpose !== "pwreset" || !payload.sub) return null;
+    const user = await prisma.user.findUnique({ where: { id: payload.sub as string } });
+    if (!user) return null;
+    if (payload.fp !== pwFingerprint(user.passwordHash)) return null; // already used / stale
+    return { userId: user.id };
+  } catch {
+    return null;
   }
 }

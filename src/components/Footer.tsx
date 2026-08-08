@@ -88,6 +88,7 @@ export function Footer() {
             ["Sign Up", "/register"],
             ["Log In", "/login"],
             ["Dashboard", "/dashboard"],
+            ["Account Settings", "/account"],
           ]}
         />
       </div>

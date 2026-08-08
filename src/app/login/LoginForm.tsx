@@ -56,7 +56,12 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
         <input type="email" className="field-input" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" />
       </div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <label className="field-label">Password</label>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <label className="field-label">Password</label>
+          <Link href="/forgot-password" style={{ fontSize: ".72rem", color: "var(--or)", textDecoration: "none" }}>
+            Forgot password?
+          </Link>
+        </div>
         <input type="password" className="field-input" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Your password" />
       </div>
 

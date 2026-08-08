@@ -42,6 +42,7 @@ model User {
   clubFollows   ClubFollow[]
   venueFollows  VenueFollow[]
   reviews       Review[]
+  savedEvents   SavedEvent[]
 }
 
 // Organiser / car club profile (one per organiser account)
@@ -124,6 +125,7 @@ model Event {
 
   registrations Registration[]
   reviews       Review[]
+  savedBy       SavedEvent[]
 
   @@index([type])
   @@index([startsAt])
@@ -162,6 +164,17 @@ model VenueFollow {
   createdAt DateTime @default(now())
 
   @@unique([userId, venueId])
+}
+
+model SavedEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventId])
 }
 
 model Review {

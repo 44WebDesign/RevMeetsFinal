@@ -9,6 +9,9 @@ import { MapView } from "@/components/MapView";
 import { AttendButton } from "@/components/AttendButton";
 import { ReviewSection } from "@/components/ReviewSection";
 import { AmenityList } from "@/components/AmenityList";
+import { SaveButton } from "@/components/SaveButton";
+import { AddToCalendar } from "@/components/AddToCalendar";
+import { ShareBar } from "@/components/ShareBar";
 import { JsonLd } from "@/components/JsonLd";
 import { parseAmenities } from "@/lib/amenities";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
@@ -111,6 +114,14 @@ export default async function EventDetail({
     ? reviewRows.find((r) => r.userId === session.sub)?.rating ?? null
     : null;
   const eventStarted = event.startsAt <= new Date();
+
+  const saved = session
+    ? !!(await prisma.savedEvent.findUnique({
+        where: { userId_eventId: { userId: session.sub, eventId: event.id } },
+      }))
+    : false;
+  const eventUrl = absoluteUrl(`/events/${event.slug}`);
+  const locationText = [event.address, event.city, event.region].filter(Boolean).join(", ");
 
   const color = eventTypeColor(event.type);
   const full = !!event.capacity && event._count.registrations >= event.capacity;
@@ -326,7 +337,26 @@ export default async function EventDetail({
                   full={full}
                 />
 
-                <div style={{ borderTop: "1px solid var(--bdr)", margin: "1.25rem 0", paddingTop: "1.25rem" }}>
+                <div style={{ display: "grid", gap: ".5rem", marginTop: ".75rem" }}>
+                  <SaveButton eventId={event.id} initialSaved={saved} loggedIn={!!session} />
+                  <AddToCalendar
+                    title={event.title}
+                    description={event.description}
+                    location={locationText}
+                    start={event.startsAt.toISOString()}
+                    end={event.endsAt ? event.endsAt.toISOString() : null}
+                    url={eventUrl}
+                  />
+                </div>
+
+                <div style={{ borderTop: "1px solid var(--bdr)", margin: "1.25rem 0 1rem", paddingTop: "1.25rem" }}>
+                  <div style={{ fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".1em", color: "var(--mut)", marginBottom: ".6rem" }}>
+                    Share
+                  </div>
+                  <ShareBar url={eventUrl} title={event.title} />
+                </div>
+
+                <div style={{ borderTop: "1px solid var(--bdr)", margin: "0 0 1.25rem", paddingTop: "1.25rem" }}>
                   <div style={{ fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".1em", color: "var(--mut)", marginBottom: ".5rem" }}>
                     Organised by
                   </div>

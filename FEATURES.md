@@ -27,6 +27,8 @@
 - ✅ Host/venue accounts get an editable club/venue profile bootstrapped at sign-up (email or Google)
 - ✅ Clear error when a Google-only account tries password login
 - ✅ Login/register pages redirect back to where the user was (`?next=`)
+- ✅ **Password reset** — "Forgot password?" flow with an emailed, 1-hour, single-use signed link (stateless; invalidated once the password changes); logs in automatically after reset
+- ✅ **Account settings** (`/account`) — edit display name, bio and avatar colour; change password (Google-only accounts can set one to also log in by email)
 
 ## 3. Events
 
@@ -43,6 +45,8 @@
 - ✅ Amenity icon strip on event cards (and venue cards) across list, search and profile views
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
+- ✅ **Save / bookmark events** for later (event page + a "Saved for Later" section on the enthusiast dashboard)
+- ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event pages
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
 - ✅ Auto-generated unique URL slugs
 
@@ -128,6 +132,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD6` | Password reset (emailed 1-hour single-use link) + account settings page (profile, avatar colour, change/set password); save/bookmark events with a dashboard section; add-to-calendar (Google + .ics) and share buttons on event pages |
 | 2026-08-04 | `fbee115` | Reworked `/events` into a map-first explorer: sidebar filters drive a full-height map with a prominent Map/List toggle sharing one filter set (keyword, city, near-me radius, date, type, amenities); removed the old top filter-bar + fixed map layout |
 | 2026-08-04 | `4178d95` | Amenity icon strips on event/venue cards; "near me" geolocation on the map explorer (distance radius, you-are-here marker, nearest-first sorting, distance badges) |
 | 2026-08-04 | `5617f5c` | Amenity filtering: collapsible chip panel in event search, live chips on the map explorer (events + venues), instant filter on the venues directory; `amenities` param on the events/venues APIs |

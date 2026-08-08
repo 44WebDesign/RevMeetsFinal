@@ -18,6 +18,29 @@ export const loginSchema = z
   })
   .strict();
 
+export const forgotSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+});
+
+export const resetSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const profileSchema = z.object({
+  name: z.string().min(2, "Name is too short").max(80),
+  bio: z.string().max(500).optional().nullable(),
+  avatarColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Pick a colour")
+    .optional(),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
+
 export const eventSchema = z.object({
   title: z.string().min(3).max(140),
   description: z.string().min(10).max(4000),

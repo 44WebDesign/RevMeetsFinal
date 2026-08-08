@@ -36,6 +36,9 @@ export default async function DashboardPage() {
 
         {/* Quick links */}
         <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
+          <Link href="/account" className="btn-ghost">
+            <i className="fas fa-gear" /> Account Settings
+          </Link>
           {user.club && (
             <Link href="/dashboard/club" className="btn-ghost">
               <i className="fas fa-users-gear" /> Edit Club Profile
@@ -133,7 +136,7 @@ async function HostDashboard({ userId }: { userId: string }) {
 }
 
 async function EnthusiastDashboard({ userId }: { userId: string }) {
-  const [registrations, clubFollows, venueFollows] = await Promise.all([
+  const [registrations, clubFollows, venueFollows, saved] = await Promise.all([
     prisma.registration.findMany({
       where: { userId },
       include: {
@@ -143,7 +146,15 @@ async function EnthusiastDashboard({ userId }: { userId: string }) {
     }),
     prisma.clubFollow.findMany({ where: { userId }, include: { club: true } }),
     prisma.venueFollow.findMany({ where: { userId }, include: { venue: true } }),
+    prisma.savedEvent.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        event: { include: { _count: { select: { registrations: true } }, club: { select: { name: true } } } },
+      },
+    }),
   ]);
+  const savedEvents = saved.map((s) => s.event);
 
   const upcoming = registrations
     .filter((r) => r.event.startsAt >= new Date(Date.now() - 86400000))
@@ -153,6 +164,7 @@ async function EnthusiastDashboard({ userId }: { userId: string }) {
     <>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
         <StatCard label="Registered events" value={registrations.length} icon="fa-ticket" />
+        <StatCard label="Saved events" value={savedEvents.length} icon="fa-bookmark" />
         <StatCard label="Clubs followed" value={clubFollows.length} icon="fa-users-gear" />
         <StatCard label="Venues followed" value={venueFollows.length} icon="fa-warehouse" />
       </div>
@@ -184,6 +196,34 @@ async function EnthusiastDashboard({ userId }: { userId: string }) {
             />
           ))}
         </div>
+      )}
+
+      {savedEvents.length > 0 && (
+        <>
+          <h2 className="hd" style={{ fontSize: "1.75rem", margin: "2.5rem 0 1.25rem" }}>
+            <i className="fas fa-bookmark" style={{ color: "var(--or)", marginRight: 8 }} />Saved for Later
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))", gap: "1.5rem" }}>
+            {savedEvents.map((e) => (
+              <EventCard
+                key={e.id}
+                event={{
+                  id: e.id,
+                  slug: e.slug,
+                  title: e.title,
+                  description: e.description,
+                  type: e.type,
+                  city: e.city,
+                  startsAt: e.startsAt.toISOString(),
+                  imageUrl: e.imageUrl,
+                  attendees: e._count.registrations,
+                  clubName: e.club?.name ?? null,
+                  amenities: e.amenities,
+                }}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {(clubFollows.length > 0 || venueFollows.length > 0) && (
