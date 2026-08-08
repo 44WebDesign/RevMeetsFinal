@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { EventForm } from "@/components/EventForm";
+import { stripeConfigured, featuredPriceLabel, featuredDays } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,14 @@ export default async function NewEventPage() {
         <p className="sec-sub" style={{ marginBottom: "2rem" }}>
           Publish your event to the map and the community. You can save it as a draft first if you&apos;re not ready.
         </p>
-        <EventForm mode="create" />
+        <EventForm
+          mode="create"
+          promote={{
+            enabled: stripeConfigured(),
+            priceLabel: featuredPriceLabel(),
+            days: featuredDays(),
+          }}
+        />
       </div>
     </section>
   );

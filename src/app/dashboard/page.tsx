@@ -39,6 +39,11 @@ export default async function DashboardPage() {
           <Link href="/account" className="btn-ghost">
             <i className="fas fa-gear" /> Account Settings
           </Link>
+          {(isHost || isVenue) && (
+            <Link href="/dashboard/promotions" className="btn-ghost">
+              <i className="fas fa-star" /> Promotions
+            </Link>
+          )}
           {user.club && (
             <Link href="/dashboard/club" className="btn-ghost">
               <i className="fas fa-users-gear" /> Edit Club Profile

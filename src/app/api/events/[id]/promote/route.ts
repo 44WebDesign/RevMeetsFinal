@@ -44,7 +44,7 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
         },
       },
     ],
-    metadata: { eventId: event.id, days: String(days) },
+    metadata: { eventId: event.id, userId: user.id, days: String(days) },
     success_url: `${origin}/api/stripe/featured-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/dashboard/events/${event.id}/edit?promote=cancelled`,
   });

@@ -59,16 +59,19 @@ export function EventForm({
   mode,
   eventId,
   initial,
+  promote,
 }: {
   mode: "create" | "edit";
   eventId?: string;
   initial?: Partial<EventFormValues>;
+  promote?: { enabled: boolean; priceLabel: string; days: number };
 }) {
   const router = useRouter();
   const [v, setV] = useState<EventFormValues>({ ...EMPTY, ...initial });
   const [venues, setVenues] = useState<VenueOption[]>([]);
   const [recurrence, setRecurrence] = useState("NONE");
   const [occurrences, setOccurrences] = useState(4);
+  const [featureNow, setFeatureNow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -134,6 +137,19 @@ export function EventForm({
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
+      // If they chose to feature the event now, send them straight to checkout.
+      if (mode === "create" && featureNow && promote?.enabled && data.id) {
+        try {
+          const pr = await fetch(`/api/events/${data.id}/promote`, { method: "POST" });
+          const pd = await pr.json().catch(() => ({}));
+          if (pr.ok && pd.url) {
+            window.location.href = pd.url;
+            return;
+          }
+        } catch {
+          /* fall through — the event was still created */
+        }
+      }
       router.push(`/events/${data.slug}`);
       router.refresh();
     } else {
@@ -287,6 +303,26 @@ export function EventForm({
         </div>
       )}
 
+      {/* Feature now (paid) — create only */}
+      {mode === "create" && promote?.enabled && (
+        <label
+          className="card-surface"
+          style={{ padding: "1rem 1.25rem", background: "var(--bg)", display: "flex", alignItems: "flex-start", gap: ".6rem", cursor: "pointer" }}
+        >
+          <input type="checkbox" checked={featureNow} onChange={(e) => setFeatureNow(e.target.checked)} style={{ marginTop: ".2rem", width: 18, height: 18, accentColor: "var(--or)" }} />
+          <span>
+            <span style={{ fontWeight: 600, fontSize: ".9rem" }}>
+              <i className="fas fa-star" style={{ color: "#FFD700" }} /> Feature this event — {promote.priceLabel} / {promote.days} days
+            </span>
+            <span style={{ display: "block", fontSize: ".75rem", color: "var(--mut)" }}>
+              Promote it to the top of listings with a Featured badge. You&apos;ll be taken to
+              secure payment right after the event is created.
+              {recurrence !== "NONE" && " (Applies to the first date in the series.)"}
+            </span>
+          </span>
+        </label>
+      )}
+
       {error && (
         <div style={{ background: "rgba(244,67,54,.1)", border: "1px solid rgba(244,67,54,.3)", color: "#ff6b5e", padding: ".75rem 1rem", borderRadius: 6, fontSize: ".85rem" }}>
           {error}
@@ -295,7 +331,13 @@ export function EventForm({
 
       <div style={{ display: "flex", gap: ".75rem", justifyContent: "space-between", flexWrap: "wrap" }}>
         <button type="submit" className="btn-or-lg" disabled={busy}>
-          {busy ? "Saving…" : mode === "create" ? "Publish Event" : "Save Changes"}
+          {busy
+            ? "Saving…"
+            : mode === "create"
+              ? featureNow && promote?.enabled
+                ? "Publish & Continue to Payment"
+                : "Publish Event"
+              : "Save Changes"}
         </button>
         {mode === "edit" && (
           <button type="button" onClick={remove} className="btn-ghost-lg" disabled={busy} style={{ borderColor: "rgba(244,67,54,.4)", color: "#ff6b5e" }}>

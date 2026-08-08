@@ -117,7 +117,9 @@
 
 *(Active when `STRIPE_SECRET_KEY` is set; the promote button shows "not enabled" otherwise)*
 
-- ✅ **Paid featured placement** via Stripe Checkout — a "Feature for £… / N days" button on the event manage page opens Stripe Checkout; on successful payment the event is featured for the configured window (verified server-side on the success redirect, idempotent). Price/duration configurable via env; promotions extend and auto-expire.
+- ✅ **Paid featured placement** via Stripe Checkout — feature an event from the **create flow** (a checkbox takes you to payment right after publishing) or later from its **Manage** page; on payment the event is featured for the configured window. Price/duration configurable via env; promotions extend and auto-expire.
+- ✅ **Idempotent activation** — applied by both the Stripe **success redirect** and a signature-verified **webhook** (`/api/stripe/webhook`), keyed on the checkout session so it's applied exactly once even if the buyer closes the tab.
+- ✅ **Host promotions view** (`/dashboard/promotions`) — active/expired promotions, purchase history and total spend, backed by a `Promotion` record per payment.
 
 ## 12. Dashboards
 
@@ -141,6 +143,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD9` | Stripe webhook for featured promotions (signature-verified, shares idempotent apply logic with the success redirect); host promotions view (/dashboard/promotions) with spend history backed by a Promotion record; "feature now" option in the create-event flow (→ checkout after publishing) |
 | 2026-08-04 | `178f9a7` | Featured placement is now a paid Stripe feature: promote button on the event manage page → Stripe Checkout → server-verified featured window (`featuredUntil`); free featured toggle removed; daily cron expires lapsed promotions |
 | 2026-08-04 | `719e0da` | Save/bookmark button on event cards (marked across all card surfaces); featured/promoted events (host toggle, priority sort, gold badge); recurring events (weekly/fortnightly/monthly series generation); Terms & Privacy pages |
 | 2026-08-04 | `fc92cc4` | Password reset (emailed 1-hour single-use link) + account settings page (profile, avatar colour, change/set password); save/bookmark events with a dashboard section; add-to-calendar (Google + .ics) and share buttons on event pages |

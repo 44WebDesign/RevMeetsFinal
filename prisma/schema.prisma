@@ -43,6 +43,7 @@ model User {
   venueFollows  VenueFollow[]
   reviews       Review[]
   savedEvents   SavedEvent[]
+  promotions    Promotion[]
 }
 
 // Organiser / car club profile (one per organiser account)
@@ -131,10 +132,28 @@ model Event {
   registrations Registration[]
   reviews       Review[]
   savedBy       SavedEvent[]
+  promotions    Promotion[]
 
   @@index([type])
   @@index([startsAt])
   @@index([seriesId])
+}
+
+// A paid featured-placement purchase (Stripe). One row per completed checkout,
+// keyed by the Stripe session for idempotency across the success redirect and
+// the webhook.
+model Promotion {
+  id              String   @id @default(cuid())
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount          Int // pence
+  currency        String   @default("gbp")
+  days            Int
+  stripeSessionId String   @unique
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
 }
 
 model Registration {
