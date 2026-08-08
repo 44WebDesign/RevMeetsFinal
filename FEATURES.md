@@ -143,7 +143,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-08-04 | `TBD9` | Stripe webhook for featured promotions (signature-verified, shares idempotent apply logic with the success redirect); host promotions view (/dashboard/promotions) with spend history backed by a Promotion record; "feature now" option in the create-event flow (→ checkout after publishing) |
+| 2026-08-04 | `2f19635` | Stripe webhook for featured promotions (signature-verified, shares idempotent apply logic with the success redirect); host promotions view (/dashboard/promotions) with spend history backed by a Promotion record; "feature now" option in the create-event flow (→ checkout after publishing) |
 | 2026-08-04 | `178f9a7` | Featured placement is now a paid Stripe feature: promote button on the event manage page → Stripe Checkout → server-verified featured window (`featuredUntil`); free featured toggle removed; daily cron expires lapsed promotions |
 | 2026-08-04 | `719e0da` | Save/bookmark button on event cards (marked across all card surfaces); featured/promoted events (host toggle, priority sort, gold badge); recurring events (weekly/fortnightly/monthly series generation); Terms & Privacy pages |
 | 2026-08-04 | `fc92cc4` | Password reset (emailed 1-hour single-use link) + account settings page (profile, avatar colour, change/set password); save/bookmark events with a dashboard section; add-to-calendar (Google + .ics) and share buttons on event pages |
