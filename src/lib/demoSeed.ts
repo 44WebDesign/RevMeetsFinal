@@ -292,7 +292,9 @@ export async function seedDemoData(
         capacity: e.cap,
         priceInfo: e.price,
         amenities: (e as { amen?: string }).amen ?? "",
+        // Two demo events ship pre-promoted (as if paid) for 60 days.
         featured: i === 0 || i === 7, // London Supercar Show & Midlands Tuner Festival
+        featuredUntil: i === 0 || i === 7 ? day(60) : null,
         organiserId: ownerId,
         clubId,
       },

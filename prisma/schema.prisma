@@ -110,8 +110,9 @@ model Event {
   // Comma-separated amenity keys (see src/lib/amenities.ts). Defaults from the
   // selected venue at creation; editable per event.
   amenities   String  @default("")
-  // Promoted placement — featured events sort first and get a badge.
-  featured    Boolean @default(false)
+  // Promoted placement (paid) — featured events sort first and get a badge.
+  featured      Boolean   @default(false)
+  featuredUntil DateTime? // when the paid promotion expires
   // Groups occurrences of a recurring event (shared cuid); null for one-offs.
   seriesId    String?
 

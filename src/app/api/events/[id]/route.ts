@@ -40,7 +40,8 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
       ...(data.capacity !== undefined ? { capacity: data.capacity || null } : {}),
       ...(data.priceInfo !== undefined ? { priceInfo: data.priceInfo || null } : {}),
       ...(data.amenities !== undefined ? { amenities: data.amenities || "" } : {}),
-      ...(data.featured !== undefined ? { featured: data.featured } : {}),
+      // `featured` is intentionally not editable here — it's a paid promotion
+      // applied only via /api/events/[id]/promote.
       ...(data.venueId !== undefined ? { venueId: data.venueId || null } : {}),
     },
   });

@@ -16,11 +16,18 @@ export const GET = handle(async (req: Request) => {
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
     return fail("Unauthorized", 401);
   }
-  if (!emailConfigured()) {
-    return ok({ sent: 0, skipped: "email not configured (set RESEND_API_KEY)" });
-  }
 
   const now = new Date();
+
+  // Expire paid featured promotions whose window has passed.
+  const expired = await prisma.event.updateMany({
+    where: { featured: true, featuredUntil: { lt: now } },
+    data: { featured: false },
+  });
+
+  if (!emailConfigured()) {
+    return ok({ sent: 0, featuredExpired: expired.count, skipped: "email not configured (set RESEND_API_KEY)" });
+  }
   const windowEnd = new Date(now.getTime() + 36 * 60 * 60 * 1000);
 
   const due = await prisma.registration.findMany({
@@ -54,5 +61,5 @@ export const GET = handle(async (req: Request) => {
     }
   }
 
-  return ok({ sent, considered: due.length });
+  return ok({ sent, considered: due.length, featuredExpired: expired.count });
 });

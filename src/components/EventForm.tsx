@@ -34,7 +34,6 @@ export type EventFormValues = {
   status: string;
   venueId: string;
   amenities: string;
-  featured: boolean;
 };
 
 const EMPTY: EventFormValues = {
@@ -54,7 +53,6 @@ const EMPTY: EventFormValues = {
   status: "PUBLISHED",
   venueId: "",
   amenities: "",
-  featured: false,
 };
 
 export function EventForm({
@@ -124,7 +122,6 @@ export function EventForm({
       status: v.status,
       venueId: v.venueId || null,
       amenities: v.amenities || "",
-      featured: v.featured,
       ...(mode === "create" && recurrence !== "NONE"
         ? { recurrence, occurrences }
         : {}),
@@ -289,19 +286,6 @@ export function EventForm({
           )}
         </div>
       )}
-
-      {/* Featured */}
-      <label style={{ display: "flex", alignItems: "flex-start", gap: ".6rem", cursor: "pointer" }}>
-        <input type="checkbox" checked={v.featured} onChange={(e) => set("featured", e.target.checked)} style={{ marginTop: ".2rem", width: 18, height: 18, accentColor: "var(--or)" }} />
-        <span>
-          <span style={{ fontWeight: 600, fontSize: ".9rem" }}>
-            <i className="fas fa-star" style={{ color: "#FFD700" }} /> Feature this event
-          </span>
-          <span style={{ display: "block", fontSize: ".75rem", color: "var(--mut)" }}>
-            Featured events are promoted — they appear first in listings and get a badge.
-          </span>
-        </span>
-      </label>
 
       {error && (
         <div style={{ background: "rgba(244,67,54,.1)", border: "1px solid rgba(244,67,54,.3)", color: "#ff6b5e", padding: ".75rem 1rem", borderRadius: 6, fontSize: ".85rem" }}>

@@ -74,7 +74,9 @@ export const POST = handle(async (req: Request) => {
     imageUrl: data.imageUrl || null,
     capacity: data.capacity || null,
     priceInfo: data.priceInfo || null,
-    featured: data.featured ?? false,
+    // Featured placement is a paid promotion (see /api/events/[id]/promote),
+    // never set for free at creation.
+    featured: false,
     // Explicit selection wins; otherwise inherit the venue's amenities.
     amenities: data.amenities ?? venueAmenities,
     organiserId: user.id,

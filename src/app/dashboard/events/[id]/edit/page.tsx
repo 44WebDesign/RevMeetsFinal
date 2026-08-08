@@ -2,6 +2,8 @@ import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { EventForm, type EventFormValues } from "@/components/EventForm";
+import { PromoteCard } from "@/components/PromoteCard";
+import { stripeConfigured, featuredPriceLabel, featuredDays } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +18,13 @@ function toLocalInput(date: Date | null): string {
 
 export default async function EditEventPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ promote?: string }>;
 }) {
   const { id } = await params;
+  const { promote } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=/dashboard/events/${id}/edit`);
 
@@ -44,7 +49,6 @@ export default async function EditEventPage({
     status: event.status,
     venueId: event.venueId ?? "",
     amenities: event.amenities ?? "",
-    featured: event.featured,
   };
 
   return (
@@ -55,6 +59,14 @@ export default async function EditEventPage({
         <p className="sec-sub" style={{ marginBottom: "2rem" }}>
           Update the details, change its status, or remove it entirely.
         </p>
+        <PromoteCard
+          eventId={event.id}
+          stripeEnabled={stripeConfigured()}
+          priceLabel={featuredPriceLabel()}
+          days={featuredDays()}
+          featuredUntil={event.featuredUntil ? event.featuredUntil.toISOString() : null}
+          notice={promote === "cancelled" ? "cancelled" : null}
+        />
         <EventForm mode="edit" eventId={event.id} initial={initial} />
       </div>
     </section>

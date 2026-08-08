@@ -46,7 +46,7 @@
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
 - ✅ **Save / bookmark events** for later — a bookmark button on every event **card** (and the event page), plus a "Saved for Later" section on the enthusiast dashboard
-- ✅ **Featured / promoted events** — hosts can feature an event; featured events sort first in listings and show a gold "Featured" badge on their card
+- ✅ **Featured / promoted events (paid)** — hosts pay via Stripe Checkout to feature an event (default £9.99 / 30 days); featured events sort first in listings and show a gold "Featured" badge. Promotions auto-expire (daily cron) and can be extended
 - ✅ **Recurring events** — create weekly / fortnightly / monthly series (up to 26 dates) in one go; each occurrence is its own event with its own page and registrations
 - ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event pages
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
@@ -113,12 +113,18 @@
 - ✅ Internal linking: footer + homepage tags point at category pages
 - ✅ **Terms of Service** and **Privacy Policy** pages (UK GDPR-oriented), linked in the footer and in the sitemap
 
-## 11. Dashboards
+## 11. Monetisation
+
+*(Active when `STRIPE_SECRET_KEY` is set; the promote button shows "not enabled" otherwise)*
+
+- ✅ **Paid featured placement** via Stripe Checkout — a "Feature for £… / N days" button on the event manage page opens Stripe Checkout; on successful payment the event is featured for the configured window (verified server-side on the success redirect, idempotent). Price/duration configurable via env; promotions extend and auto-expire.
+
+## 12. Dashboards
 
 - ✅ Role-aware dashboard: hosts/venues see event stats (events, registrations, published/drafts) and manage their events; enthusiasts see events they're attending and who they follow
 - ✅ Quick links to edit club/venue profile and view public pages
 
-## 12. Deployment & Infrastructure
+## 13. Deployment & Infrastructure
 
 - ✅ Vercel deployment (production branch `main`) with Neon Postgres
 - ✅ **Auto schema sync on deploy** — `vercel-build` runs `prisma db push` (idempotent; direct connection via `directUrl`, pooled at runtime)
@@ -135,6 +141,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD8` | Featured placement is now a paid Stripe feature: promote button on the event manage page → Stripe Checkout → server-verified featured window (`featuredUntil`); free featured toggle removed; daily cron expires lapsed promotions |
 | 2026-08-04 | `719e0da` | Save/bookmark button on event cards (marked across all card surfaces); featured/promoted events (host toggle, priority sort, gold badge); recurring events (weekly/fortnightly/monthly series generation); Terms & Privacy pages |
 | 2026-08-04 | `fc92cc4` | Password reset (emailed 1-hour single-use link) + account settings page (profile, avatar colour, change/set password); save/bookmark events with a dashboard section; add-to-calendar (Google + .ics) and share buttons on event pages |
 | 2026-08-04 | `fbee115` | Reworked `/events` into a map-first explorer: sidebar filters drive a full-height map with a prominent Map/List toggle sharing one filter set (keyword, city, near-me radius, date, type, amenities); removed the old top filter-bar + fixed map layout |
