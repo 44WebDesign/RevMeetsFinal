@@ -34,6 +34,7 @@ export type EventFormValues = {
   status: string;
   venueId: string;
   amenities: string;
+  featured: boolean;
 };
 
 const EMPTY: EventFormValues = {
@@ -53,6 +54,7 @@ const EMPTY: EventFormValues = {
   status: "PUBLISHED",
   venueId: "",
   amenities: "",
+  featured: false,
 };
 
 export function EventForm({
@@ -67,6 +69,8 @@ export function EventForm({
   const router = useRouter();
   const [v, setV] = useState<EventFormValues>({ ...EMPTY, ...initial });
   const [venues, setVenues] = useState<VenueOption[]>([]);
+  const [recurrence, setRecurrence] = useState("NONE");
+  const [occurrences, setOccurrences] = useState(4);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -120,6 +124,10 @@ export function EventForm({
       status: v.status,
       venueId: v.venueId || null,
       amenities: v.amenities || "",
+      featured: v.featured,
+      ...(mode === "create" && recurrence !== "NONE"
+        ? { recurrence, occurrences }
+        : {}),
     };
 
     const res = await fetch(mode === "create" ? "/api/events" : `/api/events/${eventId}`, {
@@ -251,6 +259,49 @@ export function EventForm({
           </Field>
         </div>
       </div>
+
+      {/* Recurring (create only) */}
+      {mode === "create" && (
+        <div className="card-surface" style={{ padding: "1rem 1.25rem", background: "var(--bg)" }}>
+          <label className="field-label" style={{ marginBottom: ".5rem" }}>
+            <i className="fas fa-repeat" /> Repeat this event
+          </label>
+          <div style={{ display: "flex", gap: ".75rem", alignItems: "flex-end", flexWrap: "wrap" }}>
+            <div style={{ flex: "1 1 180px" }}>
+              <select className="field-select" value={recurrence} onChange={(e) => setRecurrence(e.target.value)}>
+                <option value="NONE">One-off (doesn&apos;t repeat)</option>
+                <option value="WEEKLY">Weekly</option>
+                <option value="FORTNIGHTLY">Every 2 weeks</option>
+                <option value="MONTHLY">Monthly</option>
+              </select>
+            </div>
+            {recurrence !== "NONE" && (
+              <div style={{ flex: "1 1 120px" }}>
+                <label className="field-label">Number of dates</label>
+                <input type="number" min={2} max={26} className="field-input" value={occurrences} onChange={(e) => setOccurrences(Number(e.target.value))} />
+              </div>
+            )}
+          </div>
+          {recurrence !== "NONE" && (
+            <p style={{ fontSize: ".72rem", color: "var(--mut)", marginTop: ".5rem" }}>
+              Creates {occurrences} separate events, each with its own page and registrations, starting from the date above.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Featured */}
+      <label style={{ display: "flex", alignItems: "flex-start", gap: ".6rem", cursor: "pointer" }}>
+        <input type="checkbox" checked={v.featured} onChange={(e) => set("featured", e.target.checked)} style={{ marginTop: ".2rem", width: 18, height: 18, accentColor: "var(--or)" }} />
+        <span>
+          <span style={{ fontWeight: 600, fontSize: ".9rem" }}>
+            <i className="fas fa-star" style={{ color: "#FFD700" }} /> Feature this event
+          </span>
+          <span style={{ display: "block", fontSize: ".75rem", color: "var(--mut)" }}>
+            Featured events are promoted — they appear first in listings and get a badge.
+          </span>
+        </span>
+      </label>
 
       {error && (
         <div style={{ background: "rgba(244,67,54,.1)", border: "1px solid rgba(244,67,54,.3)", color: "#ff6b5e", padding: ".75rem 1rem", borderRadius: 6, fontSize: ".85rem" }}>

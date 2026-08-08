@@ -159,6 +159,7 @@ async function EnthusiastDashboard({ userId }: { userId: string }) {
   const upcoming = registrations
     .filter((r) => r.event.startsAt >= new Date(Date.now() - 86400000))
     .map((r) => r.event);
+  const savedIds = new Set(saved.map((s) => s.eventId));
 
   return (
     <>
@@ -192,6 +193,8 @@ async function EnthusiastDashboard({ userId }: { userId: string }) {
                 attendees: e._count.registrations,
                 clubName: e.club?.name ?? null,
                 amenities: e.amenities,
+                featured: e.featured,
+                saved: savedIds.has(e.id),
               }}
             />
           ))}
@@ -219,6 +222,8 @@ async function EnthusiastDashboard({ userId }: { userId: string }) {
                   attendees: e._count.registrations,
                   clubName: e.club?.name ?? null,
                   amenities: e.amenities,
+                  featured: e.featured,
+                  saved: true,
                 }}
               />
             ))}

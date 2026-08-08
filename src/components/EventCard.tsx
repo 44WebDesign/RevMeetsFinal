@@ -3,6 +3,7 @@ import Image from "next/image";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { AmenityIcons } from "./AmenityIcons";
+import { SaveIconButton } from "./SaveIconButton";
 
 export type EventCardData = {
   id: string;
@@ -16,6 +17,8 @@ export type EventCardData = {
   attendees: number;
   clubName?: string | null;
   amenities?: string;
+  saved?: boolean;
+  featured?: boolean;
 };
 
 const FALLBACK_IMG =
@@ -24,39 +27,53 @@ const FALLBACK_IMG =
 export function EventCard({ event }: { event: EventCardData }) {
   const color = eventTypeColor(event.type);
   return (
-    <Link
-      href={`/events/${event.slug}`}
-      className="card-surface"
-      style={{
-        overflow: "hidden",
-        transition: "all .3s",
-        cursor: "pointer",
-        textDecoration: "none",
-        color: "inherit",
-        display: "block",
-      }}
-    >
-      <div style={{ height: 180, position: "relative", overflow: "hidden" }}>
-        <Image
-          src={event.imageUrl || FALLBACK_IMG}
-          alt={event.title}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
-          style={{ objectFit: "cover", filter: "brightness(.85)" }}
-        />
-        <span
-          className="pill"
-          style={{
-            position: "absolute",
-            top: ".75rem",
-            left: ".75rem",
-            background: color,
-            color: "#fff",
-          }}
-        >
-          {eventTypeLabel(event.type)}
-        </span>
+    <div className="card-surface event-card" style={{ overflow: "hidden", position: "relative", transition: "all .3s" }}>
+      {/* Save button — sibling of the link (valid HTML), stacked above it */}
+      <div style={{ position: "absolute", top: ".6rem", right: ".6rem", zIndex: 2 }}>
+        <SaveIconButton eventId={event.id} initialSaved={event.saved ?? false} />
       </div>
+
+      <Link
+        href={`/events/${event.slug}`}
+        className="ev-card-link"
+        style={{ textDecoration: "none", color: "inherit", display: "block" }}
+      >
+        <div style={{ height: 180, position: "relative", overflow: "hidden" }}>
+          <Image
+            src={event.imageUrl || FALLBACK_IMG}
+            alt={event.title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
+            style={{ objectFit: "cover", filter: "brightness(.85)" }}
+          />
+          <span
+            className="pill"
+            style={{
+              position: "absolute",
+              top: ".75rem",
+              left: ".75rem",
+              background: color,
+              color: "#fff",
+            }}
+          >
+            {eventTypeLabel(event.type)}
+          </span>
+          {event.featured && (
+            <span
+              className="pill"
+              style={{
+                position: "absolute",
+                bottom: ".75rem",
+                left: ".75rem",
+                background: "rgba(8,8,8,.75)",
+                color: "#FFD700",
+                border: "1px solid rgba(255,215,0,.4)",
+              }}
+            >
+              <i className="fas fa-star" /> Featured
+            </span>
+          )}
+        </div>
       <div style={{ padding: "1.25rem" }}>
         <div
           style={{
@@ -135,6 +152,7 @@ export function EventCard({ event }: { event: EventCardData }) {
           View Event
         </span>
       </div>
-    </Link>
+      </Link>
+    </div>
   );
 }

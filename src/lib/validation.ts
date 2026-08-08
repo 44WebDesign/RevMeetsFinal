@@ -58,6 +58,10 @@ export const eventSchema = z.object({
   venueId: z.string().optional().nullable(),
   amenities: z.string().max(600).optional().nullable(),
   status: z.enum(["DRAFT", "PUBLISHED", "CANCELLED"]).optional(),
+  featured: z.boolean().optional(),
+  // Recurrence (create only): generate repeated occurrences.
+  recurrence: z.enum(["NONE", "WEEKLY", "FORTNIGHTLY", "MONTHLY"]).optional(),
+  occurrences: z.coerce.number().int().min(1).max(26).optional(),
 });
 
 export const clubSchema = z.object({

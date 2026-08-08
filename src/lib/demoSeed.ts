@@ -292,6 +292,7 @@ export async function seedDemoData(
         capacity: e.cap,
         priceInfo: e.price,
         amenities: (e as { amen?: string }).amen ?? "",
+        featured: i === 0 || i === 7, // London Supercar Show & Midlands Tuner Festival
         organiserId: ownerId,
         clubId,
       },

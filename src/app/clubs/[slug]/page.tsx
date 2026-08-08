@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
 import { JsonLd } from "@/components/JsonLd";
+import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -71,6 +72,10 @@ export default async function ClubDetail({
 
   const cats = club.categories.split(",").map((c) => c.trim()).filter(Boolean);
   const fallback = "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=80";
+
+  const savedSet = session
+    ? await getSavedEventIds(session.sub, club.events.map((e) => e.id))
+    : new Set<string>();
 
   const clubLd = {
     "@context": "https://schema.org",
@@ -152,6 +157,8 @@ export default async function ClubDetail({
                     attendees: e._count.registrations,
                     clubName: club.name,
                     amenities: e.amenities,
+                    featured: e.featured,
+                    saved: savedSet.has(e.id),
                   }}
                 />
               ))}

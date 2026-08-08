@@ -46,30 +46,58 @@ export const POST = handle(async (req: Request) => {
     venueAmenities = user.venue.amenities;
   }
 
-  const event = await prisma.event.create({
-    data: {
-      title: data.title,
-      slug: uniqueSlug(data.title),
-      description: data.description,
-      type: data.type,
-      status: data.status ?? "PUBLISHED",
-      startsAt: new Date(data.startsAt),
-      endsAt: data.endsAt ? new Date(data.endsAt) : null,
-      city: data.city,
-      region: data.region || null,
-      address: data.address || null,
-      lat: data.lat,
-      lng: data.lng,
-      imageUrl: data.imageUrl || null,
-      capacity: data.capacity || null,
-      priceInfo: data.priceInfo || null,
-      // Explicit selection wins; otherwise inherit the venue's amenities.
-      amenities: data.amenities ?? venueAmenities,
-      organiserId: user.id,
-      clubId,
-      venueId,
-    },
-  });
+  // Build the list of occurrence start times for recurring events.
+  const baseStart = new Date(data.startsAt);
+  const baseEnd = data.endsAt ? new Date(data.endsAt) : null;
+  const durationMs = baseEnd ? baseEnd.getTime() - baseStart.getTime() : null;
+  const recurrence = data.recurrence ?? "NONE";
+  const count = recurrence === "NONE" ? 1 : Math.min(Math.max(data.occurrences ?? 1, 1), 26);
+  const seriesId = count > 1 ? uniqueSlug(data.title) : null;
+
+  function occurrenceStart(i: number): Date {
+    const d = new Date(baseStart);
+    if (recurrence === "WEEKLY") d.setDate(d.getDate() + 7 * i);
+    else if (recurrence === "FORTNIGHTLY") d.setDate(d.getDate() + 14 * i);
+    else if (recurrence === "MONTHLY") d.setMonth(d.getMonth() + i);
+    return d;
+  }
+
+  const shared = {
+    description: data.description,
+    type: data.type,
+    status: data.status ?? "PUBLISHED",
+    city: data.city,
+    region: data.region || null,
+    address: data.address || null,
+    lat: data.lat,
+    lng: data.lng,
+    imageUrl: data.imageUrl || null,
+    capacity: data.capacity || null,
+    priceInfo: data.priceInfo || null,
+    featured: data.featured ?? false,
+    // Explicit selection wins; otherwise inherit the venue's amenities.
+    amenities: data.amenities ?? venueAmenities,
+    organiserId: user.id,
+    clubId,
+    venueId,
+    seriesId,
+  };
+
+  let firstEvent: { id: string; slug: string; status: string; title: string; startsAt: Date; city: string } | null = null;
+  for (let i = 0; i < count; i++) {
+    const start = occurrenceStart(i);
+    const created = await prisma.event.create({
+      data: {
+        ...shared,
+        title: data.title,
+        slug: uniqueSlug(data.title),
+        startsAt: start,
+        endsAt: durationMs !== null ? new Date(start.getTime() + durationMs) : null,
+      },
+    });
+    if (i === 0) firstEvent = created;
+  }
+  const event = firstEvent!;
 
   // Alert club followers when a new event goes straight to published.
   if (event.status === "PUBLISHED" && clubId && emailConfigured()) {

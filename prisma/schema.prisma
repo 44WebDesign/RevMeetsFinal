@@ -110,6 +110,10 @@ model Event {
   // Comma-separated amenity keys (see src/lib/amenities.ts). Defaults from the
   // selected venue at creation; editable per event.
   amenities   String  @default("")
+  // Promoted placement — featured events sort first and get a badge.
+  featured    Boolean @default(false)
+  // Groups occurrences of a recurring event (shared cuid); null for one-offs.
+  seriesId    String?
 
   organiserId String
   organiser   User    @relation("EventOrganiser", fields: [organiserId], references: [id], onDelete: Cascade)
@@ -129,6 +133,7 @@ model Event {
 
   @@index([type])
   @@index([startsAt])
+  @@index([seriesId])
 }
 
 model Registration {

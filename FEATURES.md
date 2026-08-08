@@ -45,7 +45,9 @@
 - ✅ Amenity icon strip on event cards (and venue cards) across list, search and profile views
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
-- ✅ **Save / bookmark events** for later (event page + a "Saved for Later" section on the enthusiast dashboard)
+- ✅ **Save / bookmark events** for later — a bookmark button on every event **card** (and the event page), plus a "Saved for Later" section on the enthusiast dashboard
+- ✅ **Featured / promoted events** — hosts can feature an event; featured events sort first in listings and show a gold "Featured" badge on their card
+- ✅ **Recurring events** — create weekly / fortnightly / monthly series (up to 26 dates) in one go; each occurrence is its own event with its own page and registrations
 - ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event pages
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
 - ✅ Auto-generated unique URL slugs
@@ -109,6 +111,7 @@
 - ✅ **`robots.txt`** (crawl allowed; API/dashboard/auth pages excluded; sitemap referenced)
 - ✅ `noindex` on login, register and dashboard pages
 - ✅ Internal linking: footer + homepage tags point at category pages
+- ✅ **Terms of Service** and **Privacy Policy** pages (UK GDPR-oriented), linked in the footer and in the sitemap
 
 ## 11. Dashboards
 
@@ -132,6 +135,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD7` | Save/bookmark button on event cards (marked across all card surfaces); featured/promoted events (host toggle, priority sort, gold badge); recurring events (weekly/fortnightly/monthly series generation); Terms & Privacy pages |
 | 2026-08-04 | `fc92cc4` | Password reset (emailed 1-hour single-use link) + account settings page (profile, avatar colour, change/set password); save/bookmark events with a dashboard section; add-to-calendar (Google + .ics) and share buttons on event pages |
 | 2026-08-04 | `fbee115` | Reworked `/events` into a map-first explorer: sidebar filters drive a full-height map with a prominent Map/List toggle sharing one filter set (keyword, city, near-me radius, date, type, amenities); removed the old top filter-bar + fixed map layout |
 | 2026-08-04 | `4178d95` | Amenity icon strips on event/venue cards; "near me" geolocation on the map explorer (distance radius, you-are-here marker, nearest-first sorting, distance badges) |

@@ -12,13 +12,15 @@ import {
   getEventMapPoints,
 } from "@/lib/queries";
 import { EVENT_TYPE_COLORS } from "@/lib/enums";
+import { getSession } from "@/lib/auth";
 
 // Rendered per-request so the build never needs a live database connection.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const session = await getSession();
   const [events, clubs, venues, stats, mapPoints] = await Promise.all([
-    getEvents({ take: 4 }),
+    getEvents({ take: 4 }, session?.sub),
     getClubs(),
     getVenues(),
     getStats(),

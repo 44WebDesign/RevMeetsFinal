@@ -333,6 +333,49 @@ nav.site-nav {
   border-color: var(--or) !important;
 }
 
+/* ---- Event card ---- */
+.event-card:hover {
+  border-color: var(--or);
+  transform: translateY(-4px);
+}
+.event-card .ev-btn {
+  transition: all 0.2s;
+}
+.event-card:hover .ev-btn {
+  background: var(--or);
+  border-color: var(--or) !important;
+}
+
+/* ---- Legal pages ---- */
+.legal-body {
+  color: rgba(245, 245, 245, 0.82);
+  line-height: 1.8;
+  font-size: 0.92rem;
+}
+.legal-body h2 {
+  font-family: var(--font-bebas), "Bebas Neue", cursive;
+  font-size: 1.4rem;
+  letter-spacing: 0.03em;
+  margin: 2rem 0 0.75rem;
+  color: #fff;
+}
+.legal-body p {
+  margin-bottom: 1rem;
+}
+.legal-body ul {
+  margin: 0 0 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.legal-body a {
+  color: var(--or);
+  text-decoration: none;
+}
+.legal-body a:hover {
+  text-decoration: underline;
+}
+
 /* ---- Utility ---- */
 .text-mut {
   color: var(--mut);

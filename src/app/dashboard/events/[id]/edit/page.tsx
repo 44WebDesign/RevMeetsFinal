@@ -44,6 +44,7 @@ export default async function EditEventPage({
     status: event.status,
     venueId: event.venueId ?? "",
     amenities: event.amenities ?? "",
+    featured: event.featured,
   };
 
   return (

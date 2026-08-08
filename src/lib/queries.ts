@@ -56,15 +56,19 @@ function eventWhere(filters: EventFilters) {
   return where;
 }
 
-export async function getEvents(filters: EventFilters = {}): Promise<EventCardData[]> {
+export async function getEvents(
+  filters: EventFilters = {},
+  userId?: string,
+): Promise<EventCardData[]> {
   const events = await prisma.event.findMany({
     where: eventWhere(filters),
-    orderBy: { startsAt: "asc" },
+    orderBy: [{ featured: "desc" }, { startsAt: "asc" }],
     take: filters.take ?? 60,
     include: {
       club: { select: { name: true } },
       venue: { select: { amenities: true } },
       _count: { select: { registrations: true } },
+      ...(userId ? { savedBy: { where: { userId }, select: { id: true } } } : {}),
     },
   });
 
@@ -80,6 +84,8 @@ export async function getEvents(filters: EventFilters = {}): Promise<EventCardDa
     attendees: e._count.registrations,
     clubName: e.club?.name ?? null,
     amenities: e.amenities || e.venue?.amenities || "",
+    featured: e.featured,
+    saved: userId ? (e as { savedBy?: unknown[] }).savedBy!.length > 0 : false,
   }));
 }
 
@@ -87,15 +93,16 @@ export async function getEvents(filters: EventFilters = {}): Promise<EventCardDa
 // explorer, which filters and maps from a single fetched set.
 export type ExplorerEvent = EventCardData & { lat: number; lng: number };
 
-export async function getExplorerEvents(): Promise<ExplorerEvent[]> {
+export async function getExplorerEvents(userId?: string): Promise<ExplorerEvent[]> {
   const events = await prisma.event.findMany({
     where: { status: "PUBLISHED" },
-    orderBy: { startsAt: "asc" },
+    orderBy: [{ featured: "desc" }, { startsAt: "asc" }],
     take: 500,
     include: {
       club: { select: { name: true } },
       venue: { select: { amenities: true } },
       _count: { select: { registrations: true } },
+      ...(userId ? { savedBy: { where: { userId }, select: { id: true } } } : {}),
     },
   });
   return events.map((e) => ({
@@ -110,6 +117,8 @@ export async function getExplorerEvents(): Promise<ExplorerEvent[]> {
     attendees: e._count.registrations,
     clubName: e.club?.name ?? null,
     amenities: e.amenities || e.venue?.amenities || "",
+    featured: e.featured,
+    saved: userId ? (e as { savedBy?: unknown[] }).savedBy!.length > 0 : false,
     lat: e.lat,
     lng: e.lng,
   }));
@@ -234,6 +243,20 @@ export async function getVenues(q?: string, amenities?: string[]): Promise<Venue
     lat: v.lat,
     lng: v.lng,
   }));
+}
+
+// Which of the given event IDs the user has saved (for marking inline card
+// lists on club/venue/dashboard pages).
+export async function getSavedEventIds(
+  userId: string,
+  eventIds: string[],
+): Promise<Set<string>> {
+  if (eventIds.length === 0) return new Set();
+  const rows = await prisma.savedEvent.findMany({
+    where: { userId, eventId: { in: eventIds } },
+    select: { eventId: true },
+  });
+  return new Set(rows.map((r) => r.eventId));
 }
 
 // Distinct cities with published events — powers the city landing pages.

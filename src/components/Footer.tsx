@@ -109,9 +109,12 @@ export function Footer() {
         }}
       >
         <span>© {new Date().getFullYear()} RevMeet. All rights reserved.</span>
-        <span>
-          Made with <span style={{ color: "var(--or)" }}>❤</span> for car
-          enthusiasts
+        <span style={{ display: "flex", gap: "1.25rem", alignItems: "center", flexWrap: "wrap" }}>
+          <Link href="/terms" style={{ color: "var(--mut)", textDecoration: "none" }}>Terms</Link>
+          <Link href="/privacy" style={{ color: "var(--mut)", textDecoration: "none" }}>Privacy</Link>
+          <span>
+            Made with <span style={{ color: "var(--or)" }}>❤</span> for car enthusiasts
+          </span>
         </span>
       </div>
     </footer>

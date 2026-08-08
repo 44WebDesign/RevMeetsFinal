@@ -1,5 +1,6 @@
 import { EventsExplorer } from "@/components/EventsExplorer";
 import { getExplorerEvents } from "@/lib/queries";
+import { getSession } from "@/lib/auth";
 import { eventTypeLabel } from "@/lib/enums";
 import { parseAmenityParam } from "@/lib/amenities";
 
@@ -24,7 +25,8 @@ type SearchParams = Promise<{
 
 export default async function EventsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const events = await getExplorerEvents();
+  const session = await getSession();
+  const events = await getExplorerEvents(session?.sub);
 
   const activeType = params.type ? eventTypeLabel(params.type) : null;
 

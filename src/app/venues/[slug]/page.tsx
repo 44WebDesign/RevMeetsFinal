@@ -9,6 +9,7 @@ import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
 import { AmenityList } from "@/components/AmenityList";
 import { JsonLd } from "@/components/JsonLd";
+import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
 import { parseAmenities } from "@/lib/amenities";
 
@@ -74,6 +75,9 @@ export default async function VenueDetail({
 
   const cats = venue.categories.split(",").map((c) => c.trim()).filter(Boolean);
   const amenities = parseAmenities(venue.amenities);
+  const savedSet = session
+    ? await getSavedEventIds(session.sub, venue.events.map((e) => e.id))
+    : new Set<string>();
   const fallback = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80";
 
   const venueLd = {
@@ -189,6 +193,8 @@ export default async function VenueDetail({
                     attendees: e._count.registrations,
                     clubName: e.club?.name ?? null,
                     amenities: e.amenities || venue.amenities,
+                    featured: e.featured,
+                    saved: savedSet.has(e.id),
                   }}
                 />
               ))}
