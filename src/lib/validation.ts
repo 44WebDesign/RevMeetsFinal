@@ -88,6 +88,27 @@ export const venueSchema = z.object({
   categories: z.string().max(200).optional().nullable(),
 });
 
+export const reportSchema = z.object({
+  targetType: z.enum(["EVENT", "REVIEW"]),
+  targetId: z.string().min(1),
+  reason: z.string().min(1).max(120),
+  detail: z.string().max(1000).optional().nullable(),
+});
+
+export const adminUserSchema = z.object({
+  role: z.enum(["ENTHUSIAST", "ORGANISER", "VENUE", "ADMIN"]).optional(),
+  suspended: z.boolean().optional(),
+});
+
+export const adminEventSchema = z.object({
+  status: z.enum(["DRAFT", "PUBLISHED", "CANCELLED"]).optional(),
+  featured: z.boolean().optional(),
+});
+
+export const adminReportSchema = z.object({
+  status: z.enum(["OPEN", "RESOLVED", "DISMISSED"]),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type EventInput = z.infer<typeof eventSchema>;

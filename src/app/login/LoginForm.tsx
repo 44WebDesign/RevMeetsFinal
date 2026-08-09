@@ -9,6 +9,7 @@ const OAUTH_ERRORS: Record<string, string> = {
   google_not_configured: "Google sign-in isn't configured on this server yet.",
   google_denied: "Google sign-in was cancelled.",
   google_failed: "Google sign-in failed. Please try again.",
+  account_suspended: "This account has been suspended.",
 };
 
 export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {

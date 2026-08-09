@@ -77,3 +77,19 @@ export const ROLE_LABELS: Record<Role, string> = {
   VENUE: "Venue",
   ADMIN: "Admin",
 };
+
+// ---- Moderation ----
+export const REPORT_TARGETS = ["EVENT", "REVIEW"] as const;
+export type ReportTarget = (typeof REPORT_TARGETS)[number];
+
+export const REPORT_STATUSES = ["OPEN", "RESOLVED", "DISMISSED"] as const;
+export type ReportStatus = (typeof REPORT_STATUSES)[number];
+
+export const REPORT_REASONS = [
+  "Spam or misleading",
+  "Offensive or inappropriate",
+  "Dangerous or illegal activity",
+  "Scam or fraudulent",
+  "Duplicate",
+  "Other",
+] as const;

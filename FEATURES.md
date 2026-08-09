@@ -121,12 +121,20 @@
 - ✅ **Idempotent activation** — applied by both the Stripe **success redirect** and a signature-verified **webhook** (`/api/stripe/webhook`), keyed on the checkout session so it's applied exactly once even if the buyer closes the tab.
 - ✅ **Host promotions view** (`/dashboard/promotions`) — active/expired promotions, purchase history and total spend, backed by a `Promotion` record per payment.
 
-## 12. Dashboards
+## 12. Admin & Moderation
+
+- ✅ **Admin console** (`/admin`, ADMIN role only) with a moderation nav and a platform overview (users, events, clubs, venues, registrations, reviews, open reports, promotion revenue)
+- ✅ **User management** — search users, change role, **suspend/unsuspend** (suspended accounts are blocked from email and Google login), or delete (self-protection: can't suspend/demote/delete your own admin account)
+- ✅ **Event moderation** — search events, hide (draft) / publish / cancel, unfeature, or delete any event
+- ✅ **Reporting system** — logged-in users can flag events and reviews (reason + detail, de-duplicated); admins get a **reports queue** (Open / Resolved / Dismissed) with target previews and one-click resolve / dismiss / delete-target
+- ✅ Admin link in the nav for admins; demo admin account (`admin@revmeet.test`)
+
+## 13. Dashboards
 
 - ✅ Role-aware dashboard: hosts/venues see event stats (events, registrations, published/drafts) and manage their events; enthusiasts see events they're attending and who they follow
 - ✅ Quick links to edit club/venue profile and view public pages
 
-## 13. Deployment & Infrastructure
+## 14. Deployment & Infrastructure
 
 - ✅ Vercel deployment (production branch `main`) with Neon Postgres
 - ✅ **Auto schema sync on deploy** — `vercel-build` runs `prisma db push` (idempotent; direct connection via `directUrl`, pooled at runtime)
@@ -143,6 +151,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-04 | `TBD10` | Admin/moderation system: /admin console (overview, user management with role change + suspend + delete, event moderation), user reporting of events/reviews with an admin reports queue, account suspension (blocks login), demo admin account |
 | 2026-08-04 | `2f19635` | Stripe webhook for featured promotions (signature-verified, shares idempotent apply logic with the success redirect); host promotions view (/dashboard/promotions) with spend history backed by a Promotion record; "feature now" option in the create-event flow (→ checkout after publishing) |
 | 2026-08-04 | `178f9a7` | Featured placement is now a paid Stripe feature: promote button on the event manage page → Stripe Checkout → server-verified featured window (`featuredUntil`); free featured toggle removed; daily cron expires lapsed promotions |
 | 2026-08-04 | `719e0da` | Save/bookmark button on event cards (marked across all card surfaces); featured/promoted events (host toggle, priority sort, gold badge); recurring events (weekly/fortnightly/monthly series generation); Terms & Privacy pages |

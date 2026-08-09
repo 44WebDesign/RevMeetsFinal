@@ -44,6 +44,11 @@ export function Nav({ session }: { session: SessionPayload | null }) {
       <div className="nav-actions" style={{ display: "none" }} data-desktop>
         {session ? (
           <>
+            {session.role === "ADMIN" && (
+              <Link href="/admin" className="btn-ghost" style={{ color: "var(--or)", borderColor: "rgba(255,95,31,.4)" }}>
+                <i className="fas fa-shield-halved" /> Admin
+              </Link>
+            )}
             <Link href="/dashboard" className="btn-ghost">
               <i className="fas fa-gauge-high" /> Dashboard
             </Link>
@@ -114,6 +119,11 @@ export function Nav({ session }: { session: SessionPayload | null }) {
           <div style={{ display: "flex", gap: ".75rem", marginTop: ".5rem" }}>
             {session ? (
               <>
+                {session.role === "ADMIN" && (
+                  <Link href="/admin" className="btn-ghost" onClick={() => setOpen(false)}>
+                    Admin
+                  </Link>
+                )}
                 <Link href="/dashboard" className="btn-ghost" onClick={() => setOpen(false)}>
                   Dashboard
                 </Link>

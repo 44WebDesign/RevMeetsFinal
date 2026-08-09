@@ -29,6 +29,7 @@ model User {
   googleId     String?  @unique
   name         String
   role         String   @default("ENTHUSIAST")
+  suspended    Boolean  @default(false) // moderation: blocks login & hides content
   bio          String?
   avatarColor  String   @default("#FF5F1F")
   avatarUrl    String?
@@ -44,6 +45,23 @@ model User {
   reviews       Review[]
   savedEvents   SavedEvent[]
   promotions    Promotion[]
+  reportsMade   Report[]       @relation("ReportsMade")
+}
+
+// User-submitted moderation reports (flagging events or reviews).
+model Report {
+  id         String    @id @default(cuid())
+  reporterId String?
+  reporter   User?     @relation("ReportsMade", fields: [reporterId], references: [id], onDelete: SetNull)
+  targetType String // EVENT | REVIEW
+  targetId   String
+  reason     String
+  detail     String?
+  status     String    @default("OPEN") // OPEN | RESOLVED | DISMISSED
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([status])
 }
 
 // Organiser / car club profile (one per organiser account)

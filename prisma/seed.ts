@@ -8,6 +8,7 @@ async function main() {
   const summary = await seedDemoData(prisma, { reset: true });
   console.log("Seed complete:", summary);
   console.log("Demo logins (password: password123):");
+  console.log("  Admin:      admin@revmeet.test");
   console.log("  Enthusiast: enthusiast@revmeet.test");
   console.log("  Organiser:  eastlondon@revmeet.test");
   console.log("  Venue:      harewood@revmeet.test");

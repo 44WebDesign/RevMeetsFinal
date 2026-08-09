@@ -100,6 +100,18 @@ export async function seedDemoData(
   const password = await bcrypt.hash("password123", 10);
   let users = 0;
 
+  // --- Admin demo user ---
+  await prisma.user.create({
+    data: {
+      email: "admin@revmeet.test",
+      name: "RevMeet Admin",
+      passwordHash: password,
+      role: "ADMIN",
+      avatarColor: "#F44336",
+    },
+  });
+  users++;
+
   // --- Enthusiast demo user ---
   const enthusiast = await prisma.user.create({
     data: {

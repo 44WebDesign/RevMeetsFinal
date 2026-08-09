@@ -77,6 +77,8 @@ export async function GET(req: Request) {
     await bootstrapProfileForRole(user.id, role, user.name);
   }
 
+  if (user.suspended) return fail("account_suspended");
+
   await createSession({
     sub: user.id,
     email: user.email,

@@ -12,6 +12,7 @@ import { AmenityList } from "@/components/AmenityList";
 import { SaveButton } from "@/components/SaveButton";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { ShareBar } from "@/components/ShareBar";
+import { ReportButton } from "@/components/ReportButton";
 import { JsonLd } from "@/components/JsonLd";
 import { parseAmenities } from "@/lib/amenities";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
@@ -390,6 +391,10 @@ export default async function EventDetail({
                     </Link>
                   </div>
                 )}
+
+                <div style={{ borderTop: "1px solid var(--bdr)", marginTop: "1.25rem", paddingTop: "1rem" }}>
+                  <ReportButton targetType="EVENT" targetId={event.id} loggedIn={!!session} />
+                </div>
               </div>
             </aside>
           </div>

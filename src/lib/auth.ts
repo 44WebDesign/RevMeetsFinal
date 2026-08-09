@@ -81,6 +81,13 @@ export async function getCurrentUser() {
 export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) throw new AuthError("Not authenticated", 401);
+  if (user.suspended) throw new AuthError("This account has been suspended", 403);
+  return user;
+}
+
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (user.role !== "ADMIN") throw new AuthError("Admins only", 403);
   return user;
 }
 

@@ -15,6 +15,9 @@ export const POST = handle(async (req: Request) => {
   if (!user || !user.passwordHash || !(await verifyPassword(data.password, user.passwordHash))) {
     return fail("Invalid email or password", 401);
   }
+  if (user.suspended) {
+    return fail("This account has been suspended. Contact support if you think this is a mistake.", 403);
+  }
 
   await createSession({
     sub: user.id,

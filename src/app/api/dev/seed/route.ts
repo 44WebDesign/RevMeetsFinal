@@ -55,6 +55,7 @@ export const GET = handle(async (req: Request) => {
       "Demo data loaded. You can now remove the SEED_TOKEN environment variable. " +
       "Demo logins use the password 'password123'.",
     demoLogins: {
+      admin: "admin@revmeet.test",
       enthusiast: "enthusiast@revmeet.test",
       host: "eastlondon@revmeet.test",
       venue: "harewood@revmeet.test",

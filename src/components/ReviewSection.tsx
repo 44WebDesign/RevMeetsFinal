@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ReportButton } from "./ReportButton";
 
 export type ReviewItem = {
   id: string;
@@ -157,6 +158,9 @@ export function ReviewSection({
             {r.body && (
               <p style={{ fontSize: ".85rem", color: "rgba(245,245,245,.8)", lineHeight: 1.6 }}>{r.body}</p>
             )}
+            <div style={{ marginTop: ".4rem" }}>
+              <ReportButton targetType="REVIEW" targetId={r.id} loggedIn={loggedIn} compact />
+            </div>
           </div>
         ))}
       </div>
