@@ -11,6 +11,8 @@ export type ClubCardData = {
   categories: string;
   followers: number;
   events: number;
+  rating?: number | null;
+  reviewCount?: number;
 };
 
 const FALLBACK =
@@ -68,10 +70,17 @@ export function ClubCard({ club }: { club: ClubCardData }) {
             marginBottom: ".5rem",
             display: "flex",
             alignItems: "center",
-            gap: ".3rem",
+            gap: ".6rem",
+            flexWrap: "wrap",
           }}
         >
-          <i className="fas fa-location-dot" /> {club.location}
+          <span><i className="fas fa-location-dot" /> {club.location}</span>
+          {club.rating != null && (
+            <span style={{ color: "var(--or)", fontWeight: 600 }}>
+              <i className="fas fa-star" /> {club.rating.toFixed(1)}
+              <span style={{ color: "var(--mut)", fontWeight: 400 }}> ({club.reviewCount})</span>
+            </span>
+          )}
         </div>
         <p
           style={{

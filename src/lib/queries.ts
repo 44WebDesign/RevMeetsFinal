@@ -194,6 +194,7 @@ export async function getClubs(q?: string): Promise<ClubCardData[]> {
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { follows: true, events: true } },
+      reviews: { select: { rating: true } },
     },
   });
   return clubs.map((c) => ({
@@ -206,6 +207,8 @@ export async function getClubs(q?: string): Promise<ClubCardData[]> {
     categories: c.categories,
     followers: c._count.follows,
     events: c._count.events,
+    rating: c.reviews.length ? c.reviews.reduce((s, r) => s + r.rating, 0) / c.reviews.length : null,
+    reviewCount: c.reviews.length,
   }));
 }
 
@@ -226,7 +229,10 @@ export async function getVenues(q?: string, amenities?: string[]): Promise<Venue
   const venues = await prisma.venue.findMany({
     where: and.length ? { AND: and } : undefined,
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { follows: true } } },
+    include: {
+      _count: { select: { follows: true } },
+      reviews: { select: { rating: true } },
+    },
   });
   return venues.map((v) => ({
     id: v.id,
@@ -242,6 +248,8 @@ export async function getVenues(q?: string, amenities?: string[]): Promise<Venue
     amenities: v.amenities,
     lat: v.lat,
     lng: v.lng,
+    rating: v.reviews.length ? v.reviews.reduce((s, r) => s + r.rating, 0) / v.reviews.length : null,
+    reviewCount: v.reviews.length,
   }));
 }
 

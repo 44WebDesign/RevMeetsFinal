@@ -14,6 +14,9 @@ export const PATCH = handle(async (req: Request) => {
       name: data.name,
       bio: data.bio ?? null,
       ...(data.avatarColor ? { avatarColor: data.avatarColor } : {}),
+      carMake: data.carMake ?? null,
+      carModel: data.carModel ?? null,
+      carYear: data.carYear ?? null,
     },
   });
 

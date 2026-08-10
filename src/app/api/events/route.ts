@@ -5,6 +5,7 @@ import { handle, ok, fail } from "@/lib/api";
 import { getEvents } from "@/lib/queries";
 import { uniqueSlug, formatDateTime } from "@/lib/utils";
 import { sendEmail, emailShell, eventButton, emailConfigured } from "@/lib/email";
+import { notifyMany } from "@/lib/notifications";
 import { absoluteUrl } from "@/lib/site";
 import { parseAmenityParam } from "@/lib/amenities";
 
@@ -101,25 +102,40 @@ export const POST = handle(async (req: Request) => {
   }
   const event = firstEvent!;
 
-  // Alert club followers when a new event goes straight to published.
-  if (event.status === "PUBLISHED" && clubId && emailConfigured()) {
+  // Alert club followers when a new event goes straight to published — an
+  // in-app notification for everyone, plus an email when Resend is configured.
+  if (event.status === "PUBLISHED" && clubId) {
     const follows = await prisma.clubFollow.findMany({
       where: { clubId },
-      include: { user: { select: { email: true } }, club: { select: { name: true } } },
+      include: { user: { select: { id: true, email: true } }, club: { select: { name: true } } },
       take: 500,
     });
+    const clubName = follows[0]?.club.name ?? user.club?.name ?? "A club you follow";
     const url = absoluteUrl(`/events/${event.slug}`);
-    for (const f of follows) {
-      await sendEmail({
-        to: f.user.email,
-        subject: `New event from ${f.club.name}: ${event.title}`,
-        html: emailShell(
-          `${f.club.name} just announced an event`,
-          `<p style="margin:0 0 8px"><strong>${event.title}</strong></p>
-           <p style="margin:0;color:#aaa">📅 ${formatDateTime(event.startsAt)}<br/>📍 ${event.city}</p>
-           ${eventButton(url)}`,
-        ),
-      });
+
+    await notifyMany(
+      follows.map((f) => f.user.id),
+      {
+        type: "NEW_EVENT",
+        message: `${clubName} announced a new event: ${event.title}`,
+        link: `/events/${event.slug}`,
+      },
+      user.id,
+    );
+
+    if (emailConfigured()) {
+      for (const f of follows) {
+        await sendEmail({
+          to: f.user.email,
+          subject: `New event from ${f.club.name}: ${event.title}`,
+          html: emailShell(
+            `${f.club.name} just announced an event`,
+            `<p style="margin:0 0 8px"><strong>${event.title}</strong></p>
+             <p style="margin:0;color:#aaa">📅 ${formatDateTime(event.startsAt)}<br/>📍 ${event.city}</p>
+             ${eventButton(url)}`,
+          ),
+        });
+      }
     }
   }
 

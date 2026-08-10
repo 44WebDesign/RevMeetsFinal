@@ -8,6 +8,7 @@ import { MapView } from "@/components/MapView";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
 import { AmenityList } from "@/components/AmenityList";
+import { ReviewSection } from "@/components/ReviewSection";
 import { JsonLd } from "@/components/JsonLd";
 import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -80,6 +81,28 @@ export default async function VenueDetail({
     : new Set<string>();
   const fallback = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80";
 
+  // Reviews
+  const reviewRows = await prisma.review.findMany({
+    where: { venueId: venue.id },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    include: { user: { select: { name: true, avatarColor: true } } },
+  });
+  const reviews = reviewRows.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    body: r.body,
+    author: r.user.name,
+    avatarColor: r.user.avatarColor,
+    createdAt: r.createdAt.toISOString(),
+  }));
+  const avgRating =
+    reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
+  const myRating = session
+    ? reviewRows.find((r) => r.userId === session.sub)?.rating ?? null
+    : null;
+  const isOwner = session?.sub === venue.ownerId;
+
   const venueLd = {
     "@context": "https://schema.org",
     "@type": "Place",
@@ -102,6 +125,17 @@ export default async function VenueDetail({
     },
     ...(venue.capacity ? { maximumAttendeeCapacity: venue.capacity } : {}),
     ...(amenities.length ? { amenityFeature: amenities.map((a) => ({ "@type": "LocationFeatureSpecification", name: a.label, value: true })) } : {}),
+    ...(avgRating !== null
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(avgRating.toFixed(1)),
+            reviewCount: reviews.length,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
 
   return (
@@ -200,6 +234,23 @@ export default async function VenueDetail({
               ))}
             </div>
           )}
+
+          <ReviewSection
+            target="venue"
+            targetId={venue.id}
+            reviews={reviews}
+            average={avgRating}
+            canReview={!!session && !isOwner}
+            myRating={myRating}
+            loggedIn={!!session}
+            disabledReason={
+              !session
+                ? "Log in to leave a review."
+                : isOwner
+                  ? "You can't review your own venue."
+                  : null
+            }
+          />
         </div>
       </section>
 

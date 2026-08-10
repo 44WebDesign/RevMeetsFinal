@@ -16,6 +16,8 @@ export type VenueCardData = {
   amenities?: string;
   lat?: number;
   lng?: number;
+  rating?: number | null;
+  reviewCount?: number;
 };
 
 const FALLBACK =
@@ -73,10 +75,17 @@ export function VenueCard({ venue }: { venue: VenueCardData }) {
             marginBottom: ".5rem",
             display: "flex",
             alignItems: "center",
-            gap: ".3rem",
+            gap: ".6rem",
+            flexWrap: "wrap",
           }}
         >
-          <i className="fas fa-location-dot" /> {venue.city}
+          <span><i className="fas fa-location-dot" /> {venue.city}</span>
+          {venue.rating != null && (
+            <span style={{ color: "#00BCD4", fontWeight: 600 }}>
+              <i className="fas fa-star" /> {venue.rating.toFixed(1)}
+              <span style={{ color: "var(--mut)", fontWeight: 400 }}> ({venue.reviewCount})</span>
+            </span>
+          )}
         </div>
         <p
           style={{

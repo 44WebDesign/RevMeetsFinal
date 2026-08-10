@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { SessionPayload } from "@/lib/auth";
+import { NotificationBell } from "./NotificationBell";
 
 export function Nav({ session }: { session: SessionPayload | null }) {
   const router = useRouter();
@@ -49,6 +50,7 @@ export function Nav({ session }: { session: SessionPayload | null }) {
                 <i className="fas fa-shield-halved" /> Admin
               </Link>
             )}
+            <NotificationBell />
             <Link href="/dashboard" className="btn-ghost">
               <i className="fas fa-gauge-high" /> Dashboard
             </Link>
@@ -116,9 +118,10 @@ export function Nav({ session }: { session: SessionPayload | null }) {
               {l.label}
             </Link>
           ))}
-          <div style={{ display: "flex", gap: ".75rem", marginTop: ".5rem" }}>
+          <div style={{ display: "flex", gap: ".75rem", marginTop: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
             {session ? (
               <>
+                <NotificationBell />
                 {session.role === "ADMIN" && (
                   <Link href="/admin" className="btn-ghost" onClick={() => setOpen(false)}>
                     Admin

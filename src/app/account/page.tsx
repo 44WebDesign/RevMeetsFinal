@@ -25,6 +25,10 @@ export default async function AccountPage() {
             bio: user.bio ?? "",
             avatarColor: user.avatarColor,
             hasPassword: !!user.passwordHash,
+            carMake: user.carMake ?? "",
+            carModel: user.carModel ?? "",
+            carYear: user.carYear ?? null,
+            id: user.id,
           }}
         />
       </div>

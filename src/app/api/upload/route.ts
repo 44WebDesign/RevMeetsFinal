@@ -11,10 +11,9 @@ const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 
 export const POST = handle(async (req: Request) => {
+  // Any signed-in member can upload — hosts/venues for listing images, and
+  // enthusiasts for their build gallery and event photos.
   const user = await requireUser();
-  if (user.role === "ENTHUSIAST") {
-    return fail("Only hosts and venues can upload images", 403);
-  }
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return fail("Uploads not configured — add Blob storage in Vercel (Storage → Blob), or paste an image URL instead.", 501);
   }

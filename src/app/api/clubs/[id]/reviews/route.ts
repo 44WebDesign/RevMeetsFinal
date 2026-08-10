@@ -14,7 +14,7 @@ const reviewSchema = z.object({
 export const GET = handle(async (_req: Request, ctx: Ctx) => {
   const { id } = await ctx.params;
   const reviews = await prisma.review.findMany({
-    where: { eventId: id },
+    where: { clubId: id },
     orderBy: { createdAt: "desc" },
     take: 100,
     include: { user: { select: { name: true, avatarColor: true } } },
@@ -31,41 +31,34 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
   });
 });
 
-// Create or update the caller's review. Attendees only, after the event starts.
+// Create or update the caller's review of a club. Any signed-in member can
+// review a club — except its owner.
 export const POST = handle(async (req: Request, ctx: Ctx) => {
   const user = await requireUser();
   const { id } = await ctx.params;
   const data = reviewSchema.parse(await req.json());
 
-  const event = await prisma.event.findUnique({ where: { id } });
-  if (!event) return fail("Event not found", 404);
-  if (event.startsAt > new Date()) {
-    return fail("You can review an event once it has started", 400);
-  }
-
-  const registered = await prisma.registration.findUnique({
-    where: { userId_eventId: { userId: user.id, eventId: id } },
-  });
-  if (!registered) {
-    return fail("Only attendees can review — register for the event first", 403);
+  const club = await prisma.club.findUnique({ where: { id } });
+  if (!club) return fail("Club not found", 404);
+  if (club.ownerId === user.id) {
+    return fail("You can't review your own club", 400);
   }
 
   const existing = await prisma.review.findUnique({
-    where: { userId_eventId: { userId: user.id, eventId: id } },
+    where: { userId_clubId: { userId: user.id, clubId: id } },
   });
   const review = await prisma.review.upsert({
-    where: { userId_eventId: { userId: user.id, eventId: id } },
-    create: { userId: user.id, eventId: id, rating: data.rating, body: data.body || null },
+    where: { userId_clubId: { userId: user.id, clubId: id } },
+    create: { userId: user.id, clubId: id, rating: data.rating, body: data.body || null },
     update: { rating: data.rating, body: data.body || null },
   });
 
-  // Notify the host of a new review (not edits, not their own).
-  if (!existing && event.organiserId !== user.id) {
+  if (!existing) {
     await notify({
-      userId: event.organiserId,
+      userId: club.ownerId,
       type: "REVIEW",
-      message: `${user.name} left a ${data.rating}★ review on ${event.title}`,
-      link: `/events/${event.slug}`,
+      message: `${user.name} left a ${data.rating}★ review on ${club.name}`,
+      link: `/clubs/${club.slug}`,
     });
   }
 
@@ -75,6 +68,6 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
 export const DELETE = handle(async (_req: Request, ctx: Ctx) => {
   const user = await requireUser();
   const { id } = await ctx.params;
-  await prisma.review.deleteMany({ where: { userId: user.id, eventId: id } });
+  await prisma.review.deleteMany({ where: { userId: user.id, clubId: id } });
   return ok({ ok: true });
 });

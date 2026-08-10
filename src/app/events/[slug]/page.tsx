@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth";
 import { MapView } from "@/components/MapView";
 import { AttendButton } from "@/components/AttendButton";
 import { ReviewSection } from "@/components/ReviewSection";
+import { PhotoGallery } from "@/components/PhotoGallery";
 import { AmenityList } from "@/components/AmenityList";
 import { SaveButton } from "@/components/SaveButton";
 import { AddToCalendar } from "@/components/AddToCalendar";
@@ -115,6 +116,22 @@ export default async function EventDetail({
     ? reviewRows.find((r) => r.userId === session.sub)?.rating ?? null
     : null;
   const eventStarted = event.startsAt <= new Date();
+
+  // Attendee photo wall
+  const photoRows = await prisma.photo.findMany({
+    where: { eventId: event.id },
+    orderBy: { createdAt: "desc" },
+    take: 60,
+    include: { uploader: { select: { id: true, name: true, avatarColor: true } } },
+  });
+  const photos = photoRows.map((p) => ({
+    id: p.id,
+    url: p.url,
+    caption: p.caption,
+    uploaderId: p.uploaderId,
+    uploaderName: p.uploader.name,
+    avatarColor: p.uploader.avatarColor,
+  }));
 
   const saved = session
     ? !!(await prisma.savedEvent.findUnique({
@@ -302,13 +319,35 @@ export default async function EventDetail({
               </div>
 
               <ReviewSection
-                eventId={event.id}
+                target="event"
+                targetId={event.id}
                 reviews={reviews}
                 average={avgRating}
-                canReview={registered}
+                canReview={eventStarted && registered}
                 myRating={myRating}
                 loggedIn={!!session}
-                eventStarted={eventStarted}
+                disabledReason={
+                  !eventStarted
+                    ? "Reviews open once the event starts."
+                    : !registered
+                      ? "Only attendees can review this event."
+                      : null
+                }
+              />
+
+              <PhotoGallery
+                title="Photos"
+                photos={photos}
+                eventId={event.id}
+                canAdd={registered}
+                currentUserId={session?.sub ?? null}
+                isAdmin={session?.role === "ADMIN"}
+                emptyText={
+                  registered
+                    ? "No photos yet — share the first shot from the day."
+                    : "No photos yet. Register and attend to add yours."
+                }
+                addPrompt="Share a photo from this event"
               />
             </div>
 

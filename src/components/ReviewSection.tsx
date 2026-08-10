@@ -13,6 +13,8 @@ export type ReviewItem = {
   createdAt: string;
 };
 
+export type ReviewTarget = "event" | "club" | "venue";
+
 export function Stars({ rating, size = ".85rem" }: { rating: number; size?: string }) {
   return (
     <span style={{ color: "var(--or)", fontSize: size, letterSpacing: "2px" }} aria-label={`${rating} out of 5 stars`}>
@@ -22,22 +24,26 @@ export function Stars({ rating, size = ".85rem" }: { rating: number; size?: stri
   );
 }
 
+// Generic review block for events, clubs and venues. The caller decides whether
+// the form is shown (canReview) and what to say when it isn't (disabledReason).
 export function ReviewSection({
-  eventId,
+  target,
+  targetId,
   reviews,
   average,
   canReview,
   myRating,
   loggedIn,
-  eventStarted,
+  disabledReason = null,
 }: {
-  eventId: string;
+  target: ReviewTarget;
+  targetId: string;
   reviews: ReviewItem[];
   average: number | null;
   canReview: boolean;
   myRating: number | null;
   loggedIn: boolean;
-  eventStarted: boolean;
+  disabledReason?: string | null;
 }) {
   const router = useRouter();
   const [rating, setRating] = useState(myRating ?? 0);
@@ -55,7 +61,7 @@ export function ReviewSection({
     }
     setBusy(true);
     setError(null);
-    const res = await fetch(`/api/events/${eventId}/reviews`, {
+    const res = await fetch(`/api/${target}s/${targetId}/reviews`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rating, body: body || null }),
@@ -83,7 +89,7 @@ export function ReviewSection({
       </div>
 
       {/* Review form */}
-      {eventStarted && canReview && !done && (
+      {canReview && !done && (
         <form onSubmit={submit} className="card-surface" style={{ padding: "1.25rem", marginTop: "1rem" }}>
           <label className="field-label">{myRating ? "Update your review" : "Leave a review"}</label>
           <div style={{ fontSize: "1.5rem", cursor: "pointer", marginBottom: ".6rem" }}>
@@ -119,19 +125,15 @@ export function ReviewSection({
           <i className="fas fa-check" /> Thanks — your review is live.
         </div>
       )}
-      {eventStarted && !canReview && loggedIn && !myRating && (
-        <p style={{ color: "var(--mut)", fontSize: ".85rem", marginTop: ".75rem" }}>
-          Only attendees can review this event.
-        </p>
-      )}
-      {!eventStarted && (
-        <p style={{ color: "var(--mut)", fontSize: ".85rem", marginTop: ".75rem" }}>
-          Reviews open once the event starts.
-        </p>
+      {!canReview && !done && disabledReason && (
+        <p style={{ color: "var(--mut)", fontSize: ".85rem", marginTop: ".75rem" }}>{disabledReason}</p>
       )}
 
       {/* Review list */}
       <div style={{ display: "flex", flexDirection: "column", gap: ".75rem", marginTop: "1.25rem" }}>
+        {reviews.length === 0 && (
+          <p style={{ color: "var(--mut)", fontSize: ".85rem" }}>No reviews yet — be the first.</p>
+        )}
         {reviews.map((r) => (
           <div key={r.id} className="card-surface" style={{ padding: "1rem 1.25rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".4rem" }}>

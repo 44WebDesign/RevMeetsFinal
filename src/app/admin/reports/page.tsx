@@ -33,7 +33,15 @@ export default async function AdminReports({
     prisma.event.findMany({ where: { id: { in: eventIds } }, select: { id: true, slug: true, title: true } }),
     prisma.review.findMany({
       where: { id: { in: reviewIds } },
-      select: { id: true, body: true, rating: true, user: { select: { name: true } }, event: { select: { slug: true, title: true } } },
+      select: {
+        id: true,
+        body: true,
+        rating: true,
+        user: { select: { name: true } },
+        event: { select: { slug: true, title: true } },
+        club: { select: { slug: true, name: true } },
+        venue: { select: { slug: true, name: true } },
+      },
     }),
   ]);
   const eventMap = new Map(events.map((e) => [e.id, e]));
@@ -88,7 +96,15 @@ export default async function AdminReports({
                     <>Target: <Link href={`/events/${ev.slug}`} style={{ color: "var(--or)" }}>{ev.title}</Link></>
                   ) : rv ? (
                     <>Target: review by {rv.user.name} ({rv.rating}★) on{" "}
-                      <Link href={`/events/${rv.event.slug}`} style={{ color: "var(--or)" }}>{rv.event.title}</Link>
+                      {rv.event ? (
+                        <Link href={`/events/${rv.event.slug}`} style={{ color: "var(--or)" }}>{rv.event.title}</Link>
+                      ) : rv.club ? (
+                        <Link href={`/clubs/${rv.club.slug}`} style={{ color: "var(--or)" }}>{rv.club.name}</Link>
+                      ) : rv.venue ? (
+                        <Link href={`/venues/${rv.venue.slug}`} style={{ color: "var(--or)" }}>{rv.venue.name}</Link>
+                      ) : (
+                        <span>a deleted item</span>
+                      )}
                       {rv.body ? ` — “${rv.body.slice(0, 120)}”` : ""}
                     </>
                   ) : (

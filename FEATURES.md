@@ -28,7 +28,7 @@
 - ✅ Clear error when a Google-only account tries password login
 - ✅ Login/register pages redirect back to where the user was (`?next=`)
 - ✅ **Password reset** — "Forgot password?" flow with an emailed, 1-hour, single-use signed link (stateless; invalidated once the password changes); logs in automatically after reset
-- ✅ **Account settings** (`/account`) — edit display name, bio and avatar colour; change password (Google-only accounts can set one to also log in by email)
+- ✅ **Account settings** (`/account`) — edit display name, bio, avatar colour and **garage** (car make/model/year); change password (Google-only accounts can set one to also log in by email); link to your public member profile
 
 ## 3. Events
 
@@ -49,6 +49,7 @@
 - ✅ **Featured / promoted events (paid)** — hosts pay via Stripe Checkout to feature an event (default £9.99 / 30 days); featured events sort first in listings and show a gold "Featured" badge. Promotions auto-expire (daily cron) and can be extended
 - ✅ **Recurring events** — create weekly / fortnightly / monthly series (up to 26 dates) in one go; each occurrence is its own event with its own page and registrations
 - ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event pages
+- ✅ **Attendee photo wall** — registered attendees upload photos (with captions) to an event page; everyone can view them in a grid with lightbox; uploaders/admins can delete
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
 - ✅ Auto-generated unique URL slugs
 
@@ -84,21 +85,31 @@
 
 - ✅ Attendees rate events 1–5 stars with optional comment, once the event has started
 - ✅ One review per user per event (editable); only registered attendees can review (spam control)
-- ✅ Reviews + average rating displayed on event pages
-- ✅ Average rating feeds `AggregateRating` structured data → ★ stars eligible in Google results
+- ✅ **Club & venue reviews** — any signed-in member can rate a club or venue 1–5 stars (one editable review each, owners excepted); shown with an average on the club/venue page
+- ✅ **Average rating on club & venue cards** (★ with review count) across directories and search
+- ✅ Reviews + average rating displayed on event, club and venue pages
+- ✅ Average rating feeds `AggregateRating` structured data (events, clubs, venues) → ★ stars eligible in Google results
 
-## 8. Email Notifications
+## 8. Notifications
+
+### In-app (bell menu)
+
+- ✅ **Notification bell** in the nav with an unread badge (polls in the background; marks read on open); dropdown lists recent activity with type icons and relative timestamps, deep-linking to the relevant page
+- ✅ Triggers: someone **registers** for your event, a **new review** on your event / club / venue, a **new event** from a club you follow, and photos added to your event
+- ✅ `GET /api/notifications` (list + unread count) and mark-read endpoint; creation never blocks the triggering request
+
+### Email
 
 *(Active when `RESEND_API_KEY` is set; skipped gracefully otherwise)*
 
 - ✅ Registration confirmation email on first sign-up to an event
-- ✅ New-event alerts emailed to a club's followers on publish
+- ✅ New-event alerts emailed to a club's followers on publish (in-app alert fires regardless of email config)
 - ✅ Daily pre-event reminder (8am cron via `vercel.json`) to registered attendees, deduplicated per registration
 - ✅ Branded dark email template
 
 ## 9. Images
 
-- ✅ **Direct image uploads** to Vercel Blob for hosts/venues (5 MB cap, JPG/PNG/WebP/GIF/AVIF), with URL-paste fallback and live preview
+- ✅ **Direct image uploads** to Vercel Blob for any signed-in member (5 MB cap, JPG/PNG/WebP/GIF/AVIF), with URL-paste fallback and live preview — covers listing images, build galleries and event photos
 - ✅ **`next/image` optimization** everywhere: responsive resizing, WebP/AVIF, lazy loading, `priority` on detail-page heroes (Core Web Vitals)
 
 ## 10. SEO & Discoverability
@@ -144,6 +155,13 @@
 - ✅ REST API under `/api/*` with shared error handling (Zod → 422, auth → 401/403)
 - ✅ `.env.example` documenting every variable; all integrations optional and gracefully degrading
 
+## 15. Member Profiles & Build Sharing
+
+- ✅ **Public member profiles** (`/members/<id>`) — avatar, name, bio, garage (car make/model/year) and a build photo gallery; links to the member's club/venue; indexed with `Person` structured data
+- ✅ **"Garage"** — members add their car (make, model, year) in account settings; surfaced on their profile
+- ✅ **Build photo gallery** — members upload photos of their build (file upload or URL, captions, lightbox view); owners/admins can delete
+- ✅ Reuses the shared `PhotoGallery` component with the event photo wall
+
 ---
 
 ## Changelog
@@ -152,6 +170,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-10 | `137d2bd` | Build & photo sharing (public member profiles at `/members/[id]` with garage + build gallery, attendee photo wall on events, uploads opened to all members), club & venue reviews (multi-target Review model, ★ ratings on club/venue cards + pages), and in-app notifications (bell menu with unread badge; registration / review / new-event / photo triggers) |
 | 2026-08-04 | `a4cf72a` | One-time admin-claim endpoint (`/api/admin/claim`, gated by ADMIN_CLAIM_TOKEN) to bootstrap the first admin on a live site without DB access; refreshes the session so the Admin nav appears immediately |
 | 2026-08-04 | `fae7e6b` | Admin/moderation system: /admin console (overview, user management with role change + suspend + delete, event moderation), user reporting of events/reviews with an admin reports queue, account suspension (blocks login), demo admin account |
 | 2026-08-04 | `2f19635` | Stripe webhook for featured promotions (signature-verified, shares idempotent apply logic with the success redirect); host promotions view (/dashboard/promotions) with spend history backed by a Promotion record; "feature now" option in the create-event flow (→ checkout after publishing) |

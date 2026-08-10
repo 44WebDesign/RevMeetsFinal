@@ -34,6 +34,10 @@ export const profileSchema = z.object({
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/, "Pick a colour")
     .optional(),
+  // "Garage" — the member's car/build shown on their public profile.
+  carMake: z.string().max(60).optional().nullable(),
+  carModel: z.string().max(60).optional().nullable(),
+  carYear: z.coerce.number().int().min(1885).max(2100).optional().nullable(),
 });
 
 export const changePasswordSchema = z.object({

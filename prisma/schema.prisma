@@ -33,6 +33,10 @@ model User {
   bio          String?
   avatarColor  String   @default("#FF5F1F")
   avatarUrl    String?
+  // "Garage" — the member's car/build shown on their public profile.
+  carMake      String?
+  carModel     String?
+  carYear      Int?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -46,6 +50,38 @@ model User {
   savedEvents   SavedEvent[]
   promotions    Promotion[]
   reportsMade   Report[]       @relation("ReportsMade")
+  photos        Photo[]
+  notifications Notification[]
+}
+
+// User-uploaded photos: a member's build gallery (eventId null) or photos
+// attached to an event they attended (eventId set).
+model Photo {
+  id         String   @id @default(cuid())
+  uploaderId String
+  uploader   User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  eventId    String?
+  event      Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  url        String
+  caption    String?
+  createdAt  DateTime @default(now())
+
+  @@index([uploaderId])
+  @@index([eventId])
+}
+
+// In-app notification (bell menu).
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
 }
 
 // User-submitted moderation reports (flagging events or reviews).
@@ -82,6 +118,7 @@ model Club {
 
   events  Event[]
   follows ClubFollow[]
+  reviews Review[]
 }
 
 // Venue profile — a place that promotes itself as a location for meets/events
@@ -107,6 +144,7 @@ model Venue {
 
   events  Event[]
   follows VenueFollow[]
+  reviews Review[]
 }
 
 model Event {
@@ -151,6 +189,7 @@ model Event {
   reviews       Review[]
   savedBy       SavedEvent[]
   promotions    Promotion[]
+  photos        Photo[]
 
   @@index([type])
   @@index([startsAt])
@@ -220,15 +259,24 @@ model SavedEvent {
   @@unique([userId, eventId])
 }
 
+// A review targets exactly one of an event, club or venue.
 model Review {
   id        String   @id @default(cuid())
   rating    Int // 1-5
   body      String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  clubId    String?
+  club      Club?    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  venueId   String?
+  venue     Venue?   @relation(fields: [venueId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
+  // NULLs are distinct in Postgres, so each unique only binds when its column
+  // is set — one review per user per event / club / venue.
   @@unique([userId, eventId])
+  @@unique([userId, clubId])
+  @@unique([userId, venueId])
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initials } from "@/lib/utils";
@@ -9,12 +10,24 @@ const COLORS = ["#FF5F1F", "#E040FB", "#00BCD4", "#4CAF50", "#FFD700", "#2196F3"
 export function AccountForm({
   initial,
 }: {
-  initial: { name: string; bio: string; avatarColor: string; hasPassword: boolean };
+  initial: {
+    name: string;
+    bio: string;
+    avatarColor: string;
+    hasPassword: boolean;
+    carMake: string;
+    carModel: string;
+    carYear: number | null;
+    id: string;
+  };
 }) {
   const router = useRouter();
   const [name, setName] = useState(initial.name);
   const [bio, setBio] = useState(initial.bio);
   const [avatarColor, setAvatarColor] = useState(initial.avatarColor);
+  const [carMake, setCarMake] = useState(initial.carMake);
+  const [carModel, setCarModel] = useState(initial.carModel);
+  const [carYear, setCarYear] = useState(initial.carYear ? String(initial.carYear) : "");
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
   const [profileErr, setProfileErr] = useState<string | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -33,7 +46,14 @@ export function AccountForm({
     const res = await fetch("/api/account", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, bio: bio || null, avatarColor }),
+      body: JSON.stringify({
+        name,
+        bio: bio || null,
+        avatarColor,
+        carMake: carMake || null,
+        carModel: carModel || null,
+        carYear: carYear ? Number(carYear) : null,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
@@ -98,6 +118,36 @@ export function AccountForm({
           <label className="field-label">Bio (optional)</label>
           <textarea className="field-textarea" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell the community a bit about you and your car…" />
         </div>
+
+        {/* Garage */}
+        <div style={{ borderTop: "1px solid var(--bdr)", paddingTop: "1.25rem" }}>
+          <h3 className="hd" style={{ fontSize: "1.1rem", marginBottom: ".25rem" }}>
+            <i className="fas fa-car-side" style={{ color: "var(--or)", marginRight: 6 }} /> Your Garage
+          </h3>
+          <p style={{ fontSize: ".8rem", color: "var(--mut)", marginBottom: ".9rem" }}>
+            Shown on your public profile, along with your build photos.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 90px", gap: ".6rem" }}>
+            <div>
+              <label className="field-label">Make</label>
+              <input className="field-input" value={carMake} onChange={(e) => setCarMake(e.target.value)} placeholder="e.g. Nissan" />
+            </div>
+            <div>
+              <label className="field-label">Model</label>
+              <input className="field-input" value={carModel} onChange={(e) => setCarModel(e.target.value)} placeholder="e.g. Skyline GT-R" />
+            </div>
+            <div>
+              <label className="field-label">Year</label>
+              <input className="field-input" value={carYear} onChange={(e) => setCarYear(e.target.value.replace(/[^\d]/g, ""))} placeholder="1999" inputMode="numeric" maxLength={4} />
+            </div>
+          </div>
+          <p style={{ fontSize: ".8rem", marginTop: ".75rem" }}>
+            <Link href={`/members/${initial.id}`} style={{ color: "var(--or)", textDecoration: "none" }}>
+              <i className="fas fa-arrow-up-right-from-square" /> View your public profile
+            </Link>
+          </p>
+        </div>
+
         {profileErr && <Msg color="#ff6b5e">{profileErr}</Msg>}
         {profileMsg && <Msg color="#7fd884"><i className="fas fa-check" /> {profileMsg}</Msg>}
         <button type="submit" className="btn-or-lg" disabled={savingProfile} style={{ alignSelf: "flex-start" }}>

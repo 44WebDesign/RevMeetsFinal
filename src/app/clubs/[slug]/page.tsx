@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
+import { ReviewSection } from "@/components/ReviewSection";
 import { JsonLd } from "@/components/JsonLd";
 import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -77,6 +78,28 @@ export default async function ClubDetail({
     ? await getSavedEventIds(session.sub, club.events.map((e) => e.id))
     : new Set<string>();
 
+  // Reviews
+  const reviewRows = await prisma.review.findMany({
+    where: { clubId: club.id },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    include: { user: { select: { name: true, avatarColor: true } } },
+  });
+  const reviews = reviewRows.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    body: r.body,
+    author: r.user.name,
+    avatarColor: r.user.avatarColor,
+    createdAt: r.createdAt.toISOString(),
+  }));
+  const avgRating =
+    reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
+  const myRating = session
+    ? reviewRows.find((r) => r.userId === session.sub)?.rating ?? null
+    : null;
+  const isOwner = session?.sub === club.ownerId;
+
   const clubLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -92,6 +115,17 @@ export default async function ClubDetail({
       addressCountry: "GB",
     },
     knowsAbout: cats,
+    ...(avgRating !== null
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(avgRating.toFixed(1)),
+            reviewCount: reviews.length,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
 
   return (
@@ -164,6 +198,23 @@ export default async function ClubDetail({
               ))}
             </div>
           )}
+
+          <ReviewSection
+            target="club"
+            targetId={club.id}
+            reviews={reviews}
+            average={avgRating}
+            canReview={!!session && !isOwner}
+            myRating={myRating}
+            loggedIn={!!session}
+            disabledReason={
+              !session
+                ? "Log in to leave a review."
+                : isOwner
+                  ? "You can't review your own club."
+                  : null
+            }
+          />
         </div>
       </section>
     </>

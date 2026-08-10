@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { handle, ok, fail } from "@/lib/api";
 import { sendEmail, emailShell, eventButton } from "@/lib/email";
+import { notify } from "@/lib/notifications";
 import { absoluteUrl } from "@/lib/site";
 import { formatDateTime } from "@/lib/utils";
 
@@ -34,7 +35,7 @@ export const POST = handle(async (_req: Request, ctx: Ctx) => {
     update: {},
   });
 
-  // Confirmation email on first registration only.
+  // Confirmation email + organiser notification on first registration only.
   if (!existing) {
     const url = absoluteUrl(`/events/${event.slug}`);
     await sendEmail({
@@ -47,6 +48,15 @@ export const POST = handle(async (_req: Request, ctx: Ctx) => {
          ${eventButton(url)}`,
       ),
     });
+    // Let the host know someone's coming (skip if they registered for their own).
+    if (event.organiserId !== user.id) {
+      await notify({
+        userId: event.organiserId,
+        type: "REGISTRATION",
+        message: `${user.name} is going to ${event.title}`,
+        link: `/events/${event.slug}`,
+      });
+    }
   }
 
   const count = await prisma.registration.count({ where: { eventId: id } });
