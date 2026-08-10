@@ -44,14 +44,19 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
     return fail("You can't review your own venue", 400);
   }
 
-  const existing = await prisma.review.findUnique({
-    where: { userId_venueId: { userId: user.id, venueId: id } },
+  // One review per user per venue, enforced here (no DB unique — see schema).
+  const existing = await prisma.review.findFirst({
+    where: { userId: user.id, venueId: id },
+    select: { id: true },
   });
-  const review = await prisma.review.upsert({
-    where: { userId_venueId: { userId: user.id, venueId: id } },
-    create: { userId: user.id, venueId: id, rating: data.rating, body: data.body || null },
-    update: { rating: data.rating, body: data.body || null },
-  });
+  const review = existing
+    ? await prisma.review.update({
+        where: { id: existing.id },
+        data: { rating: data.rating, body: data.body || null },
+      })
+    : await prisma.review.create({
+        data: { userId: user.id, venueId: id, rating: data.rating, body: data.body || null },
+      });
 
   if (!existing) {
     await notify({

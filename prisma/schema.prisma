@@ -274,9 +274,12 @@ model Review {
   venue     Venue?   @relation(fields: [venueId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
-  // NULLs are distinct in Postgres, so each unique only binds when its column
-  // is set — one review per user per event / club / venue.
+  // One review per user per event (pre-existing constraint). Club/venue
+  // uniqueness is enforced in the application layer instead of via DB unique
+  // constraints: adding a unique index to the live Review table trips
+  // `prisma db push`'s data-loss guard (which the Vercel build relies on to
+  // block genuinely destructive changes), so we keep the schema additive-safe.
   @@unique([userId, eventId])
-  @@unique([userId, clubId])
-  @@unique([userId, venueId])
+  @@index([clubId])
+  @@index([venueId])
 }
