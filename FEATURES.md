@@ -137,7 +137,7 @@
 - ✅ **Admin console** (`/admin`, ADMIN role only) with a moderation nav and a platform overview (users, events, clubs, venues, registrations, reviews, open reports, promotion revenue)
 - ✅ **User management** — search users, change role, **suspend/unsuspend** (suspended accounts are blocked from email and Google login), or delete (self-protection: can't suspend/demote/delete your own admin account)
 - ✅ **Event moderation** — search events, hide (draft) / publish / cancel, unfeature, or delete any event
-- ✅ **Reporting system** — logged-in users can flag events and reviews (reason + detail, de-duplicated); admins get a **reports queue** (Open / Resolved / Dismissed) with target previews and one-click resolve / dismiss / delete-target
+- ✅ **Reporting system** — logged-in users can flag events, reviews **and user-uploaded photos** (reason + detail, de-duplicated); admins get a **reports queue** (Open / Resolved / Dismissed) with target previews (including a photo thumbnail) and one-click resolve / dismiss / delete-target
 - ✅ Admin link in the nav for admins; demo admin account (`admin@revmeet.test`)
 - ✅ **One-time admin bootstrap** — `/api/admin/claim?token=…` (gated by `ADMIN_CLAIM_TOKEN`) promotes the signed-in account to ADMIN and refreshes the session, so the first admin can be created on a live site with no database access
 
@@ -145,6 +145,7 @@
 
 - ✅ Role-aware dashboard: hosts/venues see event stats (events, registrations, published/drafts) and manage their events; enthusiasts see events they're attending and who they follow
 - ✅ Quick links to edit club/venue profile and view public pages
+- ✅ **Organiser analytics** (`/dashboard/analytics`, hosts & venues) — headline stats (events, registrations, saves, event photos, average rating across their events + club/venue), a **registrations-over-time** area chart (last 12 weeks), and **top events** + **registrations-by-type** bar charts; rendered as dependency-free inline-SVG charts
 
 ## 14. Deployment & Infrastructure
 
@@ -170,6 +171,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-11 | `_______` | Organiser analytics dashboard (`/dashboard/analytics`): registrations-over-time area chart, top-events + registrations-by-type bar charts, headline stats — all dependency-free inline SVG; photo moderation — user photos are now reportable (`PHOTO` target) and admins can preview + delete them from the reports queue |
 | 2026-08-10 | `7489968` | Fix deploy: drop the new club/venue Review unique constraints (they tripped `prisma db push`'s data-loss guard on the live table) and enforce one-review-per-user-per-club/venue in the API instead — keeps the schema additive-safe so `vercel-build` needs no `--accept-data-loss` |
 | 2026-08-10 | `6e46a98` | Build & photo sharing (public member profiles at `/members/[id]` with garage + build gallery, attendee photo wall on events, uploads opened to all members), club & venue reviews (multi-target Review model, ★ ratings on club/venue cards + pages), and in-app notifications (bell menu with unread badge; registration / review / new-event / photo triggers) |
 | 2026-08-04 | `a4cf72a` | One-time admin-claim endpoint (`/api/admin/claim`, gated by ADMIN_CLAIM_TOKEN) to bootstrap the first admin on a live site without DB access; refreshes the session so the Admin nav appears immediately |

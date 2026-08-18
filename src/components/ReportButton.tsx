@@ -12,7 +12,7 @@ export function ReportButton({
   loggedIn,
   compact = false,
 }: {
-  targetType: "EVENT" | "REVIEW";
+  targetType: "EVENT" | "REVIEW" | "PHOTO";
   targetId: string;
   loggedIn: boolean;
   compact?: boolean;

@@ -10,10 +10,17 @@ export function AdminReportActions({
   targetExists,
 }: {
   reportId: string;
-  targetType: "EVENT" | "REVIEW";
+  targetType: "EVENT" | "REVIEW" | "PHOTO";
   targetId: string;
   targetExists: boolean;
 }) {
+  const LABELS: Record<string, string> = { EVENT: "event", REVIEW: "review", PHOTO: "photo" };
+  const targetLabel = LABELS[targetType] ?? "item";
+  const DELETE_ENDPOINTS: Record<string, string> = {
+    EVENT: `/api/admin/events/${targetId}`,
+    REVIEW: `/api/admin/reviews/${targetId}`,
+    PHOTO: `/api/admin/photos/${targetId}`,
+  };
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -29,12 +36,9 @@ export function AdminReportActions({
   }
 
   async function removeTarget() {
-    const label = targetType === "EVENT" ? "event" : "review";
-    if (!confirm(`Delete the reported ${label} and resolve this report?`)) return;
+    if (!confirm(`Delete the reported ${targetLabel} and resolve this report?`)) return;
     setBusy(true);
-    const endpoint =
-      targetType === "EVENT" ? `/api/admin/events/${targetId}` : `/api/admin/reviews/${targetId}`;
-    await fetch(endpoint, { method: "DELETE" });
+    await fetch(DELETE_ENDPOINTS[targetType], { method: "DELETE" });
     await fetch(`/api/admin/reports/${reportId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -54,7 +58,7 @@ export function AdminReportActions({
       </button>
       {targetExists && (
         <button className="btn-ghost" disabled={busy} onClick={removeTarget} style={{ fontSize: ".78rem", padding: ".35rem .6rem", color: "#ff6b5e", borderColor: "rgba(244,67,54,.4)" }}>
-          Delete {targetType === "EVENT" ? "event" : "review"}
+          Delete {targetLabel}
         </button>
       )}
     </div>

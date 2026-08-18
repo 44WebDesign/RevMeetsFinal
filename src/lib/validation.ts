@@ -93,7 +93,7 @@ export const venueSchema = z.object({
 });
 
 export const reportSchema = z.object({
-  targetType: z.enum(["EVENT", "REVIEW"]),
+  targetType: z.enum(["EVENT", "REVIEW", "PHOTO"]),
   targetId: z.string().min(1),
   reason: z.string().min(1).max(120),
   detail: z.string().max(1000).optional().nullable(),

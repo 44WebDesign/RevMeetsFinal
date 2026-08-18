@@ -79,7 +79,7 @@ export const ROLE_LABELS: Record<Role, string> = {
 };
 
 // ---- Moderation ----
-export const REPORT_TARGETS = ["EVENT", "REVIEW"] as const;
+export const REPORT_TARGETS = ["EVENT", "REVIEW", "PHOTO"] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 
 export const REPORT_STATUSES = ["OPEN", "RESOLVED", "DISMISSED"] as const;

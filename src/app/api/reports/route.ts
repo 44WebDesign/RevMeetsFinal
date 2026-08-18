@@ -3,8 +3,8 @@ import { requireUser } from "@/lib/auth";
 import { reportSchema } from "@/lib/validation";
 import { handle, ok } from "@/lib/api";
 
-// Submit a moderation report against an event or review. Requires login (cuts
-// spam). De-duplicates: one open report per user per target.
+// Submit a moderation report against an event, review or photo. Requires login
+// (cuts spam). De-duplicates: one open report per user per target.
 export const POST = handle(async (req: Request) => {
   const user = await requireUser();
   const data = reportSchema.parse(await req.json());

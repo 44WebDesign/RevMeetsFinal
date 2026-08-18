@@ -29,7 +29,8 @@ export default async function AdminReports({
   // Resolve targets in bulk.
   const eventIds = reports.filter((r) => r.targetType === "EVENT").map((r) => r.targetId);
   const reviewIds = reports.filter((r) => r.targetType === "REVIEW").map((r) => r.targetId);
-  const [events, reviews] = await Promise.all([
+  const photoIds = reports.filter((r) => r.targetType === "PHOTO").map((r) => r.targetId);
+  const [events, reviews, photos] = await Promise.all([
     prisma.event.findMany({ where: { id: { in: eventIds } }, select: { id: true, slug: true, title: true } }),
     prisma.review.findMany({
       where: { id: { in: reviewIds } },
@@ -43,9 +44,20 @@ export default async function AdminReports({
         venue: { select: { slug: true, name: true } },
       },
     }),
+    prisma.photo.findMany({
+      where: { id: { in: photoIds } },
+      select: {
+        id: true,
+        url: true,
+        caption: true,
+        uploader: { select: { id: true, name: true } },
+        event: { select: { slug: true, title: true } },
+      },
+    }),
   ]);
   const eventMap = new Map(events.map((e) => [e.id, e]));
   const reviewMap = new Map(reviews.map((r) => [r.id, r]));
+  const photoMap = new Map(photos.map((p) => [p.id, p]));
 
   const tabs = ["OPEN", "RESOLVED", "DISMISSED"];
 
@@ -76,7 +88,8 @@ export default async function AdminReports({
           {reports.map((r) => {
             const ev = r.targetType === "EVENT" ? eventMap.get(r.targetId) : null;
             const rv = r.targetType === "REVIEW" ? reviewMap.get(r.targetId) : null;
-            const exists = !!ev || !!rv;
+            const ph = r.targetType === "PHOTO" ? photoMap.get(r.targetId) : null;
+            const exists = !!ev || !!rv || !!ph;
             return (
               <div key={r.id} className="card-surface" style={{ padding: "1.1rem 1.25rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: ".5rem" }}>
@@ -107,12 +120,27 @@ export default async function AdminReports({
                       )}
                       {rv.body ? ` — “${rv.body.slice(0, 120)}”` : ""}
                     </>
+                  ) : ph ? (
+                    <>Target: photo by{" "}
+                      <Link href={`/members/${ph.uploader.id}`} style={{ color: "var(--or)" }}>{ph.uploader.name}</Link>
+                      {ph.event ? (
+                        <> on <Link href={`/events/${ph.event.slug}`} style={{ color: "var(--or)" }}>{ph.event.title}</Link></>
+                      ) : " (build gallery)"}
+                      {ph.caption ? ` — “${ph.caption.slice(0, 120)}”` : ""}
+                    </>
                   ) : (
                     <span style={{ color: "#ffb347" }}>Target already deleted.</span>
                   )}
                 </div>
 
-                <AdminReportActions reportId={r.id} targetType={r.targetType as "EVENT" | "REVIEW"} targetId={r.targetId} targetExists={exists} />
+                {ph && (
+                  <a href={ph.url} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginBottom: ".6rem" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ph.url} alt={ph.caption || "Reported photo"} style={{ height: 90, borderRadius: 6, border: "1px solid var(--bdr)", objectFit: "cover" }} />
+                  </a>
+                )}
+
+                <AdminReportActions reportId={r.id} targetType={r.targetType as "EVENT" | "REVIEW" | "PHOTO"} targetId={r.targetId} targetExists={exists} />
               </div>
             );
           })}

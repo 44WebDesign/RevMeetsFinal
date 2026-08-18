@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { ReportButton } from "./ReportButton";
 
 export type GalleryPhoto = {
   id: string;
@@ -160,11 +161,16 @@ export function PhotoGallery({
                   {p.caption && (
                     <p style={{ fontSize: ".8rem", color: "rgba(245,245,245,.85)", marginBottom: ".35rem", lineHeight: 1.4 }}>{p.caption}</p>
                   )}
-                  <div style={{ display: "flex", alignItems: "center", gap: ".4rem", fontSize: ".72rem", color: "var(--mut)" }}>
-                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: p.avatarColor, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: ".55rem", fontWeight: 700 }}>
-                      {p.uploaderName.slice(0, 2).toUpperCase()}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: ".4rem" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: ".4rem", fontSize: ".72rem", color: "var(--mut)" }}>
+                      <span style={{ width: 18, height: 18, borderRadius: "50%", background: p.avatarColor, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: ".55rem", fontWeight: 700 }}>
+                        {p.uploaderName.slice(0, 2).toUpperCase()}
+                      </span>
+                      {p.uploaderName}
                     </span>
-                    {p.uploaderName}
+                    {!canDelete && currentUserId && (
+                      <ReportButton targetType="PHOTO" targetId={p.id} loggedIn compact />
+                    )}
                   </div>
                 </div>
                 {canDelete && (
