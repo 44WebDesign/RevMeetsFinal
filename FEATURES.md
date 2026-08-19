@@ -28,7 +28,7 @@
 - ✅ Clear error when a Google-only account tries password login
 - ✅ Login/register pages redirect back to where the user was (`?next=`)
 - ✅ **Password reset** — "Forgot password?" flow with an emailed, 1-hour, single-use signed link (stateless; invalidated once the password changes); logs in automatically after reset
-- ✅ **Account settings** (`/account`) — edit display name, bio, avatar colour and **garage** (car make/model/year); change password (Google-only accounts can set one to also log in by email); link to your public member profile
+- ✅ **Account settings** (`/account`) — edit display name, bio, avatar colour, **garage** (car make/model/year) and **home location + weekly-digest opt-in**; change password (Google-only accounts can set one to also log in by email); link to your public member profile
 
 ## 3. Events
 
@@ -49,6 +49,7 @@
 - ✅ **Featured / promoted events (paid)** — hosts pay via Stripe Checkout to feature an event (default £9.99 / 30 days); featured events sort first in listings and show a gold "Featured" badge. Promotions auto-expire (daily cron) and can be extended
 - ✅ **Recurring events** — create weekly / fortnightly / monthly series (up to 26 dates) in one go; each occurrence is its own event with its own page and registrations
 - ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event pages
+- ✅ **Subscribable calendar feeds (.ics)** — live-updating `webcal://` subscriptions (or one-off download / copy-link) for a club's, a venue's or a city's upcoming events, via `/api/calendar/{club,venue,city,all}/…`; "Subscribe" buttons on club, venue and city pages
 - ✅ **Attendee photo wall** — registered attendees upload photos (with captions) to an event page; everyone can view them in a grid with lightbox; uploaders/admins can delete
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
 - ✅ Auto-generated unique URL slugs
@@ -105,6 +106,7 @@
 - ✅ Registration confirmation email on first sign-up to an event
 - ✅ New-event alerts emailed to a club's followers on publish (in-app alert fires regardless of email config)
 - ✅ Daily pre-event reminder (8am cron via `vercel.json`) to registered attendees, deduplicated per registration
+- ✅ **Weekly "events near you" digest** (Monday 9am cron) — each opted-in member gets a short list of upcoming events near their saved location and from clubs/venues they follow; ranked (followed first, then nearest / soonest), rate-limited per user, opt-out in account settings
 - ✅ Branded dark email template
 
 ## 9. Images
@@ -155,6 +157,8 @@
 - ✅ Seed endpoint `&mode=amenities` — safe backfill of amenity data onto demo rows for databases seeded before the amenity catalog (never touches real users' selections)
 - ✅ REST API under `/api/*` with shared error handling (Zod → 422, auth → 401/403)
 - ✅ `.env.example` documenting every variable; all integrations optional and gracefully degrading
+- ✅ **Automated tests** — Vitest unit suite for pure logic (`npm test`: slugs, distance, amenities, enums, Zod schemas, `.ics` builder, digest ranking) and a Postgres-backed integration suite (`npm run test:integration`)
+- ✅ **GitHub Actions CI** (`.github/workflows/ci.yml`) — on every push/PR: unit tests + `tsc` + `next build`, plus a Postgres 16 service job running the integration tests
 
 ## 15. Member Profiles & Build Sharing
 
@@ -171,6 +175,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-08-11 | `_______` | Test harness (Vitest unit suite + Postgres-backed integration suite + GitHub Actions CI); subscribable `.ics` calendar feeds for clubs/venues/cities (webcal subscribe buttons); weekly "events near you" digest email (home location + opt-in in account settings, ranked near/followed, Monday cron) |
 | 2026-08-11 | `803b7dd` | Organiser analytics dashboard (`/dashboard/analytics`): registrations-over-time area chart, top-events + registrations-by-type bar charts, headline stats — all dependency-free inline SVG; photo moderation — user photos are now reportable (`PHOTO` target) and admins can preview + delete them from the reports queue |
 | 2026-08-10 | `7489968` | Fix deploy: drop the new club/venue Review unique constraints (they tripped `prisma db push`'s data-loss guard on the live table) and enforce one-review-per-user-per-club/venue in the API instead — keeps the schema additive-safe so `vercel-build` needs no `--accept-data-loss` |
 | 2026-08-10 | `6e46a98` | Build & photo sharing (public member profiles at `/members/[id]` with garage + build gallery, attendee photo wall on events, uploads opened to all members), club & venue reviews (multi-target Review model, ★ ratings on club/venue cards + pages), and in-app notifications (bell menu with unread badge; registration / review / new-event / photo triggers) |

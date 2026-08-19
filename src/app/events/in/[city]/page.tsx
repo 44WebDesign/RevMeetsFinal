@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EventCard } from "@/components/EventCard";
 import { MapView } from "@/components/MapView";
+import { CalendarSubscribe } from "@/components/CalendarSubscribe";
 import { JsonLd } from "@/components/JsonLd";
 import { getEvents, getEventMapPoints, getEventCities } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -76,8 +77,13 @@ export default async function CityEventsPage({
 
         {points.length > 0 && <MapView points={points} height={320} fitToPoints />}
 
-        <div style={{ margin: "2rem 0 1rem", color: "var(--mut)", fontSize: ".9rem" }}>
-          {events.length} upcoming {events.length === 1 ? "event" : "events"} in {name}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: ".75rem", margin: "2rem 0 1rem" }}>
+          <span style={{ color: "var(--mut)", fontSize: ".9rem" }}>
+            {events.length} upcoming {events.length === 1 ? "event" : "events"} in {name}
+          </span>
+          {events.length > 0 && (
+            <CalendarSubscribe path={`/api/calendar/city/${encodeURIComponent(name)}`} label={`Subscribe to ${name} events`} compact />
+          )}
         </div>
 
         {events.length === 0 ? (

@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
 import { ReviewSection } from "@/components/ReviewSection";
+import { CalendarSubscribe } from "@/components/CalendarSubscribe";
 import { JsonLd } from "@/components/JsonLd";
 import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -167,9 +168,12 @@ export default async function ClubDetail({
             {club.description}
           </p>
 
-          <h2 className="hd" style={{ fontSize: "1.75rem", margin: "2.5rem 0 1.25rem" }}>
-            Upcoming Events ({club.events.length})
-          </h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: ".75rem", margin: "2.5rem 0 1.25rem" }}>
+            <h2 className="hd" style={{ fontSize: "1.75rem" }}>
+              Upcoming Events ({club.events.length})
+            </h2>
+            {club.events.length > 0 && <CalendarSubscribe path={`/api/calendar/club/${club.slug}`} label="Subscribe to calendar" />}
+          </div>
           {club.events.length === 0 ? (
             <div className="card-surface" style={{ padding: "2.5rem", textAlign: "center", color: "var(--mut)" }}>
               This club hasn&apos;t published any events yet.

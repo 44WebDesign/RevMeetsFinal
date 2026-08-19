@@ -43,6 +43,18 @@ npm run dev                  # http://localhost:3000
 
 > Generate a real `JWT_SECRET` with `openssl rand -base64 32`.
 
+## Testing
+
+```bash
+npm test                 # unit tests (Vitest) — pure logic, no database needed
+npm run test:integration # database-backed tests (needs DATABASE_URL + a pushed schema)
+```
+
+Unit tests live next to the code as `*.test.ts`; database-backed tests live in
+`tests/integration/`. Both run automatically on every push via GitHub Actions
+(`.github/workflows/ci.yml`), which also type-checks and builds the app and
+spins up a Postgres 16 service for the integration job.
+
 ## Deploying to Vercel
 
 1. **Push this repo to GitHub** (already done if you're reading this there).

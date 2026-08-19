@@ -17,6 +17,10 @@ export const PATCH = handle(async (req: Request) => {
       carMake: data.carMake ?? null,
       carModel: data.carModel ?? null,
       carYear: data.carYear ?? null,
+      homeCity: data.homeCity ?? null,
+      homeLat: data.homeLat ?? null,
+      homeLng: data.homeLng ?? null,
+      ...(data.digestOptIn !== undefined ? { digestOptIn: data.digestOptIn } : {}),
     },
   });
 

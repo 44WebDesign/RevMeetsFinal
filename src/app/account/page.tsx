@@ -28,6 +28,10 @@ export default async function AccountPage() {
             carMake: user.carMake ?? "",
             carModel: user.carModel ?? "",
             carYear: user.carYear ?? null,
+            homeCity: user.homeCity ?? "",
+            homeLat: user.homeLat ?? null,
+            homeLng: user.homeLng ?? null,
+            digestOptIn: user.digestOptIn,
             id: user.id,
           }}
         />

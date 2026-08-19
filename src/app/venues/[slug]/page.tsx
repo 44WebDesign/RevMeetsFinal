@@ -9,6 +9,7 @@ import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
 import { AmenityList } from "@/components/AmenityList";
 import { ReviewSection } from "@/components/ReviewSection";
+import { CalendarSubscribe } from "@/components/CalendarSubscribe";
 import { JsonLd } from "@/components/JsonLd";
 import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -203,9 +204,12 @@ export default async function VenueDetail({
             </aside>
           </div>
 
-          <h2 className="hd" style={{ fontSize: "1.75rem", margin: "2.5rem 0 1.25rem" }}>
-            Events Here ({venue.events.length})
-          </h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: ".75rem", margin: "2.5rem 0 1.25rem" }}>
+            <h2 className="hd" style={{ fontSize: "1.75rem" }}>
+              Events Here ({venue.events.length})
+            </h2>
+            {venue.events.length > 0 && <CalendarSubscribe path={`/api/calendar/venue/${venue.slug}`} label="Subscribe to calendar" />}
+          </div>
           {venue.events.length === 0 ? (
             <div className="card-surface" style={{ padding: "2.5rem", textAlign: "center", color: "var(--mut)" }}>
               No events scheduled at this venue yet.

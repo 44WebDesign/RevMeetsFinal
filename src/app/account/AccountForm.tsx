@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initials } from "@/lib/utils";
+import { LocationPicker } from "@/components/LocationPicker";
 
 const COLORS = ["#FF5F1F", "#E040FB", "#00BCD4", "#4CAF50", "#FFD700", "#2196F3", "#F44336", "#9C27B0"];
 
@@ -18,6 +19,10 @@ export function AccountForm({
     carMake: string;
     carModel: string;
     carYear: number | null;
+    homeCity: string;
+    homeLat: number | null;
+    homeLng: number | null;
+    digestOptIn: boolean;
     id: string;
   };
 }) {
@@ -28,6 +33,10 @@ export function AccountForm({
   const [carMake, setCarMake] = useState(initial.carMake);
   const [carModel, setCarModel] = useState(initial.carModel);
   const [carYear, setCarYear] = useState(initial.carYear ? String(initial.carYear) : "");
+  const [homeCity, setHomeCity] = useState(initial.homeCity);
+  const [homeLat, setHomeLat] = useState<number | null>(initial.homeLat);
+  const [homeLng, setHomeLng] = useState<number | null>(initial.homeLng);
+  const [digestOptIn, setDigestOptIn] = useState(initial.digestOptIn);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
   const [profileErr, setProfileErr] = useState<string | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -53,6 +62,10 @@ export function AccountForm({
         carMake: carMake || null,
         carModel: carModel || null,
         carYear: carYear ? Number(carYear) : null,
+        homeCity: homeCity || null,
+        homeLat,
+        homeLng,
+        digestOptIn,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -146,6 +159,43 @@ export function AccountForm({
               <i className="fas fa-arrow-up-right-from-square" /> View your public profile
             </Link>
           </p>
+        </div>
+
+        {/* Digest & location */}
+        <div style={{ borderTop: "1px solid var(--bdr)", paddingTop: "1.25rem" }}>
+          <h3 className="hd" style={{ fontSize: "1.1rem", marginBottom: ".25rem" }}>
+            <i className="fas fa-envelope-open-text" style={{ color: "var(--or)", marginRight: 6 }} /> Events Near You
+          </h3>
+          <p style={{ fontSize: ".8rem", color: "var(--mut)", marginBottom: ".9rem" }}>
+            Get a weekly email of upcoming events near you and from clubs/venues you follow.
+          </p>
+          <label style={{ display: "flex", alignItems: "center", gap: ".5rem", fontSize: ".9rem", cursor: "pointer", marginBottom: "1rem" }}>
+            <input type="checkbox" checked={digestOptIn} onChange={(e) => setDigestOptIn(e.target.checked)} style={{ width: 16, height: 16, accentColor: "var(--or)" }} />
+            Email me the weekly “events near you” digest
+          </label>
+          <div style={{ marginBottom: ".75rem" }}>
+            <label className="field-label">Home town / city</label>
+            <input className="field-input" value={homeCity} onChange={(e) => setHomeCity(e.target.value)} placeholder="e.g. Leeds" />
+          </div>
+          <label className="field-label">Your location (for “near me” events)</label>
+          <LocationPicker
+            lat={homeLat ?? 52.4}
+            lng={homeLng ?? -1.5}
+            onChange={(lat, lng) => { setHomeLat(lat); setHomeLng(lng); }}
+            height={220}
+          />
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: ".4rem", fontSize: ".78rem", color: "var(--mut)" }}>
+            <span>
+              {homeLat !== null && homeLng !== null
+                ? <><i className="fas fa-location-dot" style={{ color: "var(--or)" }} /> {homeLat.toFixed(3)}, {homeLng.toFixed(3)}</>
+                : "Not set — click the map to set your location."}
+            </span>
+            {homeLat !== null && (
+              <button type="button" onClick={() => { setHomeLat(null); setHomeLng(null); }} style={{ background: "none", border: "none", color: "var(--or)", cursor: "pointer", fontSize: ".78rem", padding: 0 }}>
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {profileErr && <Msg color="#ff6b5e">{profileErr}</Msg>}

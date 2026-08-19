@@ -37,6 +37,12 @@ model User {
   carMake      String?
   carModel     String?
   carYear      Int?
+  // Home location for the weekly "events near you" digest (all optional).
+  homeCity     String?
+  homeLat      Float?
+  homeLng      Float?
+  digestOptIn  Boolean   @default(true)
+  lastDigestAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

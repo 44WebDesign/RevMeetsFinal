@@ -38,6 +38,11 @@ export const profileSchema = z.object({
   carMake: z.string().max(60).optional().nullable(),
   carModel: z.string().max(60).optional().nullable(),
   carYear: z.coerce.number().int().min(1885).max(2100).optional().nullable(),
+  // Home location + weekly "events near you" digest preferences.
+  homeCity: z.string().max(80).optional().nullable(),
+  homeLat: z.coerce.number().min(-90).max(90).optional().nullable(),
+  homeLng: z.coerce.number().min(-180).max(180).optional().nullable(),
+  digestOptIn: z.boolean().optional(),
 });
 
 export const changePasswordSchema = z.object({
