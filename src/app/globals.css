@@ -9,7 +9,9 @@
   --or: #ff5f1f;
   --ord: #e04e10;
   --bg: #080808;
-  --bg2: #101010;
+  /* A touch lighter + a hint cooler than --bg so alternating sections read as
+     distinct chapters, while staying darker than --card so cards still lift. */
+  --bg2: #101014;
   --card: #131313;
   --card2: #1a1a1a;
   --bdr: #1e1e1e;
@@ -198,6 +200,20 @@ nav.site-nav {
 .section {
   padding: 5rem 1.5rem;
 }
+/* Faint accent hairline at the top of a section — separates the home page's
+   stacked sections into clear "chapters". */
+.home-sec {
+  position: relative;
+}
+.home-sec::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 95, 31, 0.35), transparent);
+}
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -379,8 +395,9 @@ nav.site-nav {
   transition: all 0.2s;
 }
 .event-card:hover .ev-btn {
-  background: var(--or);
+  background: var(--or) !important;
   border-color: var(--or) !important;
+  color: #fff !important;
 }
 
 /* ---- Legal pages ---- */

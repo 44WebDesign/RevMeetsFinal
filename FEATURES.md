@@ -19,6 +19,7 @@
 - ✅ **Readability & accessibility pass** — secondary text meets the 4.5:1 contrast threshold, cards carry subtle elevation, a keyboard `:focus-visible` ring, and `prefers-reduced-motion` support
 - ✅ **Branded image placeholders** — listings without a photo show an accent-tinted gradient cover (per event type / club / venue) instead of a repeated stock image
 - ✅ **Honest homepage stats** — real counts (incl. cities covered), rounded only when genuinely large, and hidden entirely until the site has enough activity to be credible
+- ✅ **Real event photo in the homepage hero** — pulls a recent published event's cover (falls back to a curated stock shot), with clearer "chapter" separation between home sections
 - ✅ Custom favicon (checkered-flag mark) and 404 page
 
 ## 2. Accounts & Authentication
@@ -48,6 +49,8 @@
 - ✅ Amenity icon strip on event cards (and venue cards) across list, search and profile views
 - ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
+- ✅ **Social proof on cards** — average star rating + review count, and a prominent "going" tally, surfaced on every event card
+- ✅ **Honest urgency cues** — date-proximity badges (Today / Tomorrow / This weekend / In N days) and a "only N left" flag when an event with a real capacity is genuinely filling up; shown on cards and above the register button on the event page (derived from real data, never fabricated)
 - ✅ **Save / bookmark events** for later — a bookmark button on every event **card** (and the event page), plus a "Saved for Later" section on the enthusiast dashboard
 - ✅ **Featured / promoted events (paid)** — hosts pay via Stripe Checkout to feature an event (default £9.99 / 30 days); featured events sort first in listings and show a gold "Featured" badge. Promotions auto-expire (daily cron) and can be extended
 - ✅ **Recurring events** — create weekly / fortnightly / monthly series (up to 26 dates) in one go; each occurrence is its own event with its own page and registrations
@@ -178,6 +181,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-09-03 | `_______` | Engagement/UX round 2: social proof on event cards (star rating + review count, prominent "going"), honest urgency cues (date-proximity + "only N left" near capacity, on cards and the event page), a real recent event photo in the homepage hero, a properly-styled "View Event" card button (no longer a hover-only ghost), and clearer visual separation between home sections; adds `lib/urgency.ts` with unit tests |
 | 2026-09-03 | `dda62a1` | Design/UX quick wins from the design review: lightened secondary text to meet 4.5:1 contrast, larger card titles, card shadows + keyboard focus ring + reduced-motion support, branded gradient image placeholders (no more repeated stock photos), and honest homepage stats (real city count, no fake "340+", hidden when the site is sparse) |
 | 2026-08-11 | `1a9fa4f` | Test harness (Vitest unit suite + Postgres-backed integration suite + GitHub Actions CI); subscribable `.ics` calendar feeds for clubs/venues/cities (webcal subscribe buttons); weekly "events near you" digest email (home location + opt-in in account settings, ranked near/followed, Monday cron) |
 | 2026-08-11 | `803b7dd` | Organiser analytics dashboard (`/dashboard/analytics`): registrations-over-time area chart, top-events + registrations-by-type bar charts, headline stats — all dependency-free inline SVG; photo moderation — user photos are now reportable (`PHOTO` target) and admins can preview + delete them from the reports queue |

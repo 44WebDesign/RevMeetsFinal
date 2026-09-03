@@ -67,12 +67,23 @@ export async function getEvents(
     include: {
       club: { select: { name: true } },
       venue: { select: { amenities: true } },
+      reviews: { select: { rating: true } },
       _count: { select: { registrations: true } },
       ...(userId ? { savedBy: { where: { userId }, select: { id: true } } } : {}),
     },
   });
 
-  return events.map((e) => ({
+  return events.map(toEventCard(userId));
+}
+
+// Shared row → EventCardData mapper (used by the list + explorer queries).
+function toEventCard(userId?: string) {
+  return (e: {
+    id: string; slug: string; title: string; description: string; type: string; city: string;
+    startsAt: Date; imageUrl: string | null; amenities: string; featured: boolean; capacity: number | null;
+    club?: { name: string } | null; venue?: { amenities: string } | null;
+    reviews: { rating: number }[]; _count: { registrations: number }; savedBy?: unknown[];
+  }): EventCardData => ({
     id: e.id,
     slug: e.slug,
     title: e.title,
@@ -82,11 +93,14 @@ export async function getEvents(
     startsAt: e.startsAt.toISOString(),
     imageUrl: e.imageUrl,
     attendees: e._count.registrations,
+    capacity: e.capacity,
     clubName: e.club?.name ?? null,
     amenities: e.amenities || e.venue?.amenities || "",
     featured: e.featured,
-    saved: userId ? (e as { savedBy?: unknown[] }).savedBy!.length > 0 : false,
-  }));
+    rating: e.reviews.length ? e.reviews.reduce((s, r) => s + r.rating, 0) / e.reviews.length : null,
+    reviewCount: e.reviews.length,
+    saved: userId ? (e.savedBy?.length ?? 0) > 0 : false,
+  });
 }
 
 // Full event rows (card data + coordinates) for the client-side events
@@ -101,27 +115,24 @@ export async function getExplorerEvents(userId?: string): Promise<ExplorerEvent[
     include: {
       club: { select: { name: true } },
       venue: { select: { amenities: true } },
+      reviews: { select: { rating: true } },
       _count: { select: { registrations: true } },
       ...(userId ? { savedBy: { where: { userId }, select: { id: true } } } : {}),
     },
   });
-  return events.map((e) => ({
-    id: e.id,
-    slug: e.slug,
-    title: e.title,
-    description: e.description,
-    type: e.type,
-    city: e.city,
-    startsAt: e.startsAt.toISOString(),
-    imageUrl: e.imageUrl,
-    attendees: e._count.registrations,
-    clubName: e.club?.name ?? null,
-    amenities: e.amenities || e.venue?.amenities || "",
-    featured: e.featured,
-    saved: userId ? (e as { savedBy?: unknown[] }).savedBy!.length > 0 : false,
-    lat: e.lat,
-    lng: e.lng,
-  }));
+  const map = toEventCard(userId);
+  return events.map((e) => ({ ...map(e), lat: e.lat, lng: e.lng }));
+}
+
+// A recent published event's cover image, for the homepage hero — real
+// community content over generic stock. Null when none have an image.
+export async function getHeroImage(): Promise<string | null> {
+  const e = await prisma.event.findFirst({
+    where: { status: "PUBLISHED", imageUrl: { not: null } },
+    orderBy: [{ featured: "desc" }, { startsAt: "asc" }],
+    select: { imageUrl: true },
+  });
+  return e?.imageUrl ?? null;
 }
 
 export async function getEventMapPoints(filters: EventFilters = {}): Promise<MapPoint[]> {

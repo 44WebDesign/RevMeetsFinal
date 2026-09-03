@@ -10,6 +10,7 @@ import {
   getVenues,
   getStats,
   getEventMapPoints,
+  getHeroImage,
 } from "@/lib/queries";
 import { EVENT_TYPE_COLORS } from "@/lib/enums";
 import { getSession } from "@/lib/auth";
@@ -19,13 +20,19 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const session = await getSession();
-  const [events, clubs, venues, stats, mapPoints] = await Promise.all([
+  const [events, clubs, venues, stats, mapPoints, heroImage] = await Promise.all([
     getEvents({ take: 4 }, session?.sub),
     getClubs(),
     getVenues(),
     getStats(),
     getEventMapPoints(),
+    getHeroImage(),
   ]);
+
+  // Prefer a real event cover for the hero; fall back to a curated stock shot.
+  const heroBg =
+    heroImage ||
+    "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1920&q=80";
 
   return (
     <>
@@ -47,8 +54,7 @@ export default async function HomePage() {
           style={{
             position: "absolute",
             inset: 0,
-            background:
-              "url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1920&q=80') center/cover",
+            background: `url('${heroBg}') center/cover`,
             filter: "brightness(.3) saturate(.7)",
           }}
         />
@@ -164,7 +170,7 @@ export default async function HomePage() {
       )}
 
       {/* HOW IT WORKS */}
-      <section id="how" className="section" style={{ background: "var(--bg)" }}>
+      <section id="how" className="section home-sec" style={{ background: "var(--bg)" }}>
         <div className="container">
           <div className="sec-label">How It Works</div>
           <div className="sec-title">
@@ -189,7 +195,7 @@ export default async function HomePage() {
       </section>
 
       {/* MAP */}
-      <section id="map-sec" className="section" style={{ background: "var(--bg2)" }}>
+      <section id="map-sec" className="section home-sec" style={{ background: "var(--bg2)" }}>
         <div className="container">
           <div
             style={{
@@ -238,7 +244,7 @@ export default async function HomePage() {
       </section>
 
       {/* EVENTS */}
-      <section id="events" className="section" style={{ background: "var(--bg)" }}>
+      <section id="events" className="section home-sec" style={{ background: "var(--bg)" }}>
         <div className="container">
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: ".5rem" }}>
             <div>
@@ -272,7 +278,7 @@ export default async function HomePage() {
       </section>
 
       {/* CLUBS */}
-      <section id="clubs" className="section" style={{ background: "var(--bg2)" }}>
+      <section id="clubs" className="section home-sec" style={{ background: "var(--bg2)" }}>
         <div className="container">
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: ".5rem" }}>
             <div>
@@ -304,7 +310,7 @@ export default async function HomePage() {
       </section>
 
       {/* VENUES */}
-      <section id="venues" className="section" style={{ background: "var(--bg)" }}>
+      <section id="venues" className="section home-sec" style={{ background: "var(--bg)" }}>
         <div className="container">
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: ".5rem" }}>
             <div>
@@ -338,7 +344,7 @@ export default async function HomePage() {
       </section>
 
       {/* SIGN UP */}
-      <section id="signup" className="section" style={{ background: "var(--bg2)" }}>
+      <section id="signup" className="section home-sec" style={{ background: "var(--bg2)" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "3rem" }}>
             <div className="sec-label">Join Today</div>

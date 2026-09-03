@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
+import { dateProximity, spacesLeft, isFillingUp } from "@/lib/urgency";
 import { AmenityIcons } from "./AmenityIcons";
 import { SaveIconButton } from "./SaveIconButton";
 import { FallbackCover } from "./FallbackCover";
@@ -16,14 +17,20 @@ export type EventCardData = {
   startsAt: string | Date;
   imageUrl?: string | null;
   attendees: number;
+  capacity?: number | null;
   clubName?: string | null;
   amenities?: string;
   saved?: boolean;
   featured?: boolean;
+  rating?: number | null;
+  reviewCount?: number;
 };
 
 export function EventCard({ event }: { event: EventCardData }) {
   const color = eventTypeColor(event.type);
+  const proximity = dateProximity(event.startsAt);
+  const filling = isFillingUp(event.capacity, event.attendees);
+  const left = spacesLeft(event.capacity, event.attendees);
   return (
     <div className="card-surface event-card" style={{ overflow: "hidden", position: "relative", transition: "all .3s" }}>
       {/* Save button — sibling of the link (valid HTML), stacked above it */}
@@ -46,7 +53,7 @@ export function EventCard({ event }: { event: EventCardData }) {
               style={{ objectFit: "cover", filter: "brightness(.85)" }}
             />
           ) : (
-            <FallbackCover accent={color} label={eventTypeLabel(event.type)} />
+            <FallbackCover accent={color} />
           )}
           <span
             className="pill"
@@ -75,6 +82,36 @@ export function EventCard({ event }: { event: EventCardData }) {
               <i className="fas fa-star" /> Featured
             </span>
           )}
+          {/* Honest urgency: near-full wins over date proximity */}
+          {filling && left !== null ? (
+            <span
+              className="pill"
+              style={{
+                position: "absolute",
+                bottom: ".75rem",
+                right: ".75rem",
+                background: "rgba(8,8,8,.8)",
+                color: "#ffbf47",
+                border: "1px solid rgba(255,191,71,.45)",
+              }}
+            >
+              <i className="fas fa-fire" /> {left} left
+            </span>
+          ) : proximity ? (
+            <span
+              className="pill"
+              style={{
+                position: "absolute",
+                bottom: ".75rem",
+                right: ".75rem",
+                background: proximity.urgent ? color : "rgba(8,8,8,.8)",
+                color: "#fff",
+                border: proximity.urgent ? "none" : `1px solid ${color}`,
+              }}
+            >
+              {proximity.label}
+            </span>
+          ) : null}
         </div>
       <div style={{ padding: "1.25rem" }}>
         <div
@@ -94,9 +131,19 @@ export function EventCard({ event }: { event: EventCardData }) {
             <i className="fas fa-location-dot" /> {event.city}
           </span>
         </div>
-        <h3 style={{ fontSize: "1.08rem", fontWeight: 700, marginBottom: ".5rem", lineHeight: 1.25 }}>
+        <h3 style={{ fontSize: "1.08rem", fontWeight: 700, marginBottom: ".4rem", lineHeight: 1.25 }}>
           {event.title}
         </h3>
+        {event.rating != null && (event.reviewCount ?? 0) > 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: ".35rem", marginBottom: ".5rem", fontSize: ".78rem" }}>
+            <span style={{ color: "var(--or)", fontWeight: 700 }}>
+              <i className="fas fa-star" /> {event.rating.toFixed(1)}
+            </span>
+            <span style={{ color: "var(--mut)" }}>
+              ({event.reviewCount} review{event.reviewCount === 1 ? "" : "s"})
+            </span>
+          </div>
+        )}
         <p
           style={{
             fontSize: ".82rem",
@@ -132,8 +179,9 @@ export function EventCard({ event }: { event: EventCardData }) {
               </>
             )}
           </span>
-          <span style={{ fontSize: ".8rem", color: "var(--mut)" }}>
-            <i className="fas fa-users" /> {event.attendees} going
+          <span style={{ fontSize: ".82rem", color: "var(--txt)", fontWeight: 600 }}>
+            <i className="fas fa-users" style={{ color: "var(--or)" }} /> {event.attendees}{" "}
+            <span style={{ color: "var(--mut)", fontWeight: 400 }}>going</span>
           </span>
         </div>
         <span
@@ -141,17 +189,18 @@ export function EventCard({ event }: { event: EventCardData }) {
           style={{
             display: "block",
             width: "100%",
-            border: "1px solid var(--bdr2)",
-            color: "#fff",
+            background: "rgba(255,95,31,.12)",
+            border: "1px solid rgba(255,95,31,.4)",
+            color: "var(--or)",
             padding: ".6rem",
             borderRadius: 6,
-            fontSize: ".8rem",
-            fontWeight: 600,
+            fontSize: ".82rem",
+            fontWeight: 700,
             textAlign: "center",
             marginTop: ".875rem",
           }}
         >
-          View Event
+          View Event <i className="fas fa-arrow-right" style={{ fontSize: ".7rem" }} />
         </span>
       </div>
       </Link>

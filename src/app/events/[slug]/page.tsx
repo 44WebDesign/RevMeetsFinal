@@ -18,6 +18,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { parseAmenities } from "@/lib/amenities";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDateTime } from "@/lib/utils";
+import { dateProximity, spacesLeft, isFillingUp } from "@/lib/urgency";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -364,10 +365,32 @@ export default async function EventDetail({
                 </div>
 
                 {event.capacity && (
-                  <div style={{ marginBottom: "1rem", fontSize: ".85rem", color: "var(--mut)" }}>
+                  <div style={{ marginBottom: ".5rem", fontSize: ".85rem", color: "var(--mut)" }}>
                     <i className="fas fa-user-group" /> {event._count.registrations} / {event.capacity} spaces filled
                   </div>
                 )}
+
+                {/* Honest urgency cues */}
+                {(() => {
+                  const left = spacesLeft(event.capacity, event._count.registrations);
+                  const filling = isFillingUp(event.capacity, event._count.registrations);
+                  const prox = dateProximity(event.startsAt);
+                  if (!filling && !prox) return null;
+                  return (
+                    <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+                      {filling && left !== null && (
+                        <span className="pill" style={{ background: "rgba(255,191,71,.14)", color: "#ffbf47", border: "1px solid rgba(255,191,71,.45)" }}>
+                          <i className="fas fa-fire" /> Only {left} left
+                        </span>
+                      )}
+                      {prox && (
+                        <span className="pill" style={{ background: prox.urgent ? color : "rgba(255,255,255,.06)", color: prox.urgent ? "#fff" : "var(--txt)", border: prox.urgent ? "none" : "1px solid var(--bdr2)" }}>
+                          <i className="fas fa-clock" /> {prox.label}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <AttendButton
                   eventId={event.id}
