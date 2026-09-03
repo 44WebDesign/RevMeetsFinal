@@ -178,7 +178,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-09-03 | `_______` | Design/UX quick wins from the design review: lightened secondary text to meet 4.5:1 contrast, larger card titles, card shadows + keyboard focus ring + reduced-motion support, branded gradient image placeholders (no more repeated stock photos), and honest homepage stats (real city count, no fake "340+", hidden when the site is sparse) |
+| 2026-09-03 | `dda62a1` | Design/UX quick wins from the design review: lightened secondary text to meet 4.5:1 contrast, larger card titles, card shadows + keyboard focus ring + reduced-motion support, branded gradient image placeholders (no more repeated stock photos), and honest homepage stats (real city count, no fake "340+", hidden when the site is sparse) |
 | 2026-08-11 | `1a9fa4f` | Test harness (Vitest unit suite + Postgres-backed integration suite + GitHub Actions CI); subscribable `.ics` calendar feeds for clubs/venues/cities (webcal subscribe buttons); weekly "events near you" digest email (home location + opt-in in account settings, ranked near/followed, Monday cron) |
 | 2026-08-11 | `803b7dd` | Organiser analytics dashboard (`/dashboard/analytics`): registrations-over-time area chart, top-events + registrations-by-type bar charts, headline stats — all dependency-free inline SVG; photo moderation — user photos are now reportable (`PHOTO` target) and admins can preview + delete them from the reports queue |
 | 2026-08-10 | `7489968` | Fix deploy: drop the new club/venue Review unique constraints (they tripped `prisma db push`'s data-loss guard on the live table) and enforce one-review-per-user-per-club/venue in the API instead — keeps the schema additive-safe so `vercel-build` needs no `--accept-data-loss` |
