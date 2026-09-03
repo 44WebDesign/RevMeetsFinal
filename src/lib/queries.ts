@@ -303,6 +303,7 @@ export async function getClubs(q?: string): Promise<ClubCardData[]> {
     followers: c._count.follows,
     events: c._count.events,
     featured: c.featured,
+    verified: c.verified,
     rating: c.reviews.length ? c.reviews.reduce((s, r) => s + r.rating, 0) / c.reviews.length : null,
     reviewCount: c.reviews.length,
   }));
@@ -345,6 +346,7 @@ export async function getVenues(q?: string, amenities?: string[]): Promise<Venue
     lat: v.lat,
     lng: v.lng,
     featured: v.featured,
+    verified: v.verified,
     rating: v.reviews.length ? v.reviews.reduce((s, r) => s + r.rating, 0) / v.reviews.length : null,
     reviewCount: v.reviews.length,
   }));

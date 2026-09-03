@@ -32,6 +32,7 @@ const ICONS: Record<string, string> = {
   REMINDER: "fa-bell",
   PHOTO: "fa-camera",
   FOLLOW: "fa-heart",
+  ENQUIRY: "fa-envelope",
 };
 
 // Bell menu with an unread badge. Polls the notifications API periodically and

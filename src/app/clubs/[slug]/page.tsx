@@ -8,6 +8,7 @@ import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
 import { ReviewSection } from "@/components/ReviewSection";
 import { CalendarSubscribe } from "@/components/CalendarSubscribe";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { JsonLd } from "@/components/JsonLd";
 import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -148,7 +149,10 @@ export default async function ClubDetail({
                   </span>
                 ))}
               </div>
-              <h1 className="hd" style={{ fontSize: "clamp(2rem,5vw,3.25rem)", lineHeight: 1 }}>{club.name}</h1>
+              <h1 className="hd" style={{ fontSize: "clamp(2rem,5vw,3.25rem)", lineHeight: 1, display: "flex", alignItems: "center", gap: ".6rem", flexWrap: "wrap" }}>
+                {club.name}
+                {club.verified && <VerifiedBadge size="1rem" withLabel />}
+              </h1>
               <p style={{ color: "var(--mut)", marginTop: ".5rem" }}>
                 <i className="fas fa-location-dot" style={{ color: "var(--or)" }} /> {club.location}
                 {club.website && (

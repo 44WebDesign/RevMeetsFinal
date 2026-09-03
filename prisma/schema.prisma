@@ -122,6 +122,8 @@ model Club {
   // Paid featured placement (see Promotion) — sorts first + gets a badge.
   featured      Boolean   @default(false)
   featuredUntil DateTime?
+  // Admin-granted trust badge (a real check, not a purchasable label).
+  verified      Boolean   @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -152,6 +154,8 @@ model Venue {
   // Paid featured placement (see Promotion) — sorts first + gets a badge.
   featured      Boolean   @default(false)
   featuredUntil DateTime?
+  // Admin-granted trust badge (a real check, not a purchasable label).
+  verified      Boolean   @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

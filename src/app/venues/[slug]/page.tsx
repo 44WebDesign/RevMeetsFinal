@@ -10,6 +10,8 @@ import { FollowButton } from "@/components/FollowButton";
 import { AmenityList } from "@/components/AmenityList";
 import { ReviewSection } from "@/components/ReviewSection";
 import { CalendarSubscribe } from "@/components/CalendarSubscribe";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { EnquiryButton } from "@/components/EnquiryButton";
 import { JsonLd } from "@/components/JsonLd";
 import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -158,7 +160,10 @@ export default async function VenueDetail({
                   </span>
                 ))}
               </div>
-              <h1 className="hd" style={{ fontSize: "clamp(2rem,5vw,3.25rem)", lineHeight: 1 }}>{venue.name}</h1>
+              <h1 className="hd" style={{ fontSize: "clamp(2rem,5vw,3.25rem)", lineHeight: 1, display: "flex", alignItems: "center", gap: ".6rem", flexWrap: "wrap" }}>
+                {venue.name}
+                {venue.verified && <VerifiedBadge size="1rem" withLabel />}
+              </h1>
               <p style={{ color: "var(--mut)", marginTop: ".5rem" }}>
                 <i className="fas fa-location-dot" style={{ color: "#00BCD4" }} /> {venue.address}, {venue.city}
                 {venue.postcode ? ` ${venue.postcode}` : ""}
@@ -195,11 +200,17 @@ export default async function VenueDetail({
                 <InfoRow icon="fa-city" label="City" value={venue.city} />
                 {venue.website && (
                   <div style={{ marginTop: "1rem" }}>
-                    <a href={venue.website} target="_blank" rel="noopener noreferrer" className="btn-or" style={{ display: "block", textAlign: "center" }}>
+                    <a href={venue.website} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ display: "block", textAlign: "center" }}>
                       <i className="fas fa-globe" /> Visit Website
                     </a>
                   </div>
                 )}
+                <div style={{ marginTop: "1rem" }}>
+                  <div style={{ fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".1em", color: "var(--mut)", marginBottom: ".5rem" }}>
+                    Host an event here?
+                  </div>
+                  <EnquiryButton venueId={venue.id} venueName={venue.name} loggedIn={!!session} isOwner={session?.sub === venue.ownerId} />
+                </div>
               </div>
             </aside>
           </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { AmenityIcons } from "./AmenityIcons";
 import { FallbackCover } from "./FallbackCover";
+import { VerifiedBadge } from "./VerifiedBadge";
 
 export type VenueCardData = {
   id: string;
@@ -18,6 +19,7 @@ export type VenueCardData = {
   lat?: number;
   lng?: number;
   featured?: boolean;
+  verified?: boolean;
   rating?: number | null;
   reviewCount?: number;
 };
@@ -75,7 +77,10 @@ export function VenueCard({ venue }: { venue: VenueCardData }) {
             </span>
           ))}
         </div>
-        <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: ".3rem", lineHeight: 1.25 }}>{venue.name}</h3>
+        <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: ".3rem", lineHeight: 1.25, display: "flex", alignItems: "center", gap: ".4rem" }}>
+          {venue.name}
+          {venue.verified && <VerifiedBadge />}
+        </h3>
         <div
           style={{
             fontSize: ".78rem",

@@ -16,6 +16,7 @@ function ev(id: string, coords: { lat: number; lng: number }, extra: Partial<Dig
     startsAt: extra.startsAt ?? new Date("2026-09-01T09:00:00Z"),
     clubId: extra.clubId ?? null,
     venueId: extra.venueId ?? null,
+    featured: extra.featured ?? false,
   };
 }
 
@@ -59,5 +60,34 @@ describe("rankEventsForUser", () => {
     expect(picks).toHaveLength(2);
     expect(picks[0].id).toBe("london"); // closest
     expect(picks[1].id).toBe("reading");
+  });
+
+  it("gives a relevant featured event the sponsored top slot", () => {
+    const ctx: DigestContext = { homeLat: LONDON.lat, homeLng: LONDON.lng, followedClubIds: [], followedVenueIds: [], engagedCities: [], radiusKm: 80 };
+    const near = ev("near", READING);
+    const sponsored = ev("sponsored", READING, { featured: true } as Partial<DigestCandidate>);
+    const picks = rankEventsForUser([near, sponsored], ctx);
+    expect(picks[0].id).toBe("sponsored");
+    expect(picks[0].reason).toBe("featured");
+  });
+
+  it("never shows a featured event that isn't relevant to the user", () => {
+    const ctx: DigestContext = { homeLat: LONDON.lat, homeLng: LONDON.lng, followedClubIds: [], followedVenueIds: [], engagedCities: [], radiusKm: 80 };
+    const farSponsored = ev("far", LEEDS, { featured: true } as Partial<DigestCandidate>);
+    expect(rankEventsForUser([farSponsored], ctx)).toEqual([]);
+  });
+
+  it("caps the number of sponsored slots", () => {
+    const ctx: DigestContext = { homeLat: LONDON.lat, homeLng: LONDON.lng, followedClubIds: [], followedVenueIds: [], engagedCities: [], radiusKm: 80, maxFeatured: 1 };
+    const picks = rankEventsForUser(
+      [
+        ev("f1", LONDON, { featured: true } as Partial<DigestCandidate>),
+        ev("f2", READING, { featured: true } as Partial<DigestCandidate>),
+        ev("plain", LONDON),
+      ],
+      ctx,
+    );
+    expect(picks.filter((p) => p.reason === "featured")).toHaveLength(1);
+    expect(picks.some((p) => p.id === "plain")).toBe(true);
   });
 });

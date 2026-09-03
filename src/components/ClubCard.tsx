@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FallbackCover } from "./FallbackCover";
+import { VerifiedBadge } from "./VerifiedBadge";
 
 export type ClubCardData = {
   id: string;
@@ -13,6 +14,7 @@ export type ClubCardData = {
   followers: number;
   events: number;
   featured?: boolean;
+  verified?: boolean;
   rating?: number | null;
   reviewCount?: number;
 };
@@ -70,7 +72,10 @@ export function ClubCard({ club }: { club: ClubCardData }) {
             </span>
           ))}
         </div>
-        <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: ".3rem", lineHeight: 1.25 }}>{club.name}</h3>
+        <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: ".3rem", lineHeight: 1.25, display: "flex", alignItems: "center", gap: ".4rem" }}>
+          {club.name}
+          {club.verified && <VerifiedBadge />}
+        </h3>
         <div
           style={{
             fontSize: ".78rem",

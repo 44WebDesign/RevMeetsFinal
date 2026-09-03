@@ -114,6 +114,12 @@ export const adminEventSchema = z.object({
   featured: z.boolean().optional(),
 });
 
+// Admin moderation of a club/venue listing (verify + featured override).
+export const adminListingSchema = z.object({
+  verified: z.boolean().optional(),
+  featured: z.boolean().optional(),
+});
+
 export const adminReportSchema = z.object({
   status: z.enum(["OPEN", "RESOLVED", "DISMISSED"]),
 });

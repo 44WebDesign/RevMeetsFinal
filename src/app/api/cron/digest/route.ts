@@ -33,9 +33,20 @@ export const GET = handle(async (req: Request) => {
     where: { status: "PUBLISHED", startsAt: { gte: now, lte: horizon } },
     orderBy: { startsAt: "asc" },
     take: 300,
-    select: { id: true, title: true, slug: true, city: true, lat: true, lng: true, startsAt: true, clubId: true, venueId: true },
+    select: { id: true, title: true, slug: true, city: true, lat: true, lng: true, startsAt: true, clubId: true, venueId: true, featured: true, featuredUntil: true },
   });
-  const candidates: DigestCandidate[] = events;
+  const candidates: DigestCandidate[] = events.map((e) => ({
+    id: e.id,
+    title: e.title,
+    slug: e.slug,
+    city: e.city,
+    lat: e.lat,
+    lng: e.lng,
+    startsAt: e.startsAt,
+    clubId: e.clubId,
+    venueId: e.venueId,
+    featured: e.featured && !!e.featuredUntil && e.featuredUntil > now,
+  }));
 
   if (candidates.length === 0) {
     return ok({ sent: 0, considered: 0, note: "no upcoming events in window" });
@@ -117,8 +128,9 @@ function digestBody(picks: DigestPick[]): string {
       (p) => `
       <tr>
         <td style="padding:10px 0;border-bottom:1px solid #262626">
+          ${p.reason === "featured" ? `<span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#FFD700;border:1px solid rgba(255,215,0,.5);border-radius:100px;padding:1px 8px;margin-bottom:4px">★ Featured</span><br/>` : ""}
           <a href="${absoluteUrl(`/events/${p.slug}`)}" style="color:#fff;font-weight:700;text-decoration:none;font-size:15px">${escapeHtml(p.title)}</a>
-          <div style="color:#aaa;font-size:13px;margin-top:2px">📅 ${formatDate(p.startsAt)} · 📍 ${escapeHtml(p.city)} · ${reasonLabel(p)}</div>
+          <div style="color:#aaa;font-size:13px;margin-top:2px">📅 ${formatDate(p.startsAt)} · 📍 ${escapeHtml(p.city)}${p.reason === "featured" ? "" : ` · ${reasonLabel(p)}`}</div>
         </td>
       </tr>`,
     )

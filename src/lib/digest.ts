@@ -14,6 +14,7 @@ export type DigestCandidate = {
   startsAt: Date;
   clubId: string | null;
   venueId: string | null;
+  featured?: boolean; // currently a paid featured event → sponsored top slot
 };
 
 export type DigestContext = {
@@ -24,6 +25,7 @@ export type DigestContext = {
   engagedCities: string[]; // cities the user has registered for / saved, lower-cased
   radiusKm?: number; // default 80
   limit?: number; // default 8
+  maxFeatured?: number; // cap on sponsored top slots (default 2)
 };
 
 export type DigestPick = {
@@ -33,7 +35,7 @@ export type DigestPick = {
   city: string;
   startsAt: Date;
   distanceKm: number | null;
-  reason: "following" | "near" | "city";
+  reason: "featured" | "following" | "near" | "city";
 };
 
 // Returns the events worth emailing this user, best-first, or [] when there's
@@ -44,6 +46,7 @@ export function rankEventsForUser(
 ): DigestPick[] {
   const radiusKm = ctx.radiusKm ?? 80;
   const limit = ctx.limit ?? 8;
+  const maxFeatured = ctx.maxFeatured ?? 2;
   const hasHome = ctx.homeLat !== null && ctx.homeLng !== null;
   const clubs = new Set(ctx.followedClubIds);
   const venues = new Set(ctx.followedVenueIds);
@@ -62,6 +65,16 @@ export function rankEventsForUser(
 
     if (!following && !near && !inCity) continue;
 
+    // A paid featured event that's *also* relevant earns the sponsored top slot;
+    // featured events that aren't near/followed/in-city never appear (no spam).
+    const reason: DigestPick["reason"] = e.featured
+      ? "featured"
+      : following
+        ? "following"
+        : near
+          ? "near"
+          : "city";
+
     picks.push({
       id: e.id,
       title: e.title,
@@ -69,11 +82,11 @@ export function rankEventsForUser(
       city: e.city,
       startsAt: e.startsAt,
       distanceKm: dist,
-      reason: following ? "following" : near ? "near" : "city",
+      reason,
     });
   }
 
-  const reasonRank = { following: 0, near: 1, city: 2 } as const;
+  const reasonRank = { featured: 0, following: 1, near: 2, city: 3 } as const;
   picks.sort((a, b) => {
     if (reasonRank[a.reason] !== reasonRank[b.reason]) {
       return reasonRank[a.reason] - reasonRank[b.reason];
@@ -85,5 +98,8 @@ export function rankEventsForUser(
     return a.startsAt.getTime() - b.startsAt.getTime();
   });
 
-  return picks.slice(0, limit);
+  // Cap the number of sponsored (featured) slots so they can't fill the digest.
+  const featured = picks.filter((p) => p.reason === "featured").slice(0, maxFeatured);
+  const rest = picks.filter((p) => p.reason !== "featured");
+  return [...featured, ...rest].slice(0, limit);
 }

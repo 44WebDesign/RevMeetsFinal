@@ -79,6 +79,7 @@
 - ✅ Club's upcoming events listed on its profile
 - ✅ Owners edit their club from the dashboard
 - ✅ **Paid featured placement** — owners can promote their club (Stripe); featured clubs sort first in the directory, get a gold badge, and can appear in the homepage Spotlight
+- ✅ **Verified badge** — admin-granted trust mark (a real check, never sold as a label) shown on cards and the club page
 
 ## 6. Venues
 
@@ -90,6 +91,8 @@
 - ✅ Venue accounts' events default to their own venue location
 - ✅ Owners edit their venue (including click-to-pin location) from the dashboard
 - ✅ **Paid featured placement** — owners can promote their venue (Stripe); featured venues sort first in the directory, get a gold badge, and can appear in the homepage Spotlight
+- ✅ **Verified badge** — admin-granted trust mark shown on cards and the venue page
+- ✅ **Enquiry / contact button** (lead-gen) — signed-in organisers can send an enquiry to the venue owner from the venue page; delivered as an in-app notification + email so the owner can reply directly
 
 ## 7. Reviews & Ratings
 
@@ -105,7 +108,7 @@
 ### In-app (bell menu)
 
 - ✅ **Notification bell** in the nav with an unread badge (polls in the background; marks read on open); dropdown lists recent activity with type icons and relative timestamps, deep-linking to the relevant page
-- ✅ Triggers: someone **registers** for your event, a **new review** on your event / club / venue, a **new event** from a club you follow, and photos added to your event
+- ✅ Triggers: someone **registers** for your event, a **new review** on your event / club / venue, a **new event** from a club you follow, photos added to your event, and a new **enquiry** about your venue
 - ✅ `GET /api/notifications` (list + unread count) and mark-read endpoint; creation never blocks the triggering request
 
 ### Email
@@ -115,7 +118,7 @@
 - ✅ Registration confirmation email on first sign-up to an event
 - ✅ New-event alerts emailed to a club's followers on publish (in-app alert fires regardless of email config)
 - ✅ Daily pre-event reminder (8am cron via `vercel.json`) to registered attendees, deduplicated per registration
-- ✅ **Weekly "events near you" digest** (Monday 9am cron) — each opted-in member gets a short list of upcoming events near their saved location and from clubs/venues they follow; ranked (followed first, then nearest / soonest), rate-limited per user, opt-out in account settings
+- ✅ **Weekly "events near you" digest** (Monday 9am cron) — each opted-in member gets a short list of upcoming events near their saved location and from clubs/venues they follow; ranked (featured/sponsored first, then followed, then nearest / soonest), rate-limited per user, opt-out in account settings. A **featured event that's also relevant** to the member earns a labelled "Featured" top slot (capped so it never fills the email; irrelevant featured events are never shown)
 - ✅ Branded dark email template
 
 ## 9. Images
@@ -143,12 +146,15 @@
 - ✅ **Homepage "Spotlight"** — a prominent band that showcases currently-featured events, clubs and venues (round-robin mix), giving every paid placement extra visibility; hidden entirely when nothing is promoted.
 - ✅ **Idempotent activation** — applied by both the Stripe **success redirect** and a signature-verified **webhook** (`/api/stripe/webhook`), keyed on the checkout session so it's applied exactly once even if the buyer closes the tab; shared checkout/apply logic across all target types (legacy event-only sessions still supported).
 - ✅ **Host promotions view** (`/dashboard/promotions`) — active/expired promotions across events, clubs and venues, purchase history and total spend, backed by a `Promotion` record per payment.
+- ✅ **Sponsored digest slot** — a featured event automatically earns a labelled "Featured" spot at the top of the weekly "events near you" email for nearby members (capped, relevance-gated), extending each featured purchase's reach without a separate SKU.
+- ✅ **Venue lead-gen** — the venue **enquiry/contact** button turns listings into a channel for booking enquiries (a reason venues value being listed).
 
 ## 12. Admin & Moderation
 
 - ✅ **Admin console** (`/admin`, ADMIN role only) with a moderation nav and a platform overview (users, events, clubs, venues, registrations, reviews, open reports, promotion revenue)
 - ✅ **User management** — search users, change role, **suspend/unsuspend** (suspended accounts are blocked from email and Google login), or delete (self-protection: can't suspend/demote/delete your own admin account)
 - ✅ **Event moderation** — search events, hide (draft) / publish / cancel, unfeature, or delete any event
+- ✅ **Listings moderation** (`/admin/listings`) — grant/revoke the **Verified** trust badge on clubs & venues, and override featured placement
 - ✅ **Reporting system** — logged-in users can flag events, reviews **and user-uploaded photos** (reason + detail, de-duplicated); admins get a **reports queue** (Open / Resolved / Dismissed) with target previews (including a photo thumbnail) and one-click resolve / dismiss / delete-target
 - ✅ Admin link in the nav for admins; demo admin account (`admin@revmeet.test`)
 - ✅ **One-time admin bootstrap** — `/api/admin/claim?token=…` (gated by `ADMIN_CLAIM_TOKEN`) promotes the signed-in account to ADMIN and refreshes the session, so the first admin can be created on a live site with no database access
@@ -186,6 +192,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-09-03 | `_______` | Lighter-touch monetisation round: **verified** trust badges for clubs & venues (admin-granted via a new `/admin/listings` page; badge on cards + detail), a **venue enquiry/contact** button (lead-gen — notifies + emails the owner), and a **sponsored slot in the weekly digest** (a relevant featured event earns a labelled top spot, capped and relevance-gated). Adds `verified` to Club/Venue (additive-safe); digest ranking + tests updated |
 | 2026-09-03 | `24c2a51` | Featured placement extended to **clubs & venues** (paid promote from their dashboard profile; gold badge + top-of-directory sort; daily expiry cron covers all three types) and a **homepage Spotlight** band showing currently-featured events/clubs/venues (round-robin, hidden when none). Generalised the `Promotion` model + shared checkout/apply logic (idempotent, legacy event sessions still work); integration tests added |
 | 2026-09-03 | `f1ed256` | Engagement/UX round 3: dashboard profile-completion nudge (endowed progress — bio / garage / location / build photo, next-step CTA, dismissible checklist) and a "recently viewed" events strip (per-browser localStorage, on the homepage and event pages); adds `lib/profileCompletion.ts` + `lib/recentViews.ts` with unit tests |
 | 2026-09-03 | `9ca17db` | Engagement/UX round 2: social proof on event cards (star rating + review count, prominent "going"), honest urgency cues (date-proximity + "only N left" near capacity, on cards and the event page), a real recent event photo in the homepage hero, a properly-styled "View Event" card button (no longer a hover-only ghost), and clearer visual separation between home sections; adds `lib/urgency.ts` with unit tests |
