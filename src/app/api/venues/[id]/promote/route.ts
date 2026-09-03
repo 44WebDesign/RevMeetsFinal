@@ -7,7 +7,7 @@ import { appOrigin } from "@/lib/google";
 
 type Ctx = { params: Promise<{ id: string }> };
 
-// Start a Stripe Checkout session to feature (promote) an event.
+// Start a Stripe Checkout session to feature (promote) a venue.
 export const POST = handle(async (req: Request, ctx: Ctx) => {
   const user = await requireUser();
   const { id } = await ctx.params;
@@ -16,19 +16,19 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
     return fail("Paid promotion isn't set up on this site yet.", 501);
   }
 
-  const event = await prisma.event.findUnique({ where: { id } });
-  if (!event) return fail("Event not found", 404);
-  if (event.organiserId !== user.id && user.role !== "ADMIN") {
-    return fail("You do not own this event", 403);
+  const venue = await prisma.venue.findUnique({ where: { id } });
+  if (!venue) return fail("Venue not found", 404);
+  if (venue.ownerId !== user.id && user.role !== "ADMIN") {
+    return fail("You do not own this venue", 403);
   }
 
   const url = await createFeaturedCheckout({
-    targetType: "EVENT",
-    targetId: event.id,
-    title: event.title,
+    targetType: "VENUE",
+    targetId: venue.id,
+    title: venue.name,
     userId: user.id,
     origin: appOrigin(req),
-    cancelUrl: `${appOrigin(req)}/dashboard/events/${event.id}/edit?promote=cancelled`,
+    cancelUrl: `${appOrigin(req)}/dashboard/venue?promote=cancelled`,
   });
 
   return ok({ url });

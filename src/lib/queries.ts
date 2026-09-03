@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { eventTypeColor } from "./enums";
+import { eventTypeColor, eventTypeLabel } from "./enums";
 import type { EventCardData } from "@/components/EventCard";
 import type { ClubCardData } from "@/components/ClubCard";
 import type { VenueCardData } from "@/components/VenueCard";
@@ -124,6 +124,90 @@ export async function getExplorerEvents(userId?: string): Promise<ExplorerEvent[
   return events.map((e) => ({ ...map(e), lat: e.lat, lng: e.lng }));
 }
 
+// ---- Homepage spotlight (paid featured placement) ----
+export type SpotlightItem = {
+  kind: "event" | "club" | "venue";
+  title: string;
+  subtitle: string;
+  href: string;
+  imageUrl: string | null;
+  accent: string;
+  icon: string;
+};
+
+// Currently-featured events/clubs/venues, interleaved into a short mixed list
+// for the homepage spotlight. Empty when nothing is promoted (section hides).
+export async function getSpotlight(limit = 3): Promise<SpotlightItem[]> {
+  const now = new Date();
+  const featured = { featured: true, featuredUntil: { gt: now } };
+
+  const [events, clubs, venues] = await Promise.all([
+    prisma.event.findMany({
+      where: { ...featured, status: "PUBLISHED" },
+      orderBy: { featuredUntil: "desc" },
+      take: limit,
+      select: { slug: true, title: true, type: true, city: true, imageUrl: true },
+    }),
+    prisma.club.findMany({
+      where: featured,
+      orderBy: { featuredUntil: "desc" },
+      take: limit,
+      select: { slug: true, name: true, location: true, imageUrl: true },
+    }),
+    prisma.venue.findMany({
+      where: featured,
+      orderBy: { featuredUntil: "desc" },
+      take: limit,
+      select: { slug: true, name: true, city: true, imageUrl: true },
+    }),
+  ]);
+
+  const byKind: SpotlightItem[][] = [
+    events.map((e) => ({
+      kind: "event" as const,
+      title: e.title,
+      subtitle: `${eventTypeLabel(e.type)} · ${e.city}`,
+      href: `/events/${e.slug}`,
+      imageUrl: e.imageUrl,
+      accent: eventTypeColor(e.type),
+      icon: "fa-calendar-star",
+    })),
+    clubs.map((c) => ({
+      kind: "club" as const,
+      title: c.name,
+      subtitle: `Car club · ${c.location}`,
+      href: `/clubs/${c.slug}`,
+      imageUrl: c.imageUrl,
+      accent: "#FF5F1F",
+      icon: "fa-users-gear",
+    })),
+    venues.map((v) => ({
+      kind: "venue" as const,
+      title: v.name,
+      subtitle: `Venue · ${v.city}`,
+      href: `/venues/${v.slug}`,
+      imageUrl: v.imageUrl,
+      accent: "#00BCD4",
+      icon: "fa-warehouse",
+    })),
+  ];
+
+  // Round-robin so a single busy type doesn't fill every slot.
+  const mixed: SpotlightItem[] = [];
+  for (let i = 0; mixed.length < limit; i++) {
+    let added = false;
+    for (const list of byKind) {
+      if (list[i]) {
+        mixed.push(list[i]);
+        added = true;
+        if (mixed.length >= limit) break;
+      }
+    }
+    if (!added) break;
+  }
+  return mixed;
+}
+
 // A recent published event's cover image, for the homepage hero — real
 // community content over generic stock. Null when none have an image.
 export async function getHeroImage(): Promise<string | null> {
@@ -202,7 +286,7 @@ export async function getClubs(q?: string): Promise<ClubCardData[]> {
           ],
         }
       : undefined,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     include: {
       _count: { select: { follows: true, events: true } },
       reviews: { select: { rating: true } },
@@ -218,6 +302,7 @@ export async function getClubs(q?: string): Promise<ClubCardData[]> {
     categories: c.categories,
     followers: c._count.follows,
     events: c._count.events,
+    featured: c.featured,
     rating: c.reviews.length ? c.reviews.reduce((s, r) => s + r.rating, 0) / c.reviews.length : null,
     reviewCount: c.reviews.length,
   }));
@@ -239,7 +324,7 @@ export async function getVenues(q?: string, amenities?: string[]): Promise<Venue
   }
   const venues = await prisma.venue.findMany({
     where: and.length ? { AND: and } : undefined,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     include: {
       _count: { select: { follows: true } },
       reviews: { select: { rating: true } },
@@ -259,6 +344,7 @@ export async function getVenues(q?: string, amenities?: string[]): Promise<Venue
     amenities: v.amenities,
     lat: v.lat,
     lng: v.lng,
+    featured: v.featured,
     rating: v.reviews.length ? v.reviews.reduce((s, r) => s + r.rating, 0) / v.reviews.length : null,
     reviewCount: v.reviews.length,
   }));

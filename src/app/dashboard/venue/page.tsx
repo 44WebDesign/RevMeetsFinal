@@ -1,12 +1,19 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { VenueForm } from "@/components/VenueForm";
+import { PromoteCard } from "@/components/PromoteCard";
+import { stripeConfigured, featuredPriceLabel, featuredDays } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Edit Venue", robots: { index: false } };
 
-export default async function VenueProfilePage() {
+export default async function VenueProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ promote?: string }>;
+}) {
+  const { promote } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/dashboard/venue");
   if (!user.venue) redirect("/dashboard");
@@ -19,6 +26,15 @@ export default async function VenueProfilePage() {
         <p className="sec-sub" style={{ marginBottom: "2rem" }}>
           Complete your profile so organisers can find you and pin you on the map.
         </p>
+        <PromoteCard
+          promoteUrl={`/api/venues/${user.venue.id}/promote`}
+          kind="venue"
+          stripeEnabled={stripeConfigured()}
+          priceLabel={featuredPriceLabel()}
+          days={featuredDays()}
+          featuredUntil={user.venue.featuredUntil ? user.venue.featuredUntil.toISOString() : null}
+          notice={promote === "cancelled" ? "cancelled" : null}
+        />
         <VenueForm
           initial={{
             name: user.venue.name,

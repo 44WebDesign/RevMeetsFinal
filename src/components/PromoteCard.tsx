@@ -3,15 +3,26 @@
 import { useState } from "react";
 import { formatDate } from "@/lib/utils";
 
+type Kind = "event" | "club" | "venue";
+
+const WHERE: Record<Kind, string> = {
+  event: "search, category and map listings",
+  club: "the clubs directory and the homepage",
+  venue: "the venues directory and the homepage",
+};
+
+// Paid featured-placement card, shown on an event/club/venue manage page.
 export function PromoteCard({
-  eventId,
+  promoteUrl,
+  kind,
   stripeEnabled,
   priceLabel,
   days,
   featuredUntil,
   notice,
 }: {
-  eventId: string;
+  promoteUrl: string;
+  kind: Kind;
   stripeEnabled: boolean;
   priceLabel: string;
   days: number;
@@ -26,7 +37,7 @@ export function PromoteCard({
   async function promote() {
     setBusy(true);
     setError(null);
-    const res = await fetch(`/api/events/${eventId}/promote`, { method: "POST" });
+    const res = await fetch(promoteUrl, { method: "POST" });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.url) {
       window.location.href = data.url; // to Stripe Checkout
@@ -48,9 +59,8 @@ export function PromoteCard({
       {active ? (
         <>
           <p style={{ color: "#7fd884", fontSize: ".9rem", marginBottom: ".75rem" }}>
-            <i className="fas fa-circle-check" /> This event is featured until{" "}
-            <strong>{formatDate(featuredUntil!)}</strong> — it sorts first in listings and
-            shows a Featured badge.
+            <i className="fas fa-circle-check" /> This {kind} is featured until{" "}
+            <strong>{formatDate(featuredUntil!)}</strong> — it sorts first and shows a Featured badge.
           </p>
           {stripeEnabled && (
             <button className="btn-ghost" onClick={promote} disabled={busy}>
@@ -61,8 +71,8 @@ export function PromoteCard({
       ) : (
         <>
           <p style={{ color: "var(--mut)", fontSize: ".9rem", marginBottom: "1rem" }}>
-            Promote this event to the top of search, category and map listings with a gold
-            Featured badge for <strong>{days} days</strong>.
+            Promote this {kind} to the top of {WHERE[kind]} with a gold Featured badge for{" "}
+            <strong>{days} days</strong>.
           </p>
           {notice === "cancelled" && (
             <p style={{ fontSize: ".82rem", color: "var(--mut)", marginBottom: ".75rem" }}>
@@ -75,8 +85,7 @@ export function PromoteCard({
             </button>
           ) : (
             <p style={{ fontSize: ".85rem", color: "var(--mut)" }}>
-              <i className="fas fa-circle-info" /> Paid promotion isn&apos;t enabled on this
-              site yet.
+              <i className="fas fa-circle-info" /> Paid promotion isn&apos;t enabled on this site yet.
             </p>
           )}
         </>

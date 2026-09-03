@@ -26,7 +26,8 @@ export default async function PromotionsPage({
 
   const promotions = await getHostPromotions(user.id);
   const totalSpent = promotions.reduce((s, p) => s + p.amount, 0);
-  const active = promotions.filter((p) => new Date(p.expiresAt) > new Date());
+  const active = promotions.filter((p) => p.live);
+  const KIND_LABEL: Record<string, string> = { EVENT: "Event", CLUB: "Club", VENUE: "Venue" };
 
   return (
     <section className="section" style={{ background: "var(--bg)" }}>
@@ -56,45 +57,43 @@ export default async function PromotionsPage({
         {promotions.length === 0 ? (
           <div className="card-surface" style={{ padding: "3rem", textAlign: "center", color: "var(--mut)" }}>
             <i className="fas fa-star" style={{ fontSize: "1.5rem", display: "block", marginBottom: ".75rem", color: "#FFD700" }} />
-            <p style={{ marginBottom: "1rem" }}>You haven&apos;t promoted any events yet.</p>
+            <p style={{ marginBottom: "1rem" }}>You haven&apos;t promoted anything yet.</p>
             {stripeConfigured() ? (
-              <p style={{ fontSize: ".85rem" }}>Open an event&apos;s <strong>Manage</strong> page to feature it.</p>
+              <p style={{ fontSize: ".85rem" }}>Open an event&apos;s <strong>Manage</strong> page, or your club/venue profile, to feature it.</p>
             ) : (
               <p style={{ fontSize: ".85rem" }}>Paid promotion isn&apos;t enabled on this site yet.</p>
             )}
           </div>
         ) : (
           <div className="card-surface" style={{ overflow: "hidden" }}>
-            {promotions.map((p, i) => {
-              const live = new Date(p.expiresAt) > new Date();
-              return (
-                <div
-                  key={p.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "1rem",
-                    padding: "1rem 1.25rem",
-                    borderTop: i === 0 ? "none" : "1px solid var(--bdr)",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700 }}>
-                      {p.event.title}
-                      <span className="pill" style={{ marginLeft: ".6rem", background: live ? "rgba(255,215,0,.15)" : "var(--bdr2)", color: live ? "#FFD700" : "var(--mut)", border: live ? "1px solid rgba(255,215,0,.4)" : "none" }}>
-                        {live ? "Active" : "Expired"}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: ".8rem", color: "var(--mut)", marginTop: ".25rem" }}>
-                      {money(p.amount, p.currency)} · {p.days} days · purchased {formatDate(p.createdAt)} · {live ? "until" : "ended"} {formatDate(p.expiresAt)}
-                    </div>
+            {promotions.map((p, i) => (
+              <div
+                key={p.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "1rem",
+                  padding: "1rem 1.25rem",
+                  borderTop: i === 0 ? "none" : "1px solid var(--bdr)",
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700 }}>
+                    <span className="pill" style={{ marginRight: ".5rem", background: "var(--bdr2)", color: "var(--mut)" }}>{KIND_LABEL[p.kind]}</span>
+                    {p.title}
+                    <span className="pill" style={{ marginLeft: ".6rem", background: p.live ? "rgba(255,215,0,.15)" : "var(--bdr2)", color: p.live ? "#FFD700" : "var(--mut)", border: p.live ? "1px solid rgba(255,215,0,.4)" : "none" }}>
+                      {p.live ? "Active" : "Expired"}
+                    </span>
                   </div>
-                  <Link href={`/events/${p.event.slug}`} className="btn-ghost">View</Link>
+                  <div style={{ fontSize: ".8rem", color: "var(--mut)", marginTop: ".25rem" }}>
+                    {money(p.amount, p.currency)} · {p.days} days · purchased {formatDate(p.createdAt)} · {p.live ? "until" : "ended"} {formatDate(p.expiresAt)}
+                  </div>
                 </div>
-              );
-            })}
+                {p.href && <Link href={p.href} className="btn-ghost">View</Link>}
+              </div>
+            ))}
           </div>
         )}
       </div>

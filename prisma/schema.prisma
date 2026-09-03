@@ -119,12 +119,16 @@ model Club {
   imageUrl    String?
   website     String?
   categories  String   @default("") // comma-separated tags
+  // Paid featured placement (see Promotion) — sorts first + gets a badge.
+  featured      Boolean   @default(false)
+  featuredUntil DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  events  Event[]
-  follows ClubFollow[]
-  reviews Review[]
+  events     Event[]
+  follows    ClubFollow[]
+  reviews    Review[]
+  promotions Promotion[]
 }
 
 // Venue profile — a place that promotes itself as a location for meets/events
@@ -145,12 +149,16 @@ model Venue {
   capacity    Int?
   amenities   String   @default("") // comma-separated
   categories  String   @default("") // comma-separated
+  // Paid featured placement (see Promotion) — sorts first + gets a badge.
+  featured      Boolean   @default(false)
+  featuredUntil DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  events  Event[]
-  follows VenueFollow[]
-  reviews Review[]
+  events     Event[]
+  follows    VenueFollow[]
+  reviews    Review[]
+  promotions Promotion[]
 }
 
 model Event {
@@ -204,11 +212,15 @@ model Event {
 
 // A paid featured-placement purchase (Stripe). One row per completed checkout,
 // keyed by the Stripe session for idempotency across the success redirect and
-// the webhook.
+// the webhook. Targets exactly one of an event, club or venue.
 model Promotion {
   id              String   @id @default(cuid())
-  eventId         String
-  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId         String?
+  event           Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  clubId          String?
+  club            Club?    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  venueId         String?
+  venue           Venue?   @relation(fields: [venueId], references: [id], onDelete: Cascade)
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   amount          Int // pence
@@ -217,6 +229,9 @@ model Promotion {
   stripeSessionId String   @unique
   createdAt       DateTime @default(now())
   expiresAt       DateTime
+
+  @@index([clubId])
+  @@index([venueId])
 }
 
 model Registration {

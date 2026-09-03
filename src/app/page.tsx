@@ -5,6 +5,7 @@ import { ClubCard } from "@/components/ClubCard";
 import { VenueCard } from "@/components/VenueCard";
 import { MapView } from "@/components/MapView";
 import { RecentEventsStrip } from "@/components/RecentlyViewed";
+import { Spotlight } from "@/components/Spotlight";
 import {
   getEvents,
   getClubs,
@@ -12,6 +13,7 @@ import {
   getStats,
   getEventMapPoints,
   getHeroImage,
+  getSpotlight,
 } from "@/lib/queries";
 import { EVENT_TYPE_COLORS } from "@/lib/enums";
 import { getSession } from "@/lib/auth";
@@ -21,13 +23,14 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const session = await getSession();
-  const [events, clubs, venues, stats, mapPoints, heroImage] = await Promise.all([
+  const [events, clubs, venues, stats, mapPoints, heroImage, spotlight] = await Promise.all([
     getEvents({ take: 4 }, session?.sub),
     getClubs(),
     getVenues(),
     getStats(),
     getEventMapPoints(),
     getHeroImage(),
+    getSpotlight(),
   ]);
 
   // Prefer a real event cover for the hero; fall back to a curated stock shot.
@@ -169,6 +172,9 @@ export default async function HomePage() {
           </div>
         </div>
       )}
+
+      {/* SPOTLIGHT — paid featured placement; hidden when nothing is promoted */}
+      <Spotlight items={spotlight} />
 
       {/* RECENTLY VIEWED — client island, renders only for returning visitors */}
       <RecentEventsStrip />

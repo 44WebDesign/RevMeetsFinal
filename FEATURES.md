@@ -78,6 +78,7 @@
 - ✅ **Follow / unfollow** clubs (one tap, live counts)
 - ✅ Club's upcoming events listed on its profile
 - ✅ Owners edit their club from the dashboard
+- ✅ **Paid featured placement** — owners can promote their club (Stripe); featured clubs sort first in the directory, get a gold badge, and can appear in the homepage Spotlight
 
 ## 6. Venues
 
@@ -88,6 +89,7 @@
 - ✅ Events held at a venue listed on its profile
 - ✅ Venue accounts' events default to their own venue location
 - ✅ Owners edit their venue (including click-to-pin location) from the dashboard
+- ✅ **Paid featured placement** — owners can promote their venue (Stripe); featured venues sort first in the directory, get a gold badge, and can appear in the homepage Spotlight
 
 ## 7. Reviews & Ratings
 
@@ -137,9 +139,10 @@
 
 *(Active when `STRIPE_SECRET_KEY` is set; the promote button shows "not enabled" otherwise)*
 
-- ✅ **Paid featured placement** via Stripe Checkout — feature an event from the **create flow** (a checkbox takes you to payment right after publishing) or later from its **Manage** page; on payment the event is featured for the configured window. Price/duration configurable via env; promotions extend and auto-expire.
-- ✅ **Idempotent activation** — applied by both the Stripe **success redirect** and a signature-verified **webhook** (`/api/stripe/webhook`), keyed on the checkout session so it's applied exactly once even if the buyer closes the tab.
-- ✅ **Host promotions view** (`/dashboard/promotions`) — active/expired promotions, purchase history and total spend, backed by a `Promotion` record per payment.
+- ✅ **Paid featured placement for events, clubs *and* venues** via Stripe Checkout — feature an event from the **create flow** or its **Manage** page, and clubs/venues from their profile page in the dashboard; on payment the item is featured for the configured window (sorts first in its directory, gets a gold badge). Price/duration configurable via env; promotions extend and auto-expire (daily cron, all three types).
+- ✅ **Homepage "Spotlight"** — a prominent band that showcases currently-featured events, clubs and venues (round-robin mix), giving every paid placement extra visibility; hidden entirely when nothing is promoted.
+- ✅ **Idempotent activation** — applied by both the Stripe **success redirect** and a signature-verified **webhook** (`/api/stripe/webhook`), keyed on the checkout session so it's applied exactly once even if the buyer closes the tab; shared checkout/apply logic across all target types (legacy event-only sessions still supported).
+- ✅ **Host promotions view** (`/dashboard/promotions`) — active/expired promotions across events, clubs and venues, purchase history and total spend, backed by a `Promotion` record per payment.
 
 ## 12. Admin & Moderation
 
@@ -183,6 +186,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-09-03 | `_______` | Featured placement extended to **clubs & venues** (paid promote from their dashboard profile; gold badge + top-of-directory sort; daily expiry cron covers all three types) and a **homepage Spotlight** band showing currently-featured events/clubs/venues (round-robin, hidden when none). Generalised the `Promotion` model + shared checkout/apply logic (idempotent, legacy event sessions still work); integration tests added |
 | 2026-09-03 | `f1ed256` | Engagement/UX round 3: dashboard profile-completion nudge (endowed progress — bio / garage / location / build photo, next-step CTA, dismissible checklist) and a "recently viewed" events strip (per-browser localStorage, on the homepage and event pages); adds `lib/profileCompletion.ts` + `lib/recentViews.ts` with unit tests |
 | 2026-09-03 | `9ca17db` | Engagement/UX round 2: social proof on event cards (star rating + review count, prominent "going"), honest urgency cues (date-proximity + "only N left" near capacity, on cards and the event page), a real recent event photo in the homepage hero, a properly-styled "View Event" card button (no longer a hover-only ghost), and clearer visual separation between home sections; adds `lib/urgency.ts` with unit tests |
 | 2026-09-03 | `dda62a1` | Design/UX quick wins from the design review: lightened secondary text to meet 4.5:1 contrast, larger card titles, card shadows + keyboard focus ring + reduced-motion support, branded gradient image placeholders (no more repeated stock photos), and honest homepage stats (real city count, no fake "340+", hidden when the site is sparse) |

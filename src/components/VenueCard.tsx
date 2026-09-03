@@ -17,6 +17,7 @@ export type VenueCardData = {
   amenities?: string;
   lat?: number;
   lng?: number;
+  featured?: boolean;
   rating?: number | null;
   reviewCount?: number;
 };
@@ -51,6 +52,11 @@ export function VenueCard({ venue }: { venue: VenueCardData }) {
           />
         ) : (
           <FallbackCover accent="#00BCD4" icon="fa-warehouse" />
+        )}
+        {venue.featured && (
+          <span className="pill" style={{ position: "absolute", top: ".5rem", left: ".5rem", background: "rgba(8,8,8,.75)", color: "#FFD700", border: "1px solid rgba(255,215,0,.4)" }}>
+            <i className="fas fa-star" /> Featured
+          </span>
         )}
       </div>
       <div style={{ padding: "1.25rem", flex: 1 }}>

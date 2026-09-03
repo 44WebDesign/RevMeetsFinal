@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { handle, ok, fail } from "@/lib/api";
 import { sendEmail, emailShell, eventButton, emailConfigured } from "@/lib/email";
+import { expireFeatured } from "@/lib/promotions";
 import { absoluteUrl } from "@/lib/site";
 import { formatDateTime } from "@/lib/utils";
 
@@ -19,14 +20,11 @@ export const GET = handle(async (req: Request) => {
 
   const now = new Date();
 
-  // Expire paid featured promotions whose window has passed.
-  const expired = await prisma.event.updateMany({
-    where: { featured: true, featuredUntil: { lt: now } },
-    data: { featured: false },
-  });
+  // Expire paid featured promotions (events, clubs and venues) whose window has passed.
+  const featuredExpired = await expireFeatured(now);
 
   if (!emailConfigured()) {
-    return ok({ sent: 0, featuredExpired: expired.count, skipped: "email not configured (set RESEND_API_KEY)" });
+    return ok({ sent: 0, featuredExpired, skipped: "email not configured (set RESEND_API_KEY)" });
   }
   const windowEnd = new Date(now.getTime() + 36 * 60 * 60 * 1000);
 
@@ -61,5 +59,5 @@ export const GET = handle(async (req: Request) => {
     }
   }
 
-  return ok({ sent, considered: due.length, featuredExpired: expired.count });
+  return ok({ sent, considered: due.length, featuredExpired });
 });

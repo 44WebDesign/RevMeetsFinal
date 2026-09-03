@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     const session = await getStripe().checkout.sessions.retrieve(sessionId);
     const result = await applyPromotionFromSession(session);
     if (!result) return fail();
-    return NextResponse.redirect(`${origin}/events/${result.eventSlug}?promoted=1`);
+    return NextResponse.redirect(`${origin}${result.redirect}`);
   } catch (err) {
     console.error("[stripe] featured-success error:", err);
     return fail();

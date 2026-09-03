@@ -60,7 +60,8 @@ export default async function EditEventPage({
           Update the details, change its status, or remove it entirely.
         </p>
         <PromoteCard
-          eventId={event.id}
+          promoteUrl={`/api/events/${event.id}/promote`}
+          kind="event"
           stripeEnabled={stripeConfigured()}
           priceLabel={featuredPriceLabel()}
           days={featuredDays()}
