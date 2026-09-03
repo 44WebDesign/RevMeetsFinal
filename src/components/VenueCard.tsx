@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AmenityIcons } from "./AmenityIcons";
+import { FallbackCover } from "./FallbackCover";
 
 export type VenueCardData = {
   id: string;
@@ -19,9 +20,6 @@ export type VenueCardData = {
   rating?: number | null;
   reviewCount?: number;
 };
-
-const FALLBACK =
-  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=300&q=80";
 
 export function VenueCard({ venue }: { venue: VenueCardData }) {
   const cats = venue.categories
@@ -43,13 +41,17 @@ export function VenueCard({ venue }: { venue: VenueCardData }) {
       }}
     >
       <div style={{ width: 130, flexShrink: 0, overflow: "hidden", position: "relative" }}>
-        <Image
-          src={venue.imageUrl || FALLBACK}
-          alt={venue.name}
-          fill
-          sizes="130px"
-          style={{ objectFit: "cover", filter: "brightness(.8)" }}
-        />
+        {venue.imageUrl ? (
+          <Image
+            src={venue.imageUrl}
+            alt={venue.name}
+            fill
+            sizes="130px"
+            style={{ objectFit: "cover", filter: "brightness(.8)" }}
+          />
+        ) : (
+          <FallbackCover accent="#00BCD4" icon="fa-warehouse" />
+        )}
       </div>
       <div style={{ padding: "1.25rem", flex: 1 }}>
         <div style={{ display: "flex", gap: ".35rem", flexWrap: "wrap", marginBottom: ".5rem" }}>
@@ -67,7 +69,7 @@ export function VenueCard({ venue }: { venue: VenueCardData }) {
             </span>
           ))}
         </div>
-        <h3 style={{ fontSize: ".95rem", fontWeight: 700, marginBottom: ".3rem" }}>{venue.name}</h3>
+        <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: ".3rem", lineHeight: 1.25 }}>{venue.name}</h3>
         <div
           style={{
             fontSize: ".78rem",

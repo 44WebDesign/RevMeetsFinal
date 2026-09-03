@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { FallbackCover } from "./FallbackCover";
 
 export type ClubCardData = {
   id: string;
@@ -14,9 +15,6 @@ export type ClubCardData = {
   rating?: number | null;
   reviewCount?: number;
 };
-
-const FALLBACK =
-  "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=300&q=80";
 
 export function ClubCard({ club }: { club: ClubCardData }) {
   const cats = club.categories
@@ -38,13 +36,17 @@ export function ClubCard({ club }: { club: ClubCardData }) {
       }}
     >
       <div style={{ width: 130, flexShrink: 0, overflow: "hidden", position: "relative" }}>
-        <Image
-          src={club.imageUrl || FALLBACK}
-          alt={club.name}
-          fill
-          sizes="130px"
-          style={{ objectFit: "cover", filter: "brightness(.8)" }}
-        />
+        {club.imageUrl ? (
+          <Image
+            src={club.imageUrl}
+            alt={club.name}
+            fill
+            sizes="130px"
+            style={{ objectFit: "cover", filter: "brightness(.8)" }}
+          />
+        ) : (
+          <FallbackCover accent="#FF5F1F" icon="fa-users-gear" />
+        )}
       </div>
       <div style={{ padding: "1.25rem", flex: 1 }}>
         <div style={{ display: "flex", gap: ".35rem", flexWrap: "wrap", marginBottom: ".5rem" }}>
@@ -62,7 +64,7 @@ export function ClubCard({ club }: { club: ClubCardData }) {
             </span>
           ))}
         </div>
-        <h3 style={{ fontSize: ".95rem", fontWeight: 700, marginBottom: ".3rem" }}>{club.name}</h3>
+        <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: ".3rem", lineHeight: 1.25 }}>{club.name}</h3>
         <div
           style={{
             fontSize: ".78rem",

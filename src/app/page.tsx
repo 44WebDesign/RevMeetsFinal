@@ -134,32 +134,34 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* STATS */}
-      <div
-        style={{
-          background: "var(--card)",
-          borderTop: "1px solid var(--bdr)",
-          borderBottom: "1px solid var(--bdr)",
-          padding: "1.5rem 2rem",
-        }}
-      >
+      {/* STATS — only shown once there's enough real activity to be credible. */}
+      {stats.events >= 6 && (
         <div
           style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
-            gap: "1rem",
-            textAlign: "center",
+            background: "var(--card)",
+            borderTop: "1px solid var(--bdr)",
+            borderBottom: "1px solid var(--bdr)",
+            padding: "1.5rem 2rem",
           }}
-          className="stats-inner"
         >
-          <Stat n={`${stats.events}+`} l="Events Listed" />
-          <Stat n={`${stats.users}+`} l="Registered Members" />
-          <Stat n={`${stats.venues}+`} l="Clubs & Venues" />
-          <Stat n="340+" l="Cities Covered" />
+          <div
+            style={{
+              maxWidth: 1200,
+              margin: "0 auto",
+              display: "grid",
+              gridTemplateColumns: "repeat(4,1fr)",
+              gap: "1rem",
+              textAlign: "center",
+            }}
+            className="stats-inner"
+          >
+            <Stat n={statNum(stats.events)} l="Events Listed" />
+            <Stat n={statNum(stats.users)} l="Registered Members" />
+            <Stat n={statNum(stats.venues)} l="Clubs & Venues" />
+            <Stat n={statNum(stats.cities)} l="Cities Covered" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* HOW IT WORKS */}
       <section id="how" className="section" style={{ background: "var(--bg)" }}>
@@ -394,6 +396,14 @@ export default async function HomePage() {
       </section>
     </>
   );
+}
+
+// Honest stat display: show the exact number while small, and only round down
+// to a "N+" once it's genuinely large — never inflate.
+function statNum(n: number): string {
+  if (n < 20) return String(n);
+  if (n < 100) return `${Math.floor(n / 10) * 10}+`;
+  return `${Math.floor(n / 50) * 50}+`;
 }
 
 function Stat({ n, l }: { n: string; l: string }) {

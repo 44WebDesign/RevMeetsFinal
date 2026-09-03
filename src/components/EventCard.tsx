@@ -4,6 +4,7 @@ import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { AmenityIcons } from "./AmenityIcons";
 import { SaveIconButton } from "./SaveIconButton";
+import { FallbackCover } from "./FallbackCover";
 
 export type EventCardData = {
   id: string;
@@ -21,9 +22,6 @@ export type EventCardData = {
   featured?: boolean;
 };
 
-const FALLBACK_IMG =
-  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80";
-
 export function EventCard({ event }: { event: EventCardData }) {
   const color = eventTypeColor(event.type);
   return (
@@ -39,13 +37,17 @@ export function EventCard({ event }: { event: EventCardData }) {
         style={{ textDecoration: "none", color: "inherit", display: "block" }}
       >
         <div style={{ height: 180, position: "relative", overflow: "hidden" }}>
-          <Image
-            src={event.imageUrl || FALLBACK_IMG}
-            alt={event.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
-            style={{ objectFit: "cover", filter: "brightness(.85)" }}
-          />
+          {event.imageUrl ? (
+            <Image
+              src={event.imageUrl}
+              alt={event.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
+              style={{ objectFit: "cover", filter: "brightness(.85)" }}
+            />
+          ) : (
+            <FallbackCover accent={color} label={eventTypeLabel(event.type)} />
+          )}
           <span
             className="pill"
             style={{
@@ -92,7 +94,7 @@ export function EventCard({ event }: { event: EventCardData }) {
             <i className="fas fa-location-dot" /> {event.city}
           </span>
         </div>
-        <h3 style={{ fontSize: ".95rem", fontWeight: 700, marginBottom: ".5rem", lineHeight: 1.3 }}>
+        <h3 style={{ fontSize: "1.08rem", fontWeight: 700, marginBottom: ".5rem", lineHeight: 1.25 }}>
           {event.title}
         </h3>
         <p

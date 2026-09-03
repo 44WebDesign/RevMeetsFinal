@@ -280,11 +280,12 @@ export async function getEventCities(): Promise<string[]> {
 }
 
 export async function getStats() {
-  const [events, users, clubs, venues] = await Promise.all([
+  const [events, users, clubs, venues, cityRows] = await Promise.all([
     prisma.event.count({ where: { status: "PUBLISHED" } }),
     prisma.user.count(),
     prisma.club.count(),
     prisma.venue.count(),
+    prisma.event.groupBy({ by: ["city"], where: { status: "PUBLISHED" } }),
   ]);
-  return { events, users, clubs, venues: clubs + venues };
+  return { events, users, clubs, venues: clubs + venues, cities: cityRows.length };
 }
