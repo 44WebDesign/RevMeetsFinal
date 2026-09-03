@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { EventCard } from "@/components/EventCard";
+import { ProfileCompletion } from "@/components/ProfileCompletion";
+import { computeProfileCompletion } from "@/lib/profileCompletion";
 import { ROLE_LABELS, eventTypeLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 
@@ -16,6 +18,19 @@ export default async function DashboardPage() {
 
   const isHost = user.role === "ORGANISER" || user.role === "ADMIN";
   const isVenue = user.role === "VENUE";
+
+  const hasBuildPhoto =
+    (await prisma.photo.count({ where: { uploaderId: user.id, eventId: null } })) > 0;
+  const completion = computeProfileCompletion({
+    id: user.id,
+    name: user.name,
+    bio: user.bio,
+    carMake: user.carMake,
+    carModel: user.carModel,
+    homeLat: user.homeLat,
+    homeLng: user.homeLng,
+    hasBuildPhoto,
+  });
 
   return (
     <section className="section" style={{ background: "var(--bg)" }}>
@@ -33,6 +48,8 @@ export default async function DashboardPage() {
             </Link>
           )}
         </div>
+
+        <ProfileCompletion completion={completion} />
 
         {/* Quick links */}
         <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>

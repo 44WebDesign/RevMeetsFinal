@@ -4,6 +4,7 @@ import { EventCard } from "@/components/EventCard";
 import { ClubCard } from "@/components/ClubCard";
 import { VenueCard } from "@/components/VenueCard";
 import { MapView } from "@/components/MapView";
+import { RecentEventsStrip } from "@/components/RecentlyViewed";
 import {
   getEvents,
   getClubs,
@@ -168,6 +169,9 @@ export default async function HomePage() {
           </div>
         </div>
       )}
+
+      {/* RECENTLY VIEWED — client island, renders only for returning visitors */}
+      <RecentEventsStrip />
 
       {/* HOW IT WORKS */}
       <section id="how" className="section home-sec" style={{ background: "var(--bg)" }}>

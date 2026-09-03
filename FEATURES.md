@@ -52,6 +52,7 @@
 - ✅ **Social proof on cards** — average star rating + review count, and a prominent "going" tally, surfaced on every event card
 - ✅ **Honest urgency cues** — date-proximity badges (Today / Tomorrow / This weekend / In N days) and a "only N left" flag when an event with a real capacity is genuinely filling up; shown on cards and above the register button on the event page (derived from real data, never fabricated)
 - ✅ **Save / bookmark events** for later — a bookmark button on every event **card** (and the event page), plus a "Saved for Later" section on the enthusiast dashboard
+- ✅ **Recently viewed** — a per-browser strip (localStorage, works for anonymous visitors too) on the homepage and event pages, surfacing events you looked at so it's easy to return to them
 - ✅ **Featured / promoted events (paid)** — hosts pay via Stripe Checkout to feature an event (default £9.99 / 30 days); featured events sort first in listings and show a gold "Featured" badge. Promotions auto-expire (daily cron) and can be extended
 - ✅ **Recurring events** — create weekly / fortnightly / monthly series (up to 26 dates) in one go; each occurrence is its own event with its own page and registrations
 - ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event pages
@@ -152,6 +153,7 @@
 ## 13. Dashboards
 
 - ✅ Role-aware dashboard: hosts/venues see event stats (events, registrations, published/drafts) and manage their events; enthusiasts see events they're attending and who they follow
+- ✅ **Profile-completion nudge** — an endowed-progress card on the dashboard showing how complete your profile is (bio, garage, home location, build photo), the next step to take, and a dismissible checklist
 - ✅ Quick links to edit club/venue profile and view public pages
 - ✅ **Organiser analytics** (`/dashboard/analytics`, hosts & venues) — headline stats (events, registrations, saves, event photos, average rating across their events + club/venue), a **registrations-over-time** area chart (last 12 weeks), and **top events** + **registrations-by-type** bar charts; rendered as dependency-free inline-SVG charts
 
@@ -181,6 +183,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-09-03 | `_______` | Engagement/UX round 3: dashboard profile-completion nudge (endowed progress — bio / garage / location / build photo, next-step CTA, dismissible checklist) and a "recently viewed" events strip (per-browser localStorage, on the homepage and event pages); adds `lib/profileCompletion.ts` + `lib/recentViews.ts` with unit tests |
 | 2026-09-03 | `9ca17db` | Engagement/UX round 2: social proof on event cards (star rating + review count, prominent "going"), honest urgency cues (date-proximity + "only N left" near capacity, on cards and the event page), a real recent event photo in the homepage hero, a properly-styled "View Event" card button (no longer a hover-only ghost), and clearer visual separation between home sections; adds `lib/urgency.ts` with unit tests |
 | 2026-09-03 | `dda62a1` | Design/UX quick wins from the design review: lightened secondary text to meet 4.5:1 contrast, larger card titles, card shadows + keyboard focus ring + reduced-motion support, branded gradient image placeholders (no more repeated stock photos), and honest homepage stats (real city count, no fake "340+", hidden when the site is sparse) |
 | 2026-08-11 | `1a9fa4f` | Test harness (Vitest unit suite + Postgres-backed integration suite + GitHub Actions CI); subscribable `.ics` calendar feeds for clubs/venues/cities (webcal subscribe buttons); weekly "events near you" digest email (home location + opt-in in account settings, ranked near/followed, Monday cron) |

@@ -9,6 +9,7 @@ import { MapView } from "@/components/MapView";
 import { AttendButton } from "@/components/AttendButton";
 import { ReviewSection } from "@/components/ReviewSection";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { RecordRecentView, RecentEventsStrip } from "@/components/RecentlyViewed";
 import { AmenityList } from "@/components/AmenityList";
 import { SaveButton } from "@/components/SaveButton";
 import { AddToCalendar } from "@/components/AddToCalendar";
@@ -228,6 +229,16 @@ export default async function EventDetail({
   return (
     <>
       <JsonLd data={eventLd} />
+      <RecordRecentView
+        event={{
+          slug: event.slug,
+          title: event.title,
+          city: event.city,
+          type: event.type,
+          startsAt: event.startsAt.toISOString(),
+          imageUrl: event.imageUrl,
+        }}
+      />
       {/* Hero image */}
       <div style={{ position: "relative", height: 360, overflow: "hidden" }}>
         <Image
@@ -462,6 +473,8 @@ export default async function EventDetail({
           </div>
         </div>
       </section>
+
+      <RecentEventsStrip excludeSlug={event.slug} heading="Recently viewed" />
 
       <style>{`@media (max-width: 860px){.detail-grid{grid-template-columns:1fr !important}}`}</style>
     </>
