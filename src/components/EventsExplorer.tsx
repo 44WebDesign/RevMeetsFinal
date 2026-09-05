@@ -131,6 +131,7 @@ export function EventsExplorer({
         href: `/events/${e.slug}`,
         kind: "event" as const,
         amenities: e.amenities,
+        imageUrl: e.imageUrl,
       })),
     [filtered],
   );

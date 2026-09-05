@@ -25,7 +25,7 @@ export function Nav({ session }: { session: SessionPayload | null }) {
     { href: "/map", label: "Map" },
     { href: "/clubs", label: "Clubs" },
     { href: "/venues", label: "Venues" },
-    { href: "/#how", label: "How It Works" },
+    { href: "/how-it-works", label: "How It Works" },
   ];
 
   return (

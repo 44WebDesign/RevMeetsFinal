@@ -233,6 +233,7 @@ export async function getEventMapPoints(filters: EventFilters = {}): Promise<Map
       lat: true,
       lng: true,
       startsAt: true,
+      imageUrl: true,
       amenities: true,
       venue: { select: { amenities: true } },
     },
@@ -253,12 +254,13 @@ export async function getEventMapPoints(filters: EventFilters = {}): Promise<Map
     })}`,
     href: `/events/${e.slug}`,
     kind: "event" as const,
+    imageUrl: e.imageUrl,
   }));
 }
 
 export async function getVenueMapPoints(): Promise<MapPoint[]> {
   const venues = await prisma.venue.findMany({
-    select: { id: true, slug: true, name: true, city: true, lat: true, lng: true, amenities: true },
+    select: { id: true, slug: true, name: true, city: true, lat: true, lng: true, amenities: true, imageUrl: true },
   });
   return venues.map((v) => ({
     id: v.id,
@@ -272,6 +274,7 @@ export async function getVenueMapPoints(): Promise<MapPoint[]> {
     subtitle: v.city,
     href: `/venues/${v.slug}`,
     kind: "venue" as const,
+    imageUrl: v.imageUrl,
   }));
 }
 

@@ -201,6 +201,11 @@ export default async function HomePage() {
             <Step n="02" icon="fa-ticket" title="Register & Book" body="Found something you love? Create a free account, register for events, and get all the details delivered straight to you." />
             <Step n="03" icon="fa-flag-checkered" title="Show Up & Connect" body="Turn up, meet fellow enthusiasts, share your build, and be part of a community as passionate about cars as you are." />
           </div>
+          <div style={{ marginTop: "2rem" }}>
+            <Link href="/how-it-works" className="btn-ghost">
+              See the full walkthrough <i className="fas fa-arrow-right" />
+            </Link>
+          </div>
         </div>
       </section>
 

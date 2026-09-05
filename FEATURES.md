@@ -20,6 +20,7 @@
 - ✅ **Branded image placeholders** — listings without a photo show an accent-tinted gradient cover (per event type / club / venue) instead of a repeated stock image
 - ✅ **Honest homepage stats** — real counts (incl. cities covered), rounded only when genuinely large, and hidden entirely until the site has enough activity to be credible
 - ✅ **Real event photo in the homepage hero** — pulls a recent published event's cover (falls back to a curated stock shot), with clearer "chapter" separation between home sections
+- ✅ **How It Works page** (`/how-it-works`, linked from the nav) — a full walkthrough for each audience (enthusiasts / organisers & clubs / venues), with illustrative product "screenshots" of the analytics dashboard and admin console, a live interactive-map demo, and audience-growth explainers; carries `HowTo` structured data and a sitemap entry
 - ✅ Custom favicon (checkered-flag mark) and 404 page
 
 ## 2. Accounts & Authentication
@@ -67,7 +68,7 @@
 - ✅ **Amenity filtering on the map** — icon chips filter both event and venue pins live
 - ✅ **"Near me" geolocation** — one-tap browser location with a distance radius (5–100 km or any), a "you are here" marker, nearest-first results and per-result distance badges
 - ✅ Colour-coded pins by event type (matching the design's legend), venue pins in cyan
-- ✅ Rich dark-themed popups with type badge, date, city and a link to the page
+- ✅ **Mini-tile map popups** — clicking a pin opens a compact version of the list-view card (cover image or branded gradient, type pill, title, date/city, accent-matched "View" button)
 - ✅ Embedded maps on: home page, events list (fits to results), event detail, venue detail
 - ✅ Scroll-friendly behaviour (wheel zoom activates on click)
 
@@ -192,6 +193,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-09-05 | `_______` | Dedicated **How It Works** page (`/how-it-works`, nav now links to it) — per-audience walkthrough with illustrative dashboard/admin "screenshots", a live map demo and audience-growth explainers (`HowTo` JSON-LD + sitemap). Redesigned **map pin popups** into compact list-style tiles (cover/gradient + type pill + title + meta + accent button); map points now carry an image |
 | 2026-09-03 | `610b091` | Lighter-touch monetisation round: **verified** trust badges for clubs & venues (admin-granted via a new `/admin/listings` page; badge on cards + detail), a **venue enquiry/contact** button (lead-gen — notifies + emails the owner), and a **sponsored slot in the weekly digest** (a relevant featured event earns a labelled top spot, capped and relevance-gated). Adds `verified` to Club/Venue (additive-safe); digest ranking + tests updated |
 | 2026-09-03 | `24c2a51` | Featured placement extended to **clubs & venues** (paid promote from their dashboard profile; gold badge + top-of-directory sort; daily expiry cron covers all three types) and a **homepage Spotlight** band showing currently-featured events/clubs/venues (round-robin, hidden when none). Generalised the `Promotion` model + shared checkout/apply logic (idempotent, legacy event sessions still work); integration tests added |
 | 2026-09-03 | `f1ed256` | Engagement/UX round 3: dashboard profile-completion nudge (endowed progress — bio / garage / location / build photo, next-step CTA, dismissible checklist) and a "recently viewed" events strip (per-browser localStorage, on the homepage and event pages); adds `lib/profileCompletion.ts` + `lib/recentViews.ts` with unit tests |
