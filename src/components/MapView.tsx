@@ -28,6 +28,8 @@ type Props = {
   focus?: { lat: number; lng: number; zoom?: number } | null;
   // Renders a "you are here" marker.
   userLocation?: { lat: number; lng: number } | null;
+  // Full-bleed (no border/radius) — for the full-screen map hero.
+  bare?: boolean;
 };
 
 export function MapView({
@@ -38,6 +40,7 @@ export function MapView({
   fitToPoints = false,
   focus = null,
   userLocation = null,
+  bare = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -163,8 +166,8 @@ export function MapView({
       ref={containerRef}
       style={{
         height,
-        borderRadius: 8,
-        border: "1px solid var(--bdr)",
+        borderRadius: bare ? 0 : 8,
+        border: bare ? "none" : "1px solid var(--bdr)",
         overflow: "hidden",
         zIndex: 0,
       }}

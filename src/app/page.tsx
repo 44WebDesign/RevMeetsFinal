@@ -4,6 +4,7 @@ import { EventCard } from "@/components/EventCard";
 import { ClubCard } from "@/components/ClubCard";
 import { VenueCard } from "@/components/VenueCard";
 import { MapView } from "@/components/MapView";
+import { MapHero } from "@/components/MapHero";
 import { RecentEventsStrip } from "@/components/RecentlyViewed";
 import { Spotlight } from "@/components/Spotlight";
 import {
@@ -12,6 +13,7 @@ import {
   getVenues,
   getStats,
   getEventMapPoints,
+  getVenueMapPoints,
   getHeroImage,
   getSpotlight,
 } from "@/lib/queries";
@@ -21,17 +23,33 @@ import { getSession } from "@/lib/auth";
 // Rendered per-request so the build never needs a live database connection.
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ home?: string }>;
+}) {
   const session = await getSession();
-  const [events, clubs, venues, stats, mapPoints, heroImage, spotlight] = await Promise.all([
-    getEvents({ take: 4 }, session?.sub),
-    getClubs(),
-    getVenues(),
-    getStats(),
-    getEventMapPoints(),
-    getHeroImage(),
-    getSpotlight(),
-  ]);
+  const { home } = await searchParams;
+
+  // Two header styles: the classic photo hero, or a full-screen interactive
+  // map with the search overlaid. Default set via HOME_LAYOUT env; `?home=map`
+  // / `?home=classic` overrides it for previewing either live.
+  const mapLayout =
+    home === "map" || (home !== "classic" && process.env.HOME_LAYOUT === "map");
+
+  const [events, clubs, venues, stats, mapPoints, heroImage, spotlight, venuePoints] =
+    await Promise.all([
+      getEvents({ take: 4 }, session?.sub),
+      getClubs(),
+      getVenues(),
+      getStats(),
+      getEventMapPoints(),
+      getHeroImage(),
+      getSpotlight(),
+      mapLayout ? getVenueMapPoints() : Promise.resolve([]),
+    ]);
+
+  const heroPoints = [...mapPoints, ...venuePoints];
 
   // Prefer a real event cover for the hero; fall back to a curated stock shot.
   const heroBg =
@@ -40,7 +58,10 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* HERO */}
+      {mapLayout ? (
+        <MapHero points={heroPoints} />
+      ) : (
+      /* HERO */
       <section
         style={{
           minHeight: "100vh",
@@ -143,6 +164,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
+
+      <span id="discover" aria-hidden />
 
       {/* STATS — only shown once there's enough real activity to be credible. */}
       {stats.events >= 6 && (
@@ -209,7 +233,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* MAP */}
+      {/* MAP — hidden when the header is already the full-screen map */}
+      {!mapLayout && (
       <section id="map-sec" className="section home-sec" style={{ background: "var(--bg2)" }}>
         <div className="container">
           <div
@@ -257,6 +282,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* EVENTS */}
       <section id="events" className="section home-sec" style={{ background: "var(--bg)" }}>
