@@ -132,6 +132,7 @@ Each of these is off by default and degrades gracefully until configured:
 | Feature | Enable by |
 | --- | --- |
 | Google login | `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` (Google Cloud OAuth client) |
+| Real Google Maps (light look) | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (Maps JavaScript API key, billing enabled); without it maps use the free CARTO Voyager basemap |
 | Email notifications (registration confirmations, follower alerts, reminders) | `RESEND_API_KEY` from [resend.com](https://resend.com); optional `EMAIL_FROM` |
 | Daily reminder cron | Deployed via `vercel.json`; set `CRON_SECRET` to lock it down |
 | Image uploads | Vercel **Storage → Blob** (sets `BLOB_READ_WRITE_TOKEN`) |

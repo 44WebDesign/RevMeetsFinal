@@ -13,7 +13,7 @@
 - ✅ **PostgreSQL** via **Prisma ORM** (Neon-backed on Vercel; works with any Postgres)
 - ✅ **Tailwind CSS** + custom design system ported from the original RevMeet home page design
 - ✅ **Zod** validation on every API boundary
-- ✅ **Leaflet** maps with a light, Google-Maps-style street basemap (CARTO Voyager — no API key or cost)
+- ✅ **Maps** — real **Google Maps** when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set, otherwise a free **Leaflet + CARTO Voyager** light basemap (same Google-Maps-style look, no key or cost); both share the coloured pins, mini-tile popup card and location picker, so the site works with or without a key
 - ✅ Self-hosted **Bebas Neue / Inter** fonts via `next/font` (no runtime CDN dependency)
 - ✅ Dark automotive theme (orange `#FF5F1F` accent), fully responsive (mobile nav, collapsing grids)
 - ✅ **Readability & accessibility pass** — secondary text meets the 4.5:1 contrast threshold, cards carry subtle elevation, a keyboard `:focus-visible` ring, and `prefers-reduced-motion` support
@@ -194,6 +194,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-10 | `1dce1b3` | Added real **Google Maps** across the site: when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set every map (`MapView`, `MapHero`, location picker) renders as genuine Google Maps via `@googlemaps/js-api-loader`; with no key it falls back to the existing light Leaflet/Voyager basemap. Shared mini-tile popup extracted to `src/lib/mapTile.ts` (works in both Leaflet popups and Google InfoWindows); added InfoWindow dark-chrome CSS. Degrades gracefully, no key required |
 | 2026-10-10 | `00f18ab` | Switched the map basemap from the dark CARTO style to the light **Voyager** street style (Google-Maps-like colours: white/yellow roads, blue water, green parks, labels) across every map (`MapView` + the location picker); still free, same CDN, no API key. Map container loads on a matching light background |
 | 2026-09-19 | `6fabc34` | Alternative homepage header layout: a **full-screen interactive map with the search overlaid** (live event + venue pins, draggable behind the overlay). Chosen via the `HOME_LAYOUT` env var, with `/?home=map` / `/?home=classic` live preview; adds a `MapHero` component + a `bare` full-bleed option on `MapView`, and hides the mid-page map section in map mode |
 | 2026-09-05 | `40461af` | Dedicated **How It Works** page (`/how-it-works`, nav now links to it) — per-audience walkthrough with illustrative dashboard/admin "screenshots", a live map demo and audience-growth explainers (`HowTo` JSON-LD + sitemap). Redesigned **map pin popups** into compact list-style tiles (cover/gradient + type pill + title + meta + accent button); map points now carry an image |

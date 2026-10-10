@@ -1,23 +1,114 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { Map as LeafletMap, Marker } from "leaflet";
+import type { Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
+import { Loader } from "@googlemaps/js-api-loader";
 
-// A small map where clicking drops/moves a pin and reports lat/lng back.
-export function LocationPicker({
-  lat,
-  lng,
-  onChange,
-  height = 260,
-}: {
+type PickerProps = {
   lat: number;
   lng: number;
   onChange: (lat: number, lng: number) => void;
   height?: number;
-}) {
+};
+
+const GOOGLE_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+// Click/drag-a-pin location picker. Uses Google Maps when a key is set,
+// otherwise the free Leaflet + CARTO Voyager map.
+export function LocationPicker(props: PickerProps) {
+  if (GOOGLE_KEY) return <GoogleLocationPicker {...props} apiKey={GOOGLE_KEY} />;
+  return <LeafletLocationPicker {...props} />;
+}
+
+function Hint() {
+  return (
+    <p style={{ fontSize: ".72rem", color: "var(--mut)", marginTop: ".4rem" }}>
+      <i className="fas fa-hand-pointer" /> Click or drag the pin to set the exact location.
+    </p>
+  );
+}
+
+function round(n: number): number {
+  return Math.round(n * 1e6) / 1e6;
+}
+
+function GoogleLocationPicker({ lat, lng, onChange, height = 260, apiKey }: PickerProps & { apiKey: string }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    let cancelled = false;
+    const loader = new Loader({ apiKey, version: "weekly" });
+
+    loader
+      .importLibrary("maps")
+      .then(({ Map }) => {
+        if (cancelled || !containerRef.current || mapRef.current) return;
+        const map = new Map(containerRef.current, {
+          center: { lat, lng },
+          zoom: 6,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          clickableIcons: false,
+          gestureHandling: "greedy",
+        });
+        const marker = new google.maps.Marker({
+          position: { lat, lng },
+          map,
+          draggable: true,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#FF5F1F",
+            fillOpacity: 1,
+            strokeColor: "#000",
+            strokeWeight: 2,
+          },
+        });
+        marker.addListener("dragend", () => {
+          const p = marker.getPosition();
+          if (p) onChangeRef.current(round(p.lat()), round(p.lng()));
+        });
+        map.addListener("click", (e: google.maps.MapMouseEvent) => {
+          if (!e.latLng) return;
+          marker.setPosition(e.latLng);
+          onChangeRef.current(round(e.latLng.lat()), round(e.latLng.lng()));
+        });
+        mapRef.current = map;
+        markerRef.current = marker;
+      })
+      .catch((err) => console.error("[google-maps] picker failed to load:", err));
+
+    return () => {
+      cancelled = true;
+      if (markerRef.current) markerRef.current.setMap(null);
+      markerRef.current = null;
+      mapRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the marker in sync when lat/lng change from the number inputs.
+  useEffect(() => {
+    if (markerRef.current) markerRef.current.setPosition({ lat, lng });
+  }, [lat, lng]);
+
+  return (
+    <div>
+      <div ref={containerRef} style={{ height, borderRadius: 8, border: "1px solid var(--bdr)", overflow: "hidden" }} />
+      <Hint />
+    </div>
+  );
+}
+
+function LeafletLocationPicker({ lat, lng, onChange, height = 260 }: PickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
-  const markerRef = useRef<Marker | null>(null);
+  const markerRef = useRef<LeafletMarker | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -64,26 +155,14 @@ export function LocationPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep marker in sync when lat/lng change from the number inputs.
   useEffect(() => {
-    if (markerRef.current) {
-      markerRef.current.setLatLng([lat, lng]);
-    }
+    if (markerRef.current) markerRef.current.setLatLng([lat, lng]);
   }, [lat, lng]);
 
   return (
     <div>
-      <div
-        ref={containerRef}
-        style={{ height, borderRadius: 8, border: "1px solid var(--bdr)", overflow: "hidden" }}
-      />
-      <p style={{ fontSize: ".72rem", color: "var(--mut)", marginTop: ".4rem" }}>
-        <i className="fas fa-hand-pointer" /> Click or drag the pin to set the exact location.
-      </p>
+      <div ref={containerRef} style={{ height, borderRadius: 8, border: "1px solid var(--bdr)", overflow: "hidden" }} />
+      <Hint />
     </div>
   );
-}
-
-function round(n: number): number {
-  return Math.round(n * 1e6) / 1e6;
 }

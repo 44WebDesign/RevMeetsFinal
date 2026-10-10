@@ -359,6 +359,35 @@ nav.site-nav {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
+/* ---- Google Maps InfoWindow ---- */
+/* Strip the default white chrome so the dark mini-tile (see mapTile.ts) fills
+   the bubble edge-to-edge, matching the Leaflet .rm-popup styling. */
+.gm-style .gm-style-iw-c {
+  padding: 0 !important;
+  background: #131313 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5) !important;
+  overflow: hidden !important;
+}
+.gm-style .gm-style-iw-d {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+/* The little pointer tail below the bubble. */
+.gm-style .gm-style-iw-tc::after {
+  background: #131313 !important;
+}
+/* Close button: light it up and lift it above the dark card. */
+.gm-style .gm-style-iw-c button[aria-label="Close"],
+.gm-style .gm-ui-hover-effect {
+  top: 2px !important;
+  right: 2px !important;
+  opacity: 1 !important;
+}
+.gm-style .gm-ui-hover-effect > span {
+  background-color: #fff !important;
+}
+
 /* ---- Scrollbar ---- */
 ::-webkit-scrollbar {
   width: 6px;
