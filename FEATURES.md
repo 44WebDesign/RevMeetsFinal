@@ -45,7 +45,7 @@
 - ✅ **Click-to-pin location picker** (draggable marker) in the event form
 - ✅ **Venue selector** in the event form — linking a venue pulls through its amenities and drops the pin at its location
 - ✅ **Per-event amenities with icons** ("What's There" block on the event page): defaults from the selected venue, individually add/removable per event; included in the event's structured data
-- ✅ **`/events` is a map-first explorer** — sidebar filters on the left drive a full-height interactive map, with a prominent **Map / List** toggle to switch to the card grid; both views share one filter set
+- ✅ **`/events` is a map-first explorer** — a **horizontal filter/search bar** across the top drives a full-height interactive map, with a prominent **Map / List** toggle to switch to the card grid; both views share one filter set. In map view the left column is a **live "events in view" list** that re-filters as you pan/zoom the map (`MapView` reports its viewport bounds via `onBoundsChange`)
 - ✅ Explorer filters: keyword, city, near-me (geolocation + distance radius), date range, event type, amenities — all applied live client-side; deep-links (`?type=`, `?city=`, `?amenities=`) seed the initial state
 - ✅ **Amenity filtering** in event search (collapsible icon-chip panel; matches events offering *all* selected amenities, including those inherited from a venue)
 - ✅ Amenity icon strip on event cards (and venue cards) across list, search and profile views
@@ -195,6 +195,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-11 | `b9d4e05` | Reworked the **`/events` map view**: filters/search moved from the left sidebar to a **horizontal bar across the top**, and the left column is now a **live list of the events currently visible on the map** that updates as you pan/zoom. Added an `onBoundsChange` viewport-bounds callback to `MapView` (Leaflet `moveend` + Google `idle`); list view keeps the card grid |
 | 2026-10-11 | `c8ffa29` | Homepage polish: moved the **"Recently viewed"** strip to the foot of the page; fixed the **From/To date fields** in the home map's floating filter panel so they size evenly and fit inside the panel (`min-width:0` grid cells, trimmed input width) |
 | 2026-10-11 | `e251cb4` | Homepage map is now **just the map** — removed the heading, subline and "Open Full Map" button above it — with a **floating filter panel** overlaid on the left (`HomeMapExplorer`): keyword, city, "use my location" + radius, date range, event-type pills and amenities, live-filtering the pins (same controls as the `/events` page). Panel is collapsible and goes full-width on mobile |
 | 2026-10-11 | `7cd6a64` | Homepage tweaks: moved the **"Events near you" map** to sit directly under the stats bar and made it **full-width** (edge-to-edge, bare container); added a **cover image** to each card in the "Recently viewed" strip (real event photo or the branded gradient fallback), matching the list-view tile look |

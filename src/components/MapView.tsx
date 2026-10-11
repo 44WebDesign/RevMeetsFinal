@@ -20,6 +20,9 @@ export type MapPoint = {
   imageUrl?: string | null; // cover for the popup tile
 };
 
+// Visible map viewport, in lat/lng degrees.
+export type MapBounds = { north: number; south: number; east: number; west: number };
+
 export type MapViewProps = {
   points: MapPoint[];
   center?: [number, number];
@@ -32,6 +35,8 @@ export type MapViewProps = {
   userLocation?: { lat: number; lng: number } | null;
   // Full-bleed (no border/radius) — for the full-screen map hero.
   bare?: boolean;
+  // Fires with the visible bounds after the map loads and on every pan/zoom.
+  onBoundsChange?: (bounds: MapBounds) => void;
 };
 
 // Use real Google Maps when an API key is configured; otherwise fall back to
@@ -52,11 +57,14 @@ function LeafletMapView({
   focus = null,
   userLocation = null,
   bare = false,
+  onBoundsChange,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<CircleMarker[]>([]);
   const userMarkerRef = useRef<CircleMarker | null>(null);
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  onBoundsChangeRef.current = onBoundsChange;
 
   // Initialise the map once.
   useEffect(() => {
@@ -82,8 +90,18 @@ function LeafletMapView({
       // Enable scroll zoom only after the user interacts (nicer page scrolling).
       map.on("click", () => map.scrollWheelZoom.enable());
 
+      // Report the visible bounds on every pan/zoom (for a "what's on screen" list).
+      const emitBounds = () => {
+        const cb = onBoundsChangeRef.current;
+        if (!cb) return;
+        const b = map.getBounds();
+        cb({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+      };
+      map.on("moveend", emitBounds);
+
       mapRef.current = map;
       renderMarkers(L, map);
+      emitBounds();
     })();
 
     return () => {

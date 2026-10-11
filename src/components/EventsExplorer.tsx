@@ -1,17 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MapView, type MapPoint } from "./MapView";
+import Link from "next/link";
+import Image from "next/image";
+import { MapView, type MapPoint, type MapBounds } from "./MapView";
 import { EventCard } from "./EventCard";
 import { AmenityFilter } from "./AmenityFilter";
+import { FallbackCover } from "./FallbackCover";
 import { hasAllAmenities } from "@/lib/amenities";
-import { distanceKm } from "@/lib/utils";
+import { distanceKm, formatDate } from "@/lib/utils";
 import type { ExplorerEvent } from "@/lib/queries";
 import {
   EVENT_TYPES,
   EVENT_TYPE_LABELS,
   EVENT_TYPE_COLORS,
   eventTypeColor,
+  eventTypeLabel,
 } from "@/lib/enums";
 
 type LatLng = { lat: number; lng: number };
@@ -47,6 +51,9 @@ export function EventsExplorer({
   const [radius, setRadius] = useState(25);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
+
+  // Current visible map viewport — drives the "events on screen" list.
+  const [bounds, setBounds] = useState<MapBounds | null>(null);
 
   function locateMe() {
     if (!("geolocation" in navigator)) {
@@ -136,120 +143,185 @@ export function EventsExplorer({
     [filtered],
   );
 
+  // Events whose pin is inside the current map viewport (map view only).
+  const visible = useMemo(() => {
+    if (!bounds) return filtered;
+    return filtered.filter(
+      (e) =>
+        e.lat <= bounds.north &&
+        e.lat >= bounds.south &&
+        e.lng <= bounds.east &&
+        e.lng >= bounds.west,
+    );
+  }, [filtered, bounds]);
+
+  const activeCount =
+    (q ? 1 : 0) + (city ? 1 : 0) + (type ? 1 : 0) + (from ? 1 : 0) + (to ? 1 : 0) +
+    amenities.length + (userLocation ? 1 : 0);
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: "1.25rem" }} className="events-explorer">
-      {/* Sidebar filters */}
-      <aside className="card-surface" style={{ padding: "1.1rem", display: "flex", flexDirection: "column", gap: "1rem", maxHeight: "calc(100vh - 120px)", overflow: "auto", position: "sticky", top: 80 }}>
-        <div>
-          <label className="field-label">Keyword</label>
-          <input className="field-input" placeholder="Search events…" value={q} onChange={(e) => setQ(e.target.value)} />
-        </div>
-        <div>
-          <label className="field-label">City</label>
-          <input className="field-input" placeholder="Any city" value={city} onChange={(e) => setCity(e.target.value)} />
-        </div>
-
-        <div>
-          <label className="field-label" style={{ marginBottom: ".4rem" }}>Near me</label>
-          <button
-            onClick={userLocation ? () => { setUserLocation(null); setFocus(null); } : locateMe}
-            disabled={locating}
-            className={userLocation ? "btn-ghost" : "btn-or"}
-            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: ".45rem" }}
-          >
-            <i className={`fas ${locating ? "fa-spinner fa-spin" : userLocation ? "fa-xmark" : "fa-location-crosshairs"}`} />
-            {locating ? "Locating…" : userLocation ? "Clear location" : "Use my location"}
-          </button>
-          {locateError && <p style={{ fontSize: ".72rem", color: "#ff6b5e", marginTop: ".4rem" }}>{locateError}</p>}
-          {userLocation && (
-            <select className="field-select" style={{ marginTop: ".5rem" }} value={radius} onChange={(e) => setRadius(Number(e.target.value))}>
-              {RADII.map((r) => (
-                <option key={r} value={r}>{r === 0 ? "Any distance" : `Within ${r} km`}</option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".5rem" }}>
-          <div>
+    <div>
+      {/* Horizontal filter / search bar */}
+      <div className="card-surface" style={{ padding: "1rem", marginBottom: "1.25rem" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: ".75rem", alignItems: "flex-end" }}>
+          <div style={{ flex: "1 1 180px", minWidth: 0 }}>
+            <label className="field-label">Keyword</label>
+            <input className="field-input" placeholder="Search events…" value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
+          <div style={{ flex: "1 1 140px", minWidth: 0 }}>
+            <label className="field-label">City</label>
+            <input className="field-input" placeholder="Any city" value={city} onChange={(e) => setCity(e.target.value)} />
+          </div>
+          <div style={{ flex: "0 1 140px", minWidth: 0 }}>
             <label className="field-label">From</label>
-            <input type="date" className="field-input" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <input type="date" className="field-input" style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }} value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
-          <div>
+          <div style={{ flex: "0 1 140px", minWidth: 0 }}>
             <label className="field-label">To</label>
-            <input type="date" className="field-input" value={to} onChange={(e) => setTo(e.target.value)} />
+            <input type="date" className="field-input" style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }} value={to} onChange={(e) => setTo(e.target.value)} />
           </div>
-        </div>
-
-        <div>
-          <label className="field-label" style={{ marginBottom: ".4rem" }}>Event type</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: ".35rem" }}>
-            {EVENT_TYPES.map((t) => {
-              const active = type === t;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setType(active ? "" : t)}
-                  className="tag"
-                  style={{
-                    borderColor: active ? EVENT_TYPE_COLORS[t] : "var(--bdr2)",
-                    color: active ? "#fff" : "var(--mut)",
-                    background: active ? EVENT_TYPE_COLORS[t] + "22" : "transparent",
-                  }}
-                >
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: EVENT_TYPE_COLORS[t], display: "inline-block", marginRight: 5 }} />
-                  {EVENT_TYPE_LABELS[t]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div>
-          <button type="button" onClick={() => setShowAmenities((s) => !s)} className="btn-ghost" style={{ width: "100%", textAlign: "left" }} aria-expanded={showAmenities}>
-            <i className={`fas ${showAmenities ? "fa-chevron-up" : "fa-sliders"}`} /> Amenities
-            {amenities.length > 0 && <span style={{ color: "var(--or)", marginLeft: 6, fontWeight: 700 }}>{amenities.length}</span>}
-          </button>
-          {showAmenities && (
-            <div style={{ marginTop: ".6rem" }}>
-              <AmenityFilter value={amenities} onChange={setAmenities} />
+          <div style={{ flex: "0 0 auto" }}>
+            <label className="field-label">Near me</label>
+            <div style={{ display: "flex", gap: ".4rem" }}>
+              <button
+                onClick={userLocation ? () => { setUserLocation(null); setFocus(null); } : locateMe}
+                disabled={locating}
+                className={userLocation ? "btn-ghost" : "btn-or"}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: ".45rem", whiteSpace: "nowrap" }}
+              >
+                <i className={`fas ${locating ? "fa-spinner fa-spin" : userLocation ? "fa-xmark" : "fa-location-crosshairs"}`} />
+                {locating ? "Locating…" : userLocation ? "Clear" : "Use my location"}
+              </button>
+              {userLocation && (
+                <select className="field-select" style={{ width: "auto" }} value={radius} onChange={(e) => setRadius(Number(e.target.value))}>
+                  {RADII.map((r) => (
+                    <option key={r} value={r}>{r === 0 ? "Any distance" : `${r} km`}</option>
+                  ))}
+                </select>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+          <div style={{ flex: "0 0 auto" }}>
+            <label className="field-label" style={{ visibility: "hidden" }}>Amenities</label>
+            <button type="button" onClick={() => setShowAmenities((s) => !s)} className="btn-ghost" aria-expanded={showAmenities} style={{ whiteSpace: "nowrap" }}>
+              <i className={`fas ${showAmenities ? "fa-chevron-up" : "fa-sliders"}`} /> Amenities
+              {amenities.length > 0 && <span style={{ color: "var(--or)", marginLeft: 6, fontWeight: 700 }}>{amenities.length}</span>}
+            </button>
+          </div>
 
-        <button onClick={clearAll} className="btn-ghost" style={{ width: "100%" }}>
-          <i className="fas fa-rotate-left" /> Clear all filters
-        </button>
-      </aside>
-
-      {/* Main panel */}
-      <div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem", flexWrap: "wrap", gap: ".75rem" }}>
-          <span style={{ color: "var(--mut)", fontSize: ".9rem" }}>
-            {filtered.length} {filtered.length === 1 ? "event" : "events"}
-            {userLocation && radius > 0 ? ` within ${radius} km` : ""}
-          </span>
-          {/* Prominent Map / List toggle */}
-          <div style={{ display: "inline-flex", background: "var(--card2)", border: "1px solid var(--bdr2)", borderRadius: 8, padding: 3 }}>
+          {/* Map / List toggle, pushed to the right */}
+          <div style={{ marginLeft: "auto", display: "inline-flex", background: "var(--card2)", border: "1px solid var(--bdr2)", borderRadius: 8, padding: 3, alignSelf: "flex-end" }}>
             <ToggleBtn active={view === "map"} onClick={() => setView("map")} icon="fa-map-location-dot" label="Map" />
             <ToggleBtn active={view === "list"} onClick={() => setView("list")} icon="fa-grip" label="List" />
           </div>
         </div>
 
-        {/* Map view */}
-        {view === "map" && (
-          <>
-            <MapView points={points} height="calc(100vh - 180px)" fitToPoints={!userLocation} focus={focus} userLocation={userLocation} />
-            <div style={{ display: "flex", gap: "1.25rem", marginTop: ".75rem", flexWrap: "wrap", fontSize: ".78rem", color: "var(--mut)" }}>
-              <span><i className="fas fa-circle-info" /> Click a pin for details</span>
-              <span style={{ marginLeft: "auto" }}>{points.length} on map</span>
-            </div>
-          </>
+        {/* Event-type pills */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: ".35rem", marginTop: ".85rem" }}>
+          {EVENT_TYPES.map((t) => {
+            const active = type === t;
+            return (
+              <button
+                key={t}
+                onClick={() => setType(active ? "" : t)}
+                className="tag"
+                style={{
+                  borderColor: active ? EVENT_TYPE_COLORS[t] : "var(--bdr2)",
+                  color: active ? "#fff" : "var(--mut)",
+                  background: active ? EVENT_TYPE_COLORS[t] + "22" : "transparent",
+                }}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: EVENT_TYPE_COLORS[t], display: "inline-block", marginRight: 5 }} />
+                {EVENT_TYPE_LABELS[t]}
+              </button>
+            );
+          })}
+          {activeCount > 0 && (
+            <button onClick={clearAll} className="btn-ghost" style={{ padding: ".3rem .7rem", fontSize: ".78rem", marginLeft: "auto" }}>
+              <i className="fas fa-rotate-left" /> Clear all
+            </button>
+          )}
+        </div>
+
+        {/* Amenities panel (expands under the bar) */}
+        {showAmenities && (
+          <div style={{ marginTop: ".9rem", paddingTop: ".9rem", borderTop: "1px solid var(--bdr)" }}>
+            <AmenityFilter value={amenities} onChange={setAmenities} />
+          </div>
         )}
 
-        {/* List view */}
-        {view === "list" && (
-          filtered.length === 0 ? (
+        {locateError && <p style={{ fontSize: ".72rem", color: "#ff6b5e", marginTop: ".5rem" }}>{locateError}</p>}
+      </div>
+
+      {/* MAP VIEW — visible-events list on the left, map on the right */}
+      {view === "map" && (
+        <div className="events-map-layout">
+          <aside className="events-visible-list card-surface">
+            <div className="events-visible-head">
+              <span style={{ fontWeight: 700, fontSize: ".9rem" }}>
+                {visible.length} {visible.length === 1 ? "event" : "events"} in view
+              </span>
+              <span style={{ fontSize: ".72rem", color: "var(--mut)" }}>
+                <i className="fas fa-arrows-up-down-left-right" /> Pan / zoom the map
+              </span>
+            </div>
+            <div className="events-visible-scroll">
+              {visible.length === 0 ? (
+                <div style={{ padding: "2rem 1rem", textAlign: "center", color: "var(--mut)", fontSize: ".85rem" }}>
+                  <i className="fas fa-map-location-dot" style={{ fontSize: "1.3rem", display: "block", marginBottom: ".6rem" }} />
+                  No events in this area. Zoom out or move the map.
+                </div>
+              ) : (
+                visible.map((e) => {
+                  const color = eventTypeColor(e.type);
+                  return (
+                    <Link key={e.id} href={`/events/${e.slug}`} className="events-visible-item">
+                      <div className="events-visible-thumb">
+                        {e.imageUrl ? (
+                          <Image src={e.imageUrl} alt={e.title} fill sizes="76px" style={{ objectFit: "cover" }} />
+                        ) : (
+                          <FallbackCover accent={color} />
+                        )}
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <span className="pill" style={{ background: color, color: "#fff", fontSize: ".58rem", marginBottom: ".3rem" }}>
+                          {eventTypeLabel(e.type)}
+                        </span>
+                        <div style={{ fontWeight: 700, fontSize: ".84rem", lineHeight: 1.25, marginBottom: ".2rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {e.title}
+                        </div>
+                        <div style={{ fontSize: ".72rem", color: "var(--mut)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          <i className="fas fa-calendar-alt" /> {formatDate(e.startsAt)} · {e.city}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          </aside>
+
+          <div className="events-map-main">
+            <MapView
+              points={points}
+              height="100%"
+              fitToPoints={!userLocation}
+              focus={focus}
+              userLocation={userLocation}
+              onBoundsChange={setBounds}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* LIST VIEW — card grid */}
+      {view === "list" && (
+        <>
+          <div style={{ color: "var(--mut)", fontSize: ".9rem", marginBottom: "1rem" }}>
+            {filtered.length} {filtered.length === 1 ? "event" : "events"}
+            {userLocation && radius > 0 ? ` within ${radius} km` : ""}
+          </div>
+          {filtered.length === 0 ? (
             <div className="card-surface" style={{ padding: "3rem", textAlign: "center", color: "var(--mut)" }}>
               <i className="fas fa-magnifying-glass" style={{ fontSize: "1.5rem", display: "block", marginBottom: ".75rem" }} />
               No events match your filters. Try widening them.
@@ -260,15 +332,79 @@ export function EventsExplorer({
                 <EventCard key={e.id} event={e} />
               ))}
             </div>
-          )
-        )}
-      </div>
+          )}
+        </>
+      )}
 
       <style jsx>{`
+        .events-map-layout {
+          display: grid;
+          grid-template-columns: 340px 1fr;
+          gap: 1.25rem;
+          align-items: start;
+        }
+        .events-visible-list {
+          display: flex;
+          flex-direction: column;
+          padding: 0;
+          height: calc(100vh - 230px);
+          min-height: 420px;
+          overflow: hidden;
+        }
+        .events-visible-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          padding: 0.85rem 1rem;
+          border-bottom: 1px solid var(--bdr);
+          flex: 0 0 auto;
+        }
+        .events-visible-scroll {
+          overflow-y: auto;
+          flex: 1 1 auto;
+          display: flex;
+          flex-direction: column;
+        }
+        .events-map-main {
+          height: calc(100vh - 230px);
+          min-height: 420px;
+        }
         @media (max-width: 860px) {
-          .events-explorer {
-            grid-template-columns: 1fr !important;
+          .events-map-layout {
+            grid-template-columns: 1fr;
           }
+          .events-map-main {
+            height: 60vh;
+            min-height: 360px;
+            order: -1;
+          }
+          .events-visible-list {
+            height: auto;
+            max-height: 420px;
+          }
+        }
+      `}</style>
+      <style jsx global>{`
+        .events-visible-item {
+          display: flex;
+          gap: 0.7rem;
+          padding: 0.7rem 0.85rem;
+          text-decoration: none;
+          color: inherit;
+          border-bottom: 1px solid var(--bdr);
+          transition: background 0.15s;
+        }
+        .events-visible-item:hover {
+          background: var(--card2);
+        }
+        .events-visible-thumb {
+          position: relative;
+          flex: 0 0 76px;
+          width: 76px;
+          height: 76px;
+          border-radius: 8px;
+          overflow: hidden;
         }
       `}</style>
     </div>

@@ -17,6 +17,7 @@ export function GoogleMapView({
   focus = null,
   userLocation = null,
   bare = false,
+  onBoundsChange,
   apiKey,
 }: MapViewProps & { apiKey: string }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -24,6 +25,8 @@ export function GoogleMapView({
   const markersRef = useRef<google.maps.Marker[]>([]);
   const infoRef = useRef<google.maps.InfoWindow | null>(null);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  onBoundsChangeRef.current = onBoundsChange;
 
   // Load the API + create the map once.
   useEffect(() => {
@@ -46,6 +49,16 @@ export function GoogleMapView({
         });
         mapRef.current = map;
         infoRef.current = new InfoWindow();
+        // Report the visible bounds after load and on every pan/zoom settle.
+        map.addListener("idle", () => {
+          const cb = onBoundsChangeRef.current;
+          if (!cb) return;
+          const gb = map.getBounds();
+          if (!gb) return;
+          const ne = gb.getNorthEast();
+          const sw = gb.getSouthWest();
+          cb({ north: ne.lat(), east: ne.lng(), south: sw.lat(), west: sw.lng() });
+        });
         renderMarkers();
       })
       .catch((err) => console.error("[google-maps] failed to load:", err));
