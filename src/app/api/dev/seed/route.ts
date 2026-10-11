@@ -7,10 +7,15 @@ import { handle, ok, fail } from "@/lib/api";
 // Safety:
 //  - Disabled entirely unless SEED_TOKEN is set in the environment.
 //  - Requires ?token=<SEED_TOKEN> to match.
-//  - Refuses to run if ANY user already exists, so it can never overwrite real
-//    accounts or data — it only populates a brand-new, empty database.
+//  - Default (full) seed refuses to run if ANY user already exists, so it can
+//    never overwrite real accounts or data — it only populates an empty DB.
+//  - mode=add performs an *additive* seed: it inserts only the demo rows that
+//    don't already exist (matched by their fixed demo emails / slugs) and never
+//    wipes or overwrites anything, so it's safe to run on a populated database
+//    (e.g. to top up newly-introduced demo listings).
 //
-// Visit  <your-site>/api/dev/seed?token=YOUR_TOKEN  once after deploying.
+// Visit  <your-site>/api/dev/seed?token=YOUR_TOKEN           (empty DB) or
+//        <your-site>/api/dev/seed?token=YOUR_TOKEN&mode=add  (top up demo data)
 export const dynamic = "force-dynamic";
 
 export const GET = handle(async (req: Request) => {
@@ -37,13 +42,29 @@ export const GET = handle(async (req: Request) => {
     });
   }
 
+  // mode=add: additive seed — insert only the demo rows that are missing,
+  // without wiping or overwriting. Safe on a live/populated database.
+  if (url.searchParams.get("mode") === "add") {
+    const summary = await seedDemoData(prisma, { additive: true });
+    return ok({
+      seeded: true,
+      mode: "add",
+      summary,
+      message:
+        "Additive seed complete — any missing demo clubs, venues and events were " +
+        "added. Existing rows (demo or real) were left untouched. The summary counts " +
+        "only newly-created venues/events (and users); clubs shows the demo total.",
+    });
+  }
+
   const existingUsers = await prisma.user.count();
   if (existingUsers > 0) {
     return ok({
       seeded: false,
       message:
-        "Database already has data — refusing to seed so nothing is overwritten. " +
-        "Seeding only runs on a completely empty database.",
+        "Database already has data — refusing to run the full seed so nothing is " +
+        "overwritten. To add any missing demo listings without touching existing " +
+        "data, call the same URL with &mode=add.",
     });
   }
 

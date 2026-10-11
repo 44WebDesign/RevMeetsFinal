@@ -93,36 +93,44 @@ export async function backfillDemoAmenities(prisma: PrismaClient) {
 
 export async function seedDemoData(
   prisma: PrismaClient,
-  opts: { reset?: boolean } = {},
+  // reset: wipe everything first (CLI / empty DB). additive: don't wipe — only
+  // create demo rows that don't already exist (safe to run on a populated DB,
+  // e.g. to add newly-introduced demo listings). The two are independent; both
+  // paths use find-or-create so re-running never duplicates or overwrites.
+  opts: { reset?: boolean; additive?: boolean } = {},
 ): Promise<SeedSummary> {
   if (opts.reset) await wipeAll(prisma);
 
   const password = await bcrypt.hash("password123", 10);
   let users = 0;
 
+  // Find-or-create a demo user by (unique) email. Only counts genuinely new
+  // rows, so the returned summary reflects what was actually added.
+  type UserSeed = Parameters<typeof prisma.user.create>[0]["data"];
+  const upsertUser = async (data: UserSeed) => {
+    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existing) return existing;
+    users++;
+    return prisma.user.create({ data });
+  };
+
   // --- Admin demo user ---
-  await prisma.user.create({
-    data: {
-      email: "admin@revmeet.test",
-      name: "RevMeet Admin",
-      passwordHash: password,
-      role: "ADMIN",
-      avatarColor: "#F44336",
-    },
+  await upsertUser({
+    email: "admin@revmeet.test",
+    name: "RevMeet Admin",
+    passwordHash: password,
+    role: "ADMIN",
+    avatarColor: "#F44336",
   });
-  users++;
 
   // --- Enthusiast demo user ---
-  const enthusiast = await prisma.user.create({
-    data: {
-      email: "enthusiast@revmeet.test",
-      name: "Jake Reynolds",
-      passwordHash: password,
-      role: "ENTHUSIAST",
-      avatarColor: "#FF5F1F",
-    },
+  const enthusiast = await upsertUser({
+    email: "enthusiast@revmeet.test",
+    name: "Jake Reynolds",
+    passwordHash: password,
+    role: "ENTHUSIAST",
+    avatarColor: "#FF5F1F",
   });
-  users++;
 
   // --- Clubs (organisers) ---
   const clubSeed = [
@@ -239,28 +247,28 @@ export async function seedDemoData(
   const clubs: { clubId: string; ownerId: string }[] = [];
   for (let i = 0; i < clubSeed.length; i++) {
     const c = clubSeed[i];
-    const owner = await prisma.user.create({
-      data: {
-        email: c.email,
-        name: c.owner,
-        passwordHash: password,
-        role: "ORGANISER",
-        avatarColor: ["#FF5F1F", "#E040FB", "#00BCD4"][i % 3],
-      },
+    const owner = await upsertUser({
+      email: c.email,
+      name: c.owner,
+      passwordHash: password,
+      role: "ORGANISER",
+      avatarColor: ["#FF5F1F", "#E040FB", "#00BCD4"][i % 3],
     });
-    users++;
-    const club = await prisma.club.create({
-      data: {
-        ownerId: owner.id,
-        name: c.name,
-        slug: slug(c.name, i),
-        description: c.description,
-        location: c.location,
-        region: c.region,
-        categories: c.categories,
-        imageUrl: c.image,
-      },
-    });
+    const clubSlug = slug(c.name, i);
+    const club =
+      (await prisma.club.findUnique({ where: { slug: clubSlug } })) ??
+      (await prisma.club.create({
+        data: {
+          ownerId: owner.id,
+          name: c.name,
+          slug: clubSlug,
+          description: c.description,
+          location: c.location,
+          region: c.region,
+          categories: c.categories,
+          imageUrl: c.image,
+        },
+      }));
     clubs.push({ clubId: club.id, ownerId: owner.id });
   }
 
@@ -367,21 +375,20 @@ export async function seedDemoData(
   let venues = 0;
   for (let i = 0; i < venueSeed.length; i++) {
     const v = venueSeed[i];
-    const owner = await prisma.user.create({
-      data: {
-        email: v.email,
-        name: v.name,
-        passwordHash: password,
-        role: "VENUE",
-        avatarColor: "#00BCD4",
-      },
+    const venueSlug = slug(v.name, i);
+    if (await prisma.venue.findUnique({ where: { slug: venueSlug } })) continue;
+    const owner = await upsertUser({
+      email: v.email,
+      name: v.name,
+      passwordHash: password,
+      role: "VENUE",
+      avatarColor: "#00BCD4",
     });
-    users++;
     await prisma.venue.create({
       data: {
         ownerId: owner.id,
         name: v.name,
-        slug: slug(v.name, i),
+        slug: venueSlug,
         description: v.description,
         address: v.address,
         city: v.city,
@@ -448,10 +455,12 @@ export async function seedDemoData(
   for (let i = 0; i < eventSeed.length; i++) {
     const e = eventSeed[i];
     const { clubId, ownerId } = clubs[e.club];
+    const eventSlug = slug(e.title, i);
+    if (await prisma.event.findUnique({ where: { slug: eventSlug } })) continue;
     const event = await prisma.event.create({
       data: {
         title: e.title,
-        slug: slug(e.title, i),
+        slug: eventSlug,
         description: e.desc,
         type: e.type,
         status: "PUBLISHED",
@@ -474,14 +483,23 @@ export async function seedDemoData(
     events++;
 
     if (i < 3) {
-      await prisma.registration.create({
-        data: { userId: enthusiast.id, eventId: event.id },
+      // Idempotent: skip if this demo registration already exists.
+      await prisma.registration.upsert({
+        where: { userId_eventId: { userId: enthusiast.id, eventId: event.id } },
+        update: {},
+        create: { userId: enthusiast.id, eventId: event.id },
       });
     }
   }
 
-  await prisma.clubFollow.create({ data: { userId: enthusiast.id, clubId: clubs[0].clubId } });
-  await prisma.clubFollow.create({ data: { userId: enthusiast.id, clubId: clubs[2].clubId } });
+  // Demo follows — idempotent so re-runs don't fail on the unique constraint.
+  for (const clubIdx of [0, 2]) {
+    await prisma.clubFollow.upsert({
+      where: { userId_clubId: { userId: enthusiast.id, clubId: clubs[clubIdx].clubId } },
+      update: {},
+      create: { userId: enthusiast.id, clubId: clubs[clubIdx].clubId },
+    });
+  }
 
   return { users, clubs: clubs.length, venues, events };
 }
