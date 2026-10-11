@@ -173,7 +173,7 @@
 
 - ✅ Vercel deployment (production branch `main`) with Neon Postgres
 - ✅ **Auto schema sync on deploy** — `vercel-build` runs `prisma db push` (idempotent; direct connection via `directUrl`, pooled at runtime)
-- ✅ **One-time demo-data seed endpoint** `/api/dev/seed?token=…` — triple-guarded (token env var, token match, refuses on non-empty DB); demo data also loadable via `npm run db:seed`
+- ✅ **One-time demo-data seed endpoint** `/api/dev/seed?token=…` — triple-guarded (token env var, token match, refuses on non-empty DB); demo data also loadable via `npm run db:seed`. Ships a full demo dataset: **9 clubs, 6 venues and 30 events** across 27 UK cities (6 pre-featured)
 - ✅ Seed endpoint `&mode=amenities` — safe backfill of amenity data onto demo rows for databases seeded before the amenity catalog (never touches real users' selections)
 - ✅ REST API under `/api/*` with shared error handling (Zod → 422, auth → 401/403)
 - ✅ `.env.example` documenting every variable; all integrations optional and gracefully degrading
@@ -195,6 +195,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-11 | `df8bf15` | **Tripled the demo dataset** — 3→9 clubs, 2→6 venues, 10→30 events spread across 27 UK cities and all event types (6 pre-featured). Verified the seed end-to-end against a local Postgres 16 |
 | 2026-10-11 | `b9d4e05` | Reworked the **`/events` map view**: filters/search moved from the left sidebar to a **horizontal bar across the top**, and the left column is now a **live list of the events currently visible on the map** that updates as you pan/zoom. Added an `onBoundsChange` viewport-bounds callback to `MapView` (Leaflet `moveend` + Google `idle`); list view keeps the card grid |
 | 2026-10-11 | `c8ffa29` | Homepage polish: moved the **"Recently viewed"** strip to the foot of the page; fixed the **From/To date fields** in the home map's floating filter panel so they size evenly and fit inside the panel (`min-width:0` grid cells, trimmed input width) |
 | 2026-10-11 | `e251cb4` | Homepage map is now **just the map** — removed the heading, subline and "Open Full Map" button above it — with a **floating filter panel** overlaid on the left (`HomeMapExplorer`): keyword, city, "use my location" + radius, date range, event-type pills and amenities, live-filtering the pins (same controls as the `/events` page). Panel is collapsible and goes full-width on mobile |

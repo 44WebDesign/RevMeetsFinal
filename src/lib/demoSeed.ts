@@ -162,6 +162,78 @@ export async function seedDemoData(
       image:
         "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
     },
+    {
+      email: "westmids@revmeet.test",
+      owner: "West Midlands Modified",
+      name: "West Midlands Modified",
+      description:
+        "Birmingham's home for the modified scene — monthly meets, show-and-shine days and a thriving online community.",
+      location: "Birmingham, B1",
+      region: "West Midlands",
+      categories: "Shows, Meets, Stance",
+      image:
+        "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "southcoast@revmeet.test",
+      owner: "South Coast Cruisers",
+      name: "South Coast Cruisers",
+      description:
+        "Relaxed seaside cruises and meets along the South Coast, from Brighton to Bournemouth. All makes and models welcome.",
+      location: "Brighton, BN1",
+      region: "South East",
+      categories: "Cruises, Meets",
+      image:
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "welshvalleys@revmeet.test",
+      owner: "Welsh Valleys Motor Club",
+      name: "Welsh Valleys Motor Club",
+      description:
+        "Celebrating classic and performance motoring across South Wales with scenic drives through the valleys and summer shows.",
+      location: "Cardiff, CF10",
+      region: "Wales",
+      categories: "Classic, Shows, Cruises",
+      image:
+        "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "thamesvalley@revmeet.test",
+      owner: "Thames Valley Supercars",
+      name: "Thames Valley Supercars",
+      description:
+        "An exclusive supercar club running breakfast meets and charity convoys across the Home Counties.",
+      location: "Reading, RG1",
+      region: "South East",
+      categories: "Supercar, Meets",
+      image:
+        "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "highland@revmeet.test",
+      owner: "Highland Performance Club",
+      name: "Highland Performance Club",
+      description:
+        "Track days and spirited drives through the Scottish Highlands — some of the best driving roads in the UK.",
+      location: "Inverness, IV1",
+      region: "Scotland",
+      categories: "Track Days, Cruises",
+      image:
+        "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "merseyjdm@revmeet.test",
+      owner: "Mersey JDM Collective",
+      name: "Mersey JDM Collective",
+      description:
+        "Merseyside's Japanese car community — JDM meets, show-and-shine nights and group trips to the big northern shows.",
+      location: "Liverpool, L1",
+      region: "North West",
+      categories: "JDM, Stance, Meets",
+      image:
+        "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=800&q=80",
+    },
   ];
 
   const clubs: { clubId: string; ownerId: string }[] = [];
@@ -226,6 +298,70 @@ export async function seedDemoData(
       image:
         "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
     },
+    {
+      email: "castlecombe@revmeet.test",
+      name: "Castle Combe Circuit",
+      description:
+        "Wiltshire's historic motor-racing circuit, hosting track days, sprints and club car shows throughout the season.",
+      address: "Castle Combe",
+      city: "Chippenham",
+      postcode: "SN14 7EY",
+      lat: 51.4938,
+      lng: -2.2142,
+      categories: "Track, Circuit, Showground",
+      amenities: "PARKING,TOILETS,FOOD,COFFEE,PADDOCK,TRACK_ACCESS,FIRST_AID,SECURITY",
+      capacity: 2000,
+      image:
+        "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "goodwood@revmeet.test",
+      name: "Goodwood Motor Circuit",
+      description:
+        "The legendary West Sussex circuit — a bucket-list venue for track days, classic gatherings and show-and-shine events.",
+      address: "Goodwood",
+      city: "Chichester",
+      postcode: "PO18 0PH",
+      lat: 50.8569,
+      lng: -0.7594,
+      categories: "Track, Circuit, Showground",
+      amenities: "PARKING,TOILETS,FOOD,DRINKS,COFFEE,PADDOCK,TRACK_ACCESS,FIRST_AID,ACCESSIBLE",
+      capacity: 3000,
+      image:
+        "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "necbirmingham@revmeet.test",
+      name: "NEC Birmingham Hall",
+      description:
+        "A vast indoor exhibition hall in the Midlands, ideal for large indoor car shows, trade exhibitions and winter meets.",
+      address: "North Avenue, Marston Green",
+      city: "Birmingham",
+      postcode: "B40 1NT",
+      lat: 52.4514,
+      lng: -1.7181,
+      categories: "Indoor, Showground, Exhibition",
+      amenities: "PARKING,TOILETS,FOOD,DRINKS,COFFEE,INDOOR,ACCESSIBLE,WIFI,TRADE_STANDS,SECURITY",
+      capacity: 5000,
+      image:
+        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      email: "brightonseafront@revmeet.test",
+      name: "Brighton Seafront Car Park",
+      description:
+        "An iconic seafront location for coastal cruises and evening meets, with the sea as a backdrop and plenty of space.",
+      address: "Madeira Drive",
+      city: "Brighton",
+      postcode: "BN2 1EN",
+      lat: 50.8198,
+      lng: -0.1316,
+      categories: "Car Park, Seafront, Meet Point",
+      amenities: "PARKING,TOILETS,COFFEE,FOOD,PET_FRIENDLY,ACCESSIBLE",
+      capacity: 300,
+      image:
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+    },
   ];
 
   let venues = 0;
@@ -281,7 +417,32 @@ export async function seedDemoData(
     { title: "Midlands Tuner Festival", type: "CAR_SHOW", city: "Birmingham", region: "West Midlands", lat: 52.4862, lng: -1.8904, days: 18, cap: 800, price: "£12", club: 0, amen: "PARKING,FOOD,DRINKS,TOILETS,INDOOR,TRADE_STANDS,LIVE_MUSIC,DYNO,SMOKING", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80", desc: "A huge indoor and outdoor festival of modified cars, dyno competitions, trade village and evening after-party." },
     { title: "Bournemouth Coastal Cruise", type: "NIGHT_CRUISE", city: "Bournemouth", region: "South West", lat: 50.726, lng: -1.8795, days: 47, cap: 180, price: "Free", club: 2, amen: "PARKING,COFFEE,TOILETS,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "A scenic evening cruise along the Dorset coast finishing at the seafront for a relaxed meet." },
     { title: "Classic & Vintage Sunday", type: "CLASSIC_CARS", city: "Oxford", region: "South East", lat: 51.752, lng: -1.2577, days: 25, cap: 350, price: "£6", club: 0, amen: "PARKING,FOOD,COFFEE,TOILETS,KIDS_AREA,ACCESSIBLE,PET_FRIENDLY,TRADE_STANDS", img: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80", desc: "A relaxed gathering of classic and vintage motors on the green. Concours judging, picnic area and vintage traders." },
+    { title: "Edinburgh Festival of Speed", type: "SUPERCAR_MEET", city: "Edinburgh", region: "Scotland", lat: 55.9533, lng: -3.1883, days: 15, cap: 500, price: "£20", club: 4, amen: "PARKING,FOOD,DRINKS,COFFEE,TOILETS,TRADE_STANDS,LIVE_MUSIC,ACCESSIBLE,FIRST_AID", img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80", desc: "A celebration of speed in the Scottish capital — supercars, hypercars and a paddock of rare machinery on display all day." },
+    { title: "Liverpool JDM Night", type: "JDM_MEET", city: "Liverpool", region: "North West", lat: 53.4084, lng: -2.9916, days: 8, cap: 220, price: "£5", club: 8, amen: "PARKING,COFFEE,FOOD,TOILETS,SMOKING", img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=800&q=80", desc: "An after-dark meet for the Japanese scene on the Liverpool docks. Neon, downpipes and a seriously good turnout." },
+    { title: "Brighton Seafront Meet", type: "MEET", city: "Brighton", region: "South East", lat: 50.8225, lng: -0.1372, days: 5, cap: 200, price: "Free", club: 5, amen: "PARKING,COFFEE,TOILETS,FOOD,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80", desc: "A laid-back coastal meet on Madeira Drive. Grab a coffee, park up and watch the sun go down over the sea." },
+    { title: "Castle Combe Track Day", type: "TRACK_DAY", city: "Chippenham", region: "South West", lat: 51.4938, lng: -2.2142, days: 22, cap: 100, price: "£135", club: 6, amen: "PARKING,TOILETS,FOOD,COFFEE,PADDOCK,TRACK_ACCESS,FIRST_AID,SECURITY", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80", desc: "A full day of open-pit lapping at the historic Castle Combe circuit. Sighting laps, instruction and timed sessions." },
+    { title: "Goodwood Classic Breakfast", type: "CLASSIC_CARS", city: "Chichester", region: "South East", lat: 50.8569, lng: -0.7594, days: 11, cap: 400, price: "£15", club: 5, amen: "PARKING,FOOD,COFFEE,TOILETS,ACCESSIBLE,KIDS_AREA", img: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80", desc: "A Sunday-morning gathering of classics at the iconic Goodwood circuit. Bacon rolls, coffee and timeless machinery." },
+    { title: "Birmingham Winter Indoor Show", type: "CAR_SHOW", city: "Birmingham", region: "West Midlands", lat: 52.4514, lng: -1.7181, days: 30, cap: 1500, price: "£18", club: 0, amen: "PARKING,FOOD,DRINKS,COFFEE,TOILETS,INDOOR,ACCESSIBLE,WIFI,TRADE_STANDS,SECURITY", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80", desc: "The Midlands' biggest indoor show. Hundreds of show cars across multiple halls, a huge trade village and demos." },
+    { title: "Leeds Stance Wars", type: "STANCE_MEET", city: "Leeds", region: "Yorkshire", lat: 53.8008, lng: -1.5491, days: 19, cap: 350, price: "£8", club: 1, amen: "PARKING,FOOD,DRINKS,TOILETS,TRADE_STANDS,LIVE_MUSIC", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80", desc: "Yorkshire's premier stance and fitment show. Judged categories, a DJ all day and some of the cleanest builds around." },
+    { title: "Snowdonia Mountain Cruise", type: "NIGHT_CRUISE", city: "Betws-y-Coed", region: "Wales", lat: 53.096, lng: -3.8003, days: 26, cap: 120, price: "Free", club: 2, amen: "PARKING,COFFEE,TOILETS,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "A scenic convoy through the mountain passes of Snowdonia, finishing with a sunset meet by the lake." },
+    { title: "Reading Supercar Breakfast", type: "SUPERCAR_MEET", city: "Reading", region: "South East", lat: 51.4543, lng: -0.9781, days: 7, cap: 150, price: "£12", club: 3, amen: "PARKING,COFFEE,FOOD,TOILETS,ACCESSIBLE", img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80", desc: "An early-morning gathering of exotics in the Thames Valley. Coffee, pastries and a car park full of horsepower." },
+    { title: "Highland Hillclimb Sprint", type: "TRACK_DAY", city: "Inverness", region: "Scotland", lat: 57.4778, lng: -4.2247, days: 44, cap: 90, price: "£110", club: 4, amen: "PARKING,TOILETS,FOOD,COFFEE,PADDOCK,TRACK_ACCESS,FIRST_AID", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80", desc: "Timed hillclimb sprints against the backdrop of the Highlands. Open to road cars and dedicated competition machines." },
+    { title: "Nottingham Drift Jam", type: "DRIFT_EVENT", city: "Nottingham", region: "East Midlands", lat: 52.9548, lng: -1.1581, days: 33, cap: 250, price: "£15", club: 1, amen: "PARKING,FOOD,TOILETS,TRACK_ACCESS,PADDOCK,FIRST_AID,SECURITY", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80", desc: "A full day of sideways action with practice sessions, tandem battles and a relaxed, friendly paddock." },
+    { title: "Portsmouth Harbour Meet", type: "MEET", city: "Portsmouth", region: "South East", lat: 50.8198, lng: -1.088, days: 13, cap: 180, price: "Free", club: 5, amen: "PARKING,COFFEE,FOOD,TOILETS,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80", desc: "A harbourside community meet open to everything from classics to modern metal. Food vans and a great atmosphere." },
+    { title: "Norwich Classic Car Sunday", type: "CLASSIC_CARS", city: "Norwich", region: "East of England", lat: 52.6309, lng: 1.2974, days: 38, cap: 300, price: "£6", club: 0, amen: "PARKING,FOOD,COFFEE,TOILETS,KIDS_AREA,ACCESSIBLE,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80", desc: "A family-friendly classic gathering with concours judging, a picnic area and vintage trade stands." },
+    { title: "Manchester JDM Expo", type: "JDM_MEET", city: "Manchester", region: "Greater Manchester", lat: 53.4808, lng: -2.2426, days: 24, cap: 450, price: "£14", club: 8, amen: "PARKING,FOOD,DRINKS,TOILETS,INDOOR,TRADE_STANDS,LIVE_MUSIC", img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=800&q=80", desc: "An indoor expo dedicated to Japanese performance — show cars, specialist traders and live builds in progress." },
+    { title: "Plymouth Coastal Cruise", type: "NIGHT_CRUISE", city: "Plymouth", region: "South West", lat: 50.3755, lng: -4.1427, days: 50, cap: 160, price: "Free", club: 5, amen: "PARKING,COFFEE,TOILETS,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "An evening cruise along the Devon coastline ending at the Hoe for a relaxed seafront meet." },
+    { title: "Sheffield Tuner Meet", type: "MEET", city: "Sheffield", region: "Yorkshire", lat: 53.3811, lng: -1.4701, days: 10, cap: 220, price: "£5", club: 1, amen: "PARKING,FOOD,COFFEE,TOILETS,DYNO,SMOKING", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80", desc: "A monthly meet for the tuner crowd with an on-site dyno, food vans and plenty of engine bays on show." },
+    { title: "Cambridge Supercar Sunday", type: "SUPERCAR_MEET", city: "Cambridge", region: "East of England", lat: 52.2053, lng: 0.1218, days: 17, cap: 260, price: "£10", club: 3, amen: "PARKING,FOOD,DRINKS,COFFEE,TOILETS,ACCESSIBLE", img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80", desc: "A Sunday showcase of supercars and modern classics, with proceeds from entry going to a local charity." },
+    { title: "Belfast Car Culture Festival", type: "CAR_SHOW", city: "Belfast", region: "Northern Ireland", lat: 54.5973, lng: -5.9301, days: 55, cap: 700, price: "£16", club: 8, amen: "PARKING,FOOD,DRINKS,TOILETS,TRADE_STANDS,LIVE_MUSIC,KIDS_AREA,ACCESSIBLE", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80", desc: "Northern Ireland's biggest celebration of car culture — hundreds of cars, live entertainment and a family zone." },
+    { title: "Cotswolds Classic Tour", type: "CLASSIC_CARS", city: "Cheltenham", region: "South West", lat: 51.8994, lng: -2.0783, days: 29, cap: 140, price: "£25", club: 2, amen: "PARKING,FOOD,COFFEE,TOILETS,PET_FRIENDLY", img: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80", desc: "A guided classic-car tour through the Cotswolds' prettiest villages, finishing with lunch at a country pub." },
+    { title: "Milton Keynes Night Meet", type: "NIGHT_CRUISE", city: "Milton Keynes", region: "South East", lat: 52.0406, lng: -0.7594, days: 14, cap: 300, price: "Free", club: 0, amen: "PARKING,COFFEE,TOILETS,SMOKING,SECURITY", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80", desc: "A big open-air evening meet on the MK grid. Food vans, a chilled vibe and everything from stance to supercars." },
   ];
+
+  // A handful of demo events ship pre-promoted (as if paid) for 60 days,
+  // spread across the list so the homepage Spotlight / featured sorting looks
+  // populated.
+  const featuredIdx = new Set([0, 7, 14, 18, 23, 28]);
 
   let events = 0;
   for (let i = 0; i < eventSeed.length; i++) {
@@ -304,9 +465,8 @@ export async function seedDemoData(
         capacity: e.cap,
         priceInfo: e.price,
         amenities: (e as { amen?: string }).amen ?? "",
-        // Two demo events ship pre-promoted (as if paid) for 60 days.
-        featured: i === 0 || i === 7, // London Supercar Show & Midlands Tuner Festival
-        featuredUntil: i === 0 || i === 7 ? day(60) : null,
+        featured: featuredIdx.has(i),
+        featuredUntil: featuredIdx.has(i) ? day(60) : null,
         organiserId: ownerId,
         clubId,
       },
