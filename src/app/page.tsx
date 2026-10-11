@@ -210,9 +210,6 @@ export default async function HomePage({
       {/* SPOTLIGHT — paid featured placement; hidden when nothing is promoted */}
       <Spotlight items={spotlight} />
 
-      {/* RECENTLY VIEWED — client island, renders only for returning visitors */}
-      <RecentEventsStrip />
-
       {/* HOW IT WORKS */}
       <section id="how" className="section home-sec" style={{ background: "var(--bg)" }}>
         <div className="container">
@@ -400,6 +397,10 @@ export default async function HomePage({
           </div>
         </div>
       </section>
+
+      {/* RECENTLY VIEWED — client island at the foot of the page; renders only
+          for returning visitors who have viewed events */}
+      <RecentEventsStrip />
     </>
   );
 }

@@ -184,13 +184,25 @@ export function HomeMapExplorer({ events }: { events: ExplorerEvent[] }) {
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".5rem" }}>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <label className="field-label">From</label>
-                <input type="date" className="field-input" value={from} onChange={(e) => setFrom(e.target.value)} />
+                <input
+                  type="date"
+                  className="field-input"
+                  style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }}
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                />
               </div>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <label className="field-label">To</label>
-                <input type="date" className="field-input" value={to} onChange={(e) => setTo(e.target.value)} />
+                <input
+                  type="date"
+                  className="field-input"
+                  style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }}
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                />
               </div>
             </div>
 

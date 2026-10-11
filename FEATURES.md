@@ -195,6 +195,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-11 | `c8ffa29` | Homepage polish: moved the **"Recently viewed"** strip to the foot of the page; fixed the **From/To date fields** in the home map's floating filter panel so they size evenly and fit inside the panel (`min-width:0` grid cells, trimmed input width) |
 | 2026-10-11 | `e251cb4` | Homepage map is now **just the map** — removed the heading, subline and "Open Full Map" button above it — with a **floating filter panel** overlaid on the left (`HomeMapExplorer`): keyword, city, "use my location" + radius, date range, event-type pills and amenities, live-filtering the pins (same controls as the `/events` page). Panel is collapsible and goes full-width on mobile |
 | 2026-10-11 | `7cd6a64` | Homepage tweaks: moved the **"Events near you" map** to sit directly under the stats bar and made it **full-width** (edge-to-edge, bare container); added a **cover image** to each card in the "Recently viewed" strip (real event photo or the branded gradient fallback), matching the list-view tile look |
 | 2026-10-10 | `1dce1b3` | Added real **Google Maps** across the site: when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set every map (`MapView`, `MapHero`, location picker) renders as genuine Google Maps via `@googlemaps/js-api-loader`; with no key it falls back to the existing light Leaflet/Voyager basemap. Shared mini-tile popup extracted to `src/lib/mapTile.ts` (works in both Leaflet popups and Google InfoWindows); added InfoWindow dark-chrome CSS. Degrades gracefully, no key required |
