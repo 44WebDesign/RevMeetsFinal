@@ -3,8 +3,8 @@ import { HeroSearch } from "@/components/HeroSearch";
 import { EventCard } from "@/components/EventCard";
 import { ClubCard } from "@/components/ClubCard";
 import { VenueCard } from "@/components/VenueCard";
-import { MapView } from "@/components/MapView";
 import { MapHero } from "@/components/MapHero";
+import { HomeMapExplorer } from "@/components/HomeMapExplorer";
 import { RecentEventsStrip } from "@/components/RecentlyViewed";
 import { Spotlight } from "@/components/Spotlight";
 import {
@@ -14,10 +14,10 @@ import {
   getStats,
   getEventMapPoints,
   getVenueMapPoints,
+  getExplorerEvents,
   getHeroImage,
   getSpotlight,
 } from "@/lib/queries";
-import { EVENT_TYPE_COLORS } from "@/lib/enums";
 import { getSession } from "@/lib/auth";
 
 // Rendered per-request so the build never needs a live database connection.
@@ -37,16 +37,18 @@ export default async function HomePage({
   const mapLayout =
     home === "map" || (home !== "classic" && process.env.HOME_LAYOUT === "map");
 
-  const [events, clubs, venues, stats, mapPoints, heroImage, spotlight, venuePoints] =
+  const [events, clubs, venues, stats, mapPoints, heroImage, spotlight, venuePoints, homeEvents] =
     await Promise.all([
       getEvents({ take: 4 }, session?.sub),
       getClubs(),
       getVenues(),
       getStats(),
-      getEventMapPoints(),
+      mapLayout ? getEventMapPoints() : Promise.resolve([]),
       getHeroImage(),
       getSpotlight(),
       mapLayout ? getVenueMapPoints() : Promise.resolve([]),
+      // Full event data for the homepage map's floating filters (classic layout).
+      mapLayout ? Promise.resolve([]) : getExplorerEvents(session?.sub),
     ]);
 
   const heroPoints = [...mapPoints, ...venuePoints];
@@ -197,57 +199,11 @@ export default async function HomePage({
         </div>
       )}
 
-      {/* MAP — full-width, directly under the stats. Hidden when the header is
-          already the full-screen map. */}
+      {/* MAP — full-width, directly under the stats, with a floating filter
+          panel. Hidden when the header is already the full-screen map. */}
       {!mapLayout && (
-      <section id="map-sec" className="home-sec" style={{ background: "var(--bg2)", padding: "5rem 0" }}>
-        <div className="container" style={{ padding: "0 1.5rem" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <div>
-              <div className="sec-label">Interactive Map</div>
-              <div className="sec-title">EVENTS NEAR YOU</div>
-            </div>
-            <Link href="/map" className="btn-or">
-              <i className="fas fa-expand" /> Open Full Map
-            </Link>
-          </div>
-        </div>
-        <MapView points={mapPoints} height={520} bare />
-        <div className="container" style={{ padding: "0 1.5rem" }}>
-          <div
-            style={{
-              display: "flex",
-              gap: "1.5rem",
-              marginTop: "1rem",
-              flexWrap: "wrap",
-            }}
-          >
-            {Object.entries({
-              "Car Show": EVENT_TYPE_COLORS.CAR_SHOW,
-              "Track Day": EVENT_TYPE_COLORS.TRACK_DAY,
-              Cruise: EVENT_TYPE_COLORS.NIGHT_CRUISE,
-              Meet: EVENT_TYPE_COLORS.MEET,
-              Drift: EVENT_TYPE_COLORS.DRIFT_EVENT,
-            }).map(([label, color]) => (
-              <div key={label} style={{ display: "flex", alignItems: "center", gap: ".4rem", fontSize: ".8rem", color: "var(--mut)" }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: color }} />
-                {label}
-              </div>
-            ))}
-            <div style={{ marginLeft: "auto", fontSize: ".75rem", color: "var(--mut)" }}>
-              <i className="fas fa-info-circle" /> Click a pin for details
-            </div>
-          </div>
-        </div>
+      <section id="map-sec" className="home-sec" style={{ background: "var(--bg2)" }}>
+        <HomeMapExplorer events={homeEvents} />
       </section>
       )}
 

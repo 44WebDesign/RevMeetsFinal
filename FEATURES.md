@@ -70,6 +70,7 @@
 - ✅ **"Near me" geolocation** — one-tap browser location with a distance radius (5–100 km or any), a "you are here" marker, nearest-first results and per-result distance badges
 - ✅ Colour-coded pins by event type (matching the design's legend), venue pins in cyan
 - ✅ **Mini-tile map popups** — clicking a pin opens a compact version of the list-view card (cover image or branded gradient, type pill, title, date/city, accent-matched "View" button)
+- ✅ **Homepage map section** (`HomeMapExplorer`) — a full-width, chrome-free interactive map with a collapsible **floating filter panel** on the left (keyword, city, near-me + radius, dates, type, amenities) that live-filters the pins, mirroring the `/events` controls
 - ✅ Embedded maps on: home page, events list (fits to results), event detail, venue detail
 - ✅ Scroll-friendly behaviour (wheel zoom activates on click)
 
@@ -194,6 +195,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-11 | `e251cb4` | Homepage map is now **just the map** — removed the heading, subline and "Open Full Map" button above it — with a **floating filter panel** overlaid on the left (`HomeMapExplorer`): keyword, city, "use my location" + radius, date range, event-type pills and amenities, live-filtering the pins (same controls as the `/events` page). Panel is collapsible and goes full-width on mobile |
 | 2026-10-11 | `7cd6a64` | Homepage tweaks: moved the **"Events near you" map** to sit directly under the stats bar and made it **full-width** (edge-to-edge, bare container); added a **cover image** to each card in the "Recently viewed" strip (real event photo or the branded gradient fallback), matching the list-view tile look |
 | 2026-10-10 | `1dce1b3` | Added real **Google Maps** across the site: when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set every map (`MapView`, `MapHero`, location picker) renders as genuine Google Maps via `@googlemaps/js-api-loader`; with no key it falls back to the existing light Leaflet/Voyager basemap. Shared mini-tile popup extracted to `src/lib/mapTile.ts` (works in both Leaflet popups and Google InfoWindows); added InfoWindow dark-chrome CSS. Degrades gracefully, no key required |
 | 2026-10-10 | `00f18ab` | Switched the map basemap from the dark CARTO style to the light **Voyager** street style (Google-Maps-like colours: white/yellow roads, blue water, green parks, labels) across every map (`MapView` + the location picker); still free, same CDN, no API key. Map container loads on a matching light background |
