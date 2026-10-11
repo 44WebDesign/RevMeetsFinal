@@ -197,6 +197,60 @@ export default async function HomePage({
         </div>
       )}
 
+      {/* MAP — full-width, directly under the stats. Hidden when the header is
+          already the full-screen map. */}
+      {!mapLayout && (
+      <section id="map-sec" className="home-sec" style={{ background: "var(--bg2)", padding: "5rem 0" }}>
+        <div className="container" style={{ padding: "0 1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "1rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <div>
+              <div className="sec-label">Interactive Map</div>
+              <div className="sec-title">EVENTS NEAR YOU</div>
+            </div>
+            <Link href="/map" className="btn-or">
+              <i className="fas fa-expand" /> Open Full Map
+            </Link>
+          </div>
+        </div>
+        <MapView points={mapPoints} height={520} bare />
+        <div className="container" style={{ padding: "0 1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "1.5rem",
+              marginTop: "1rem",
+              flexWrap: "wrap",
+            }}
+          >
+            {Object.entries({
+              "Car Show": EVENT_TYPE_COLORS.CAR_SHOW,
+              "Track Day": EVENT_TYPE_COLORS.TRACK_DAY,
+              Cruise: EVENT_TYPE_COLORS.NIGHT_CRUISE,
+              Meet: EVENT_TYPE_COLORS.MEET,
+              Drift: EVENT_TYPE_COLORS.DRIFT_EVENT,
+            }).map(([label, color]) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: ".4rem", fontSize: ".8rem", color: "var(--mut)" }}>
+                <span style={{ width: 10, height: 10, borderRadius: "50%", background: color }} />
+                {label}
+              </div>
+            ))}
+            <div style={{ marginLeft: "auto", fontSize: ".75rem", color: "var(--mut)" }}>
+              <i className="fas fa-info-circle" /> Click a pin for details
+            </div>
+          </div>
+        </div>
+      </section>
+      )}
+
       {/* SPOTLIGHT — paid featured placement; hidden when nothing is promoted */}
       <Spotlight items={spotlight} />
 
@@ -232,57 +286,6 @@ export default async function HomePage({
           </div>
         </div>
       </section>
-
-      {/* MAP — hidden when the header is already the full-screen map */}
-      {!mapLayout && (
-      <section id="map-sec" className="section home-sec" style={{ background: "var(--bg2)" }}>
-        <div className="container">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <div>
-              <div className="sec-label">Interactive Map</div>
-              <div className="sec-title">EVENTS NEAR YOU</div>
-            </div>
-            <Link href="/map" className="btn-or">
-              <i className="fas fa-expand" /> Open Full Map
-            </Link>
-          </div>
-          <MapView points={mapPoints} height={500} />
-          <div
-            style={{
-              display: "flex",
-              gap: "1.5rem",
-              marginTop: "1rem",
-              flexWrap: "wrap",
-            }}
-          >
-            {Object.entries({
-              "Car Show": EVENT_TYPE_COLORS.CAR_SHOW,
-              "Track Day": EVENT_TYPE_COLORS.TRACK_DAY,
-              Cruise: EVENT_TYPE_COLORS.NIGHT_CRUISE,
-              Meet: EVENT_TYPE_COLORS.MEET,
-              Drift: EVENT_TYPE_COLORS.DRIFT_EVENT,
-            }).map(([label, color]) => (
-              <div key={label} style={{ display: "flex", alignItems: "center", gap: ".4rem", fontSize: ".8rem", color: "var(--mut)" }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: color }} />
-                {label}
-              </div>
-            ))}
-            <div style={{ marginLeft: "auto", fontSize: ".75rem", color: "var(--mut)" }}>
-              <i className="fas fa-info-circle" /> Click a pin for details
-            </div>
-          </div>
-        </div>
-      </section>
-      )}
 
       {/* EVENTS */}
       <section id="events" className="section home-sec" style={{ background: "var(--bg)" }}>

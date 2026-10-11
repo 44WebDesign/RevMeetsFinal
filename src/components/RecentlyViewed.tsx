@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { addRecent, parseRecent, RECENT_KEY, type RecentEvent } from "@/lib/recentViews";
+import { FallbackCover } from "./FallbackCover";
 
 function read(): RecentEvent[] {
   try {
@@ -64,16 +66,34 @@ export function RecentEventsStrip({
                 key={e.slug}
                 href={`/events/${e.slug}`}
                 className="card-surface"
-                style={{ flex: "0 0 220px", padding: "0.9rem 1rem", textDecoration: "none", color: "inherit", borderLeft: `3px solid ${color}` }}
+                style={{ flex: "0 0 220px", overflow: "hidden", textDecoration: "none", color: "inherit" }}
               >
-                <span className="pill" style={{ background: color, color: "#fff", marginBottom: ".5rem" }}>
-                  {eventTypeLabel(e.type)}
-                </span>
-                <div style={{ fontWeight: 700, fontSize: ".9rem", lineHeight: 1.3, marginBottom: ".35rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                  {e.title}
+                <div style={{ height: 110, position: "relative", overflow: "hidden" }}>
+                  {e.imageUrl ? (
+                    <Image
+                      src={e.imageUrl}
+                      alt={e.title}
+                      fill
+                      sizes="220px"
+                      style={{ objectFit: "cover", filter: "brightness(.85)" }}
+                    />
+                  ) : (
+                    <FallbackCover accent={color} />
+                  )}
+                  <span
+                    className="pill"
+                    style={{ position: "absolute", top: ".5rem", left: ".5rem", background: color, color: "#fff" }}
+                  >
+                    {eventTypeLabel(e.type)}
+                  </span>
                 </div>
-                <div style={{ fontSize: ".76rem", color: "var(--mut)" }}>
-                  <i className="fas fa-calendar-alt" /> {formatDate(e.startsAt)} · {e.city}
+                <div style={{ padding: "0.8rem 1rem" }}>
+                  <div style={{ fontWeight: 700, fontSize: ".9rem", lineHeight: 1.3, marginBottom: ".35rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                    {e.title}
+                  </div>
+                  <div style={{ fontSize: ".76rem", color: "var(--mut)" }}>
+                    <i className="fas fa-calendar-alt" /> {formatDate(e.startsAt)} · {e.city}
+                  </div>
                 </div>
               </Link>
             );
