@@ -18,6 +18,8 @@ export type MapPoint = {
   kind: "event" | "venue";
   amenities?: string; // comma-separated amenity keys (for filtering)
   imageUrl?: string | null; // cover for the popup tile
+  startsAt?: string | null; // ISO start (events only) — for date sort/filter
+  isPast?: boolean; // event whose start is before today (events only)
 };
 
 // Visible map viewport, in lat/lng degrees.

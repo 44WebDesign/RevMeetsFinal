@@ -268,27 +268,46 @@ export async function getHeroImage(): Promise<string | null> {
   return e?.imageUrl ?? null;
 }
 
-export async function getEventMapPoints(filters: EventFilters = {}): Promise<MapPoint[]> {
-  const events = await prisma.event.findMany({
-    where: eventWhere(filters),
+// Event pins for the maps. Upcoming-only by default (so past events never
+// clutter the map / homepage hero). Pass `includePast` to also return a bounded
+// set of recent past events, each tagged `isPast`, for the map page's toggle.
+export async function getEventMapPoints(
+  filters: EventFilters & { includePast?: boolean } = {},
+): Promise<MapPoint[]> {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const select = {
+    id: true,
+    slug: true,
+    title: true,
+    type: true,
+    city: true,
+    lat: true,
+    lng: true,
+    startsAt: true,
+    imageUrl: true,
+    amenities: true,
+    venue: { select: { amenities: true } },
+  } as const;
+
+  const baseWhere = eventWhere(filters);
+  const upcoming = await prisma.event.findMany({
+    where: { ...baseWhere, startsAt: { gte: startOfToday } },
     orderBy: { startsAt: "asc" },
     take: 300,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      type: true,
-      city: true,
-      lat: true,
-      lng: true,
-      startsAt: true,
-      imageUrl: true,
-      amenities: true,
-      venue: { select: { amenities: true } },
-    },
+    select,
   });
+  const past = filters.includePast
+    ? await prisma.event.findMany({
+        where: { ...baseWhere, startsAt: { lt: startOfToday } },
+        orderBy: { startsAt: "desc" },
+        take: 150,
+        select,
+      })
+    : [];
 
-  return events.map((e) => ({
+  const toPoint = (e: (typeof upcoming)[number], isPast: boolean): MapPoint => ({
     id: e.id,
     slug: e.slug,
     lat: e.lat,
@@ -304,7 +323,11 @@ export async function getEventMapPoints(filters: EventFilters = {}): Promise<Map
     href: `/events/${e.slug}`,
     kind: "event" as const,
     imageUrl: e.imageUrl,
-  }));
+    startsAt: e.startsAt.toISOString(),
+    isPast,
+  });
+
+  return [...upcoming.map((e) => toPoint(e, false)), ...past.map((e) => toPoint(e, true))];
 }
 
 export async function getVenueMapPoints(): Promise<MapPoint[]> {

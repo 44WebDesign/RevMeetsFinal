@@ -72,7 +72,7 @@
 
 ## 4. Interactive Map (core discovery feature)
 
-- ✅ Full-page **map explorer** (`/map`): every event + venue, live keyword filter, per-type toggles, event/venue layer toggles, synced results list
+- ✅ Full-page **map explorer** (`/map`): every **upcoming** event + venue, live keyword filter, per-type toggles, event/venue layer toggles, synced results list. Adds a **Sort** control (soonest / nearest / A–Z), **quick-date chips** (this weekend / week / month), an **Include past events** toggle (off by default — past events no longer clutter the map), always-visible **removable active-filter chips**, and a **mobile filter collapse**
 - ✅ **Amenity filtering on the map** — icon chips filter both event and venue pins live
 - ✅ **"Near me" geolocation** — one-tap browser location with a distance radius (5–100 km or any), a "you are here" marker, nearest-first results and per-result distance badges
 - ✅ Colour-coded pins by event type (matching the design's legend), venue pins in cyan
@@ -204,6 +204,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-16 | `06b9119` | **Map page review pass** (same treatment as `/events`): `/map` now shows **upcoming events by default** (with an Include-past toggle), a **Sort** control (soonest / nearest / A–Z), **quick-date chips**, always-visible **active-filter chips**, and a **mobile filter collapse**. `getEventMapPoints` is upcoming-only by default (also de-clutters the homepage map hero) with an `includePast` option; `MapPoint` gains `startsAt`/`isPast`. Verified against local Postgres 16 |
 | 2026-10-16 | `7f62907` | **Events page review pass:** the explorer now shows **upcoming events only by default** (fixes past events appearing, and leading, in the list/map) with an **Include past events** toggle; added a **Sort** control (soonest / nearest / recently added / featured), **quick-date chips** (this weekend / week / month), an always-visible **result count + removable active-filter chips**, a **mobile Filters collapse**, and a "going" count on the map's in-view list. `getExplorerEvents` now fetches upcoming-first + a bounded recent-past set and exposes `isPast`/`createdAt`. Verified against local Postgres 16 |
 | 2026-10-16 | `d51c739` | Homepage hero now carries a **stylised UK map + pulsing event-pin overlay** (`HeroMapOverlay`) over the photo, with two floating real-event mini-cards on wide screens — conveying "events across the UK" at a glance. Pure inline SVG/CSS (no map tiles), reduced-motion aware |
 | 2026-10-16 | `40b416f` | Added a **newsletter admin view** — a Newsletter stat on the admin overview (total + new-this-week) and a dedicated `/admin/newsletter` page (subscriber counts: total / with area / emailed / new this week, plus the recent subscriber list) |

@@ -11,7 +11,7 @@ export const metadata = {
 
 export default async function MapPage() {
   const [eventPoints, venuePoints] = await Promise.all([
-    getEventMapPoints(),
+    getEventMapPoints({ includePast: true }),
     getVenueMapPoints(),
   ]);
 
