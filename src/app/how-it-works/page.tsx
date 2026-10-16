@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MapView } from "@/components/MapView";
 import { JsonLd } from "@/components/JsonLd";
+import { Breadcrumbs, breadcrumbLd } from "@/components/Breadcrumbs";
 import { BrowserFrame, DashboardMock, AdminMock, GrowthMock } from "@/components/HowItWorksVisuals";
 import { eventTypeColor } from "@/lib/enums";
 import { absoluteUrl } from "@/lib/site";
@@ -26,6 +27,14 @@ const DEMO_POINTS: MapPoint[] = [
   { id: "d3", slug: "#", lat: 52.4862, lng: -1.8904, title: "Midlands Tuner Festival", type: "CAR_SHOW", color: eventTypeColor("CAR_SHOW"), subtitle: "Birmingham · Sun 27 Sep", href: "/events", kind: "event" },
 ];
 
+const FAQS: { q: string; a: string }[] = [
+  { q: "Is RevMeet free?", a: "Yes. Browsing events, clubs and venues is free, and creating an account — as an enthusiast, organiser/club or venue — is free too. Optional paid \"Featured\" placement is the only thing that costs anything." },
+  { q: "Do I need an account to find events?", a: "No. You can browse the map and lists, filter, and view any event, club or venue without signing in. You only need a free account to register for events, save them, follow clubs/venues, upload photos or leave reviews." },
+  { q: "How do I list my event or club?", a: "Register as a host/club, then create events from your dashboard — each gets its own page and registrations. Build a club profile people can follow, and every new event you publish alerts your followers and nearby members automatically." },
+  { q: "How does \"events near you\" work?", a: "Add your home location (or subscribe with your town/postcode from any page's footer) and we'll email you a short weekly round-up of upcoming events matched to your area. It's opt-in and you can unsubscribe any time." },
+  { q: "How do I get a Verified badge?", a: "Verified badges are granted by our team after a genuine check that a club or venue is real and its details are accurate. It's a trust signal, never sold as a label." },
+];
+
 export default function HowItWorksPage() {
   const howToLd = {
     "@context": "https://schema.org",
@@ -39,9 +48,27 @@ export default function HowItWorksPage() {
     ],
   };
 
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  const crumbs = [{ label: "Home", href: "/" }, { label: "How It Works" }];
+
   return (
     <>
       <JsonLd data={howToLd} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={breadcrumbLd(crumbs, absoluteUrl)} />
+
+      <div className="container" style={{ padding: ".9rem 1.5rem 0" }}>
+        <Breadcrumbs items={crumbs} />
+      </div>
 
       {/* HERO */}
       <section className="section" style={{ background: "var(--bg)", paddingBottom: "2.5rem" }}>
@@ -178,8 +205,27 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* FAQ */}
       <section className="section home-sec" style={{ background: "var(--bg)" }}>
+        <div className="container" style={{ maxWidth: 820 }}>
+          <div className="sec-label">Good to know</div>
+          <h2 className="sec-title" style={{ fontSize: "clamp(1.8rem,4vw,2.75rem)" }}>FREQUENTLY ASKED</h2>
+          <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: ".75rem" }}>
+            {FAQS.map((f) => (
+              <details key={f.q} className="card-surface" style={{ padding: "1.1rem 1.25rem" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 700, fontSize: ".98rem", listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+                  {f.q}
+                  <i className="fas fa-plus" style={{ color: "var(--or)", fontSize: ".8rem", flexShrink: 0 }} />
+                </summary>
+                <p style={{ color: "var(--mut)", fontSize: ".9rem", lineHeight: 1.7, marginTop: ".75rem" }}>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="section home-sec" style={{ background: "var(--bg2)" }}>
         <div className="container" style={{ textAlign: "center", maxWidth: 720 }}>
           <div className="sec-label" style={{ textAlign: "center" }}>Ready?</div>
           <h2 className="sec-title" style={{ fontSize: "clamp(1.8rem,4vw,2.75rem)" }}>JOIN THE COMMUNITY</h2>

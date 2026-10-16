@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NewsletterSignup } from "./NewsletterSignup";
 
 export function Footer() {
   return (
@@ -9,6 +10,20 @@ export function Footer() {
         padding: "3rem 1.5rem 1.5rem",
       }}
     >
+      {/* Site-wide "events near you" signup */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto 2.5rem",
+          padding: "1.25rem 1.5rem",
+          background: "var(--bg)",
+          border: "1px solid var(--bdr2)",
+          borderRadius: 12,
+        }}
+      >
+        <NewsletterSignup compact />
+      </div>
+
       <div
         style={{
           maxWidth: 1200,
