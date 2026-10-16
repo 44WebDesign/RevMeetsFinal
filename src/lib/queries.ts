@@ -76,6 +76,24 @@ export async function getEvents(
   return events.map(toEventCard(userId));
 }
 
+// Soonest upcoming events (pure date order, not featured-first) for the
+// homepage "Happening soon" strip. Only events starting from now onward.
+export async function getUpcomingSoon(take = 4, userId?: string): Promise<EventCardData[]> {
+  const events = await prisma.event.findMany({
+    where: { status: "PUBLISHED", startsAt: { gte: new Date() } },
+    orderBy: { startsAt: "asc" },
+    take,
+    include: {
+      club: { select: { name: true } },
+      venue: { select: { amenities: true } },
+      reviews: { select: { rating: true } },
+      _count: { select: { registrations: true } },
+      ...(userId ? { savedBy: { where: { userId }, select: { id: true } } } : {}),
+    },
+  });
+  return events.map(toEventCard(userId));
+}
+
 // Shared row → EventCardData mapper (used by the list + explorer queries).
 function toEventCard(userId?: string) {
   return (e: {

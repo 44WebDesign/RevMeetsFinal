@@ -308,3 +308,13 @@ model Review {
   @@index([clubId])
   @@index([venueId])
 }
+
+// Lightweight "events near you" email list — lets anonymous visitors subscribe
+// from the homepage without creating an account. Stored regardless of whether
+// Resend is configured (email sending degrades gracefully).
+model NewsletterSignup {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  area      String? // optional town / postcode / region they typed
+  createdAt DateTime @default(now())
+}

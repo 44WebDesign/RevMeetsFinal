@@ -7,8 +7,10 @@ import { MapHero } from "@/components/MapHero";
 import { HomeMapExplorer } from "@/components/HomeMapExplorer";
 import { RecentEventsStrip } from "@/components/RecentlyViewed";
 import { Spotlight } from "@/components/Spotlight";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import {
   getEvents,
+  getUpcomingSoon,
   getClubs,
   getVenues,
   getStats,
@@ -37,9 +39,11 @@ export default async function HomePage({
   const mapLayout =
     home === "map" || (home !== "classic" && process.env.HOME_LAYOUT === "map");
 
-  const [events, clubs, venues, stats, mapPoints, heroImage, spotlight, venuePoints, homeEvents] =
+  const [events, soon, clubs, venues, stats, mapPoints, heroImage, spotlight, venuePoints, homeEvents] =
     await Promise.all([
       getEvents({ take: 4 }, session?.sub),
+      // Soonest-by-date upcoming events for the "Happening soon" strip.
+      getUpcomingSoon(4, session?.sub),
       getClubs(),
       getVenues(),
       getStats(),
@@ -66,7 +70,7 @@ export default async function HomePage({
       /* HERO */
       <section
         style={{
-          minHeight: "100vh",
+          minHeight: "82vh",
           position: "relative",
           display: "flex",
           alignItems: "center",
@@ -165,6 +169,23 @@ export default async function HomePage({
             ))}
           </div>
         </div>
+        <a
+          href="#discover"
+          aria-label="Scroll to explore"
+          style={{
+            position: "absolute",
+            bottom: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 2,
+            color: "rgba(245,245,245,.8)",
+            fontSize: "1.2rem",
+            textDecoration: "none",
+            textShadow: "0 1px 10px rgba(0,0,0,.9)",
+          }}
+        >
+          <i className="fas fa-chevron-down" />
+        </a>
       </section>
       )}
 
@@ -199,49 +220,43 @@ export default async function HomePage({
         </div>
       )}
 
-      {/* MAP — full-width, directly under the stats, with a floating filter
-          panel. Hidden when the header is already the full-screen map. */}
-      {!mapLayout && (
-      <section id="map-sec" className="home-sec" style={{ background: "var(--bg2)" }}>
-        <HomeMapExplorer events={homeEvents} />
+      {/* HAPPENING SOON — soonest upcoming events (pure date order) for urgency */}
+      {soon.length > 0 && (
+      <section id="soon" className="section home-sec" style={{ background: "var(--bg)" }}>
+        <div className="container">
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: ".5rem" }}>
+            <div>
+              <div className="sec-label"><i className="fas fa-bolt" /> Happening Soon</div>
+              <div className="sec-title">WHAT&apos;S ON NEXT</div>
+            </div>
+            <Link href="/events" className="btn-ghost">
+              All upcoming <i className="fas fa-arrow-right" />
+            </Link>
+          </div>
+          <div className="sec-sub">
+            The next events on the calendar — grab your spot before they fill up.
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))",
+              gap: "1.5rem",
+              marginTop: "2.5rem",
+            }}
+          >
+            {soon.map((e) => (
+              <EventCard key={e.id} event={e} />
+            ))}
+          </div>
+        </div>
       </section>
       )}
 
       {/* SPOTLIGHT — paid featured placement; hidden when nothing is promoted */}
       <Spotlight items={spotlight} />
 
-      {/* HOW IT WORKS */}
-      <section id="how" className="section home-sec" style={{ background: "var(--bg)" }}>
-        <div className="container">
-          <div className="sec-label">How It Works</div>
-          <div className="sec-title">
-            GET STARTED IN
-            <br />
-            THREE SIMPLE STEPS
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3,1fr)",
-              gap: "2rem",
-              marginTop: "3rem",
-            }}
-            className="how-grid"
-          >
-            <Step n="01" icon="fa-map-location-dot" title="Search Your Area" body="Enter your location and browse upcoming car events on our interactive map. Filter by event type, date, distance and more." />
-            <Step n="02" icon="fa-ticket" title="Register & Book" body="Found something you love? Create a free account, register for events, and get all the details delivered straight to you." />
-            <Step n="03" icon="fa-flag-checkered" title="Show Up & Connect" body="Turn up, meet fellow enthusiasts, share your build, and be part of a community as passionate about cars as you are." />
-          </div>
-          <div style={{ marginTop: "2rem" }}>
-            <Link href="/how-it-works" className="btn-ghost">
-              See the full walkthrough <i className="fas fa-arrow-right" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* EVENTS */}
-      <section id="events" className="section home-sec" style={{ background: "var(--bg)" }}>
+      {/* FEATURED EVENTS — curated / promoted picks */}
+      <section id="events" className="section home-sec" style={{ background: "var(--bg2)" }}>
         <div className="container">
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: ".5rem" }}>
             <div>
@@ -274,13 +289,24 @@ export default async function HomePage({
         </div>
       </section>
 
+      {/* MAP — full-width interactive map with a floating filter panel. Hidden
+          when the header is already the full-screen map. */}
+      {!mapLayout && (
+      <section id="map-sec" className="home-sec" style={{ background: "var(--bg)" }}>
+        <HomeMapExplorer events={homeEvents} />
+      </section>
+      )}
+
+      {/* NEWSLETTER — "events near you" email capture (distinct accent band) */}
+      <NewsletterSignup />
+
       {/* CLUBS */}
-      <section id="clubs" className="section home-sec" style={{ background: "var(--bg2)" }}>
+      <section id="clubs" className="section home-sec" style={{ background: "var(--bg)" }}>
         <div className="container">
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: ".5rem" }}>
             <div>
               <div className="sec-label">Top Rated</div>
-              <div className="sec-title">FEATURED CLUBS</div>
+              <div className="sec-title">CLUBS TO JOIN</div>
             </div>
             <Link href="/clubs" className="btn-ghost">
               View All <i className="fas fa-arrow-right" />
@@ -307,12 +333,12 @@ export default async function HomePage({
       </section>
 
       {/* VENUES */}
-      <section id="venues" className="section home-sec" style={{ background: "var(--bg)" }}>
+      <section id="venues" className="section home-sec" style={{ background: "var(--bg2)" }}>
         <div className="container">
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: ".5rem" }}>
             <div>
               <div className="sec-label">Great Locations</div>
-              <div className="sec-title">FEATURED VENUES</div>
+              <div className="sec-title">VENUES TO DISCOVER</div>
             </div>
             <Link href="/venues" className="btn-ghost">
               View All <i className="fas fa-arrow-right" />
@@ -337,6 +363,37 @@ export default async function HomePage({
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS — moved below the listings; new visitors scroll to it,
+          returning visitors get straight to events */}
+      <section id="how" className="section home-sec" style={{ background: "var(--bg)" }}>
+        <div className="container">
+          <div className="sec-label">How It Works</div>
+          <div className="sec-title">
+            GET STARTED IN
+            <br />
+            THREE SIMPLE STEPS
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3,1fr)",
+              gap: "2rem",
+              marginTop: "3rem",
+            }}
+            className="how-grid"
+          >
+            <Step n="01" icon="fa-map-location-dot" title="Search Your Area" body="Enter your location and browse upcoming car events on our interactive map. Filter by event type, date, distance and more." />
+            <Step n="02" icon="fa-ticket" title="Register & Book" body="Found something you love? Create a free account, register for events, and get all the details delivered straight to you." />
+            <Step n="03" icon="fa-flag-checkered" title="Show Up & Connect" body="Turn up, meet fellow enthusiasts, share your build, and be part of a community as passionate about cars as you are." />
+          </div>
+          <div style={{ marginTop: "2rem" }}>
+            <Link href="/how-it-works" className="btn-ghost">
+              See the full walkthrough <i className="fas fa-arrow-right" />
+            </Link>
+          </div>
         </div>
       </section>
 
