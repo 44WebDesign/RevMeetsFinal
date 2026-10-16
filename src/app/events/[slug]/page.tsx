@@ -15,9 +15,12 @@ import { SaveButton } from "@/components/SaveButton";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { ShareBar } from "@/components/ShareBar";
 import { ReportButton } from "@/components/ReportButton";
+import { EventCard } from "@/components/EventCard";
+import { Breadcrumbs, breadcrumbLd } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { parseAmenities } from "@/lib/amenities";
-import { eventTypeColor, eventTypeLabel } from "@/lib/enums";
+import { eventTypeColor, eventTypeLabel, EVENT_TYPE_SLUGS, type EventType } from "@/lib/enums";
+import { getSavedEventIds } from "@/lib/queries";
 import { formatDateTime } from "@/lib/utils";
 import { dateProximity, spacesLeft, isFillingUp } from "@/lib/urgency";
 import { absoluteUrl } from "@/lib/site";
@@ -146,6 +149,41 @@ export default async function EventDetail({
   const color = eventTypeColor(event.type);
   const full = !!event.capacity && event._count.registrations >= event.capacity;
   const fallbackImg = FALLBACK_EVENT_IMG;
+  const finished = (event.endsAt ?? event.startsAt) < new Date();
+
+  // Related upcoming events of the same type (onward discovery).
+  const relatedRows = await prisma.event.findMany({
+    where: { status: "PUBLISHED", startsAt: { gte: new Date() }, id: { not: event.id }, type: event.type },
+    orderBy: { startsAt: "asc" },
+    take: 3,
+    include: { _count: { select: { registrations: true } }, club: { select: { name: true } } },
+  });
+  const relatedSaved = session
+    ? await getSavedEventIds(session.sub, relatedRows.map((e) => e.id))
+    : new Set<string>();
+  const related = relatedRows.map((e) => ({
+    id: e.id,
+    slug: e.slug,
+    title: e.title,
+    description: e.description,
+    type: e.type,
+    city: e.city,
+    startsAt: e.startsAt.toISOString(),
+    imageUrl: e.imageUrl,
+    attendees: e._count.registrations,
+    clubName: e.club?.name ?? null,
+    amenities: e.amenities,
+    featured: e.featured,
+    saved: relatedSaved.has(e.id),
+  }));
+
+  const typeSlug = EVENT_TYPE_SLUGS[event.type as EventType];
+  const crumbs = [
+    { label: "Home", href: "/" },
+    { label: "Events", href: "/events" },
+    ...(typeSlug ? [{ label: eventTypeLabel(event.type), href: `/events/type/${typeSlug}` }] : []),
+    { label: event.title },
+  ];
 
   // Event's own amenity selection; events created before this feature fall
   // back to their venue's amenities.
@@ -229,6 +267,7 @@ export default async function EventDetail({
   return (
     <>
       <JsonLd data={eventLd} />
+      <JsonLd data={breadcrumbLd(crumbs, absoluteUrl)} />
       <RecordRecentView
         event={{
           slug: event.slug,
@@ -239,6 +278,9 @@ export default async function EventDetail({
           imageUrl: event.imageUrl,
         }}
       />
+      <div className="container" style={{ padding: ".9rem 1.5rem 0" }}>
+        <Breadcrumbs items={crumbs} />
+      </div>
       {/* Hero image */}
       <div style={{ position: "relative", height: 360, overflow: "hidden" }}>
         <Image
@@ -267,8 +309,15 @@ export default async function EventDetail({
             padding: "2rem 1.5rem",
           }}
         >
-          <span className="pill" style={{ background: color, color: "#fff" }}>
-            {eventTypeLabel(event.type)}
+          <span style={{ display: "inline-flex", gap: ".4rem", flexWrap: "wrap" }}>
+            <span className="pill" style={{ background: color, color: "#fff" }}>
+              {eventTypeLabel(event.type)}
+            </span>
+            {finished && (
+              <span className="pill" style={{ background: "rgba(8,8,8,.7)", color: "#bbb", border: "1px solid var(--bdr2)" }}>
+                <i className="fas fa-flag-checkered" /> Finished
+              </span>
+            )}
           </span>
           <h1 className="hd" style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", marginTop: ".5rem", lineHeight: 1 }}>
             {event.title}
@@ -381,47 +430,69 @@ export default async function EventDetail({
                   </div>
                 )}
 
-                {/* Honest urgency cues */}
-                {(() => {
-                  const left = spacesLeft(event.capacity, event._count.registrations);
-                  const filling = isFillingUp(event.capacity, event._count.registrations);
-                  const prox = dateProximity(event.startsAt);
-                  if (!filling && !prox) return null;
-                  return (
-                    <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap", marginBottom: "1rem" }}>
-                      {filling && left !== null && (
-                        <span className="pill" style={{ background: "rgba(255,191,71,.14)", color: "#ffbf47", border: "1px solid rgba(255,191,71,.45)" }}>
-                          <i className="fas fa-fire" /> Only {left} left
-                        </span>
-                      )}
-                      {prox && (
-                        <span className="pill" style={{ background: prox.urgent ? color : "rgba(255,255,255,.06)", color: prox.urgent ? "#fff" : "var(--txt)", border: prox.urgent ? "none" : "1px solid var(--bdr2)" }}>
-                          <i className="fas fa-clock" /> {prox.label}
-                        </span>
-                      )}
+                {finished ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: ".6rem",
+                      padding: ".85rem 1rem",
+                      borderRadius: 8,
+                      background: "var(--card2)",
+                      border: "1px solid var(--bdr2)",
+                      color: "var(--mut)",
+                      fontSize: ".88rem",
+                    }}
+                  >
+                    <i className="fas fa-flag-checkered" style={{ color: "var(--or)" }} />
+                    This event has finished. Browse{" "}
+                    <Link href="/events" style={{ color: "var(--or)", textDecoration: "none" }}>upcoming events</Link>.
+                  </div>
+                ) : (
+                  <>
+                    {/* Honest urgency cues */}
+                    {(() => {
+                      const left = spacesLeft(event.capacity, event._count.registrations);
+                      const filling = isFillingUp(event.capacity, event._count.registrations);
+                      const prox = dateProximity(event.startsAt);
+                      if (!filling && !prox) return null;
+                      return (
+                        <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+                          {filling && left !== null && (
+                            <span className="pill" style={{ background: "rgba(255,191,71,.14)", color: "#ffbf47", border: "1px solid rgba(255,191,71,.45)" }}>
+                              <i className="fas fa-fire" /> Only {left} left
+                            </span>
+                          )}
+                          {prox && (
+                            <span className="pill" style={{ background: prox.urgent ? color : "rgba(255,255,255,.06)", color: prox.urgent ? "#fff" : "var(--txt)", border: prox.urgent ? "none" : "1px solid var(--bdr2)" }}>
+                              <i className="fas fa-clock" /> {prox.label}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    <AttendButton
+                      eventId={event.id}
+                      initialRegistered={registered}
+                      initialAttendees={event._count.registrations}
+                      loggedIn={!!session}
+                      full={full}
+                    />
+
+                    <div style={{ display: "grid", gap: ".5rem", marginTop: ".75rem" }}>
+                      <SaveButton eventId={event.id} initialSaved={saved} loggedIn={!!session} />
+                      <AddToCalendar
+                        title={event.title}
+                        description={event.description}
+                        location={locationText}
+                        start={event.startsAt.toISOString()}
+                        end={event.endsAt ? event.endsAt.toISOString() : null}
+                        url={eventUrl}
+                      />
                     </div>
-                  );
-                })()}
-
-                <AttendButton
-                  eventId={event.id}
-                  initialRegistered={registered}
-                  initialAttendees={event._count.registrations}
-                  loggedIn={!!session}
-                  full={full}
-                />
-
-                <div style={{ display: "grid", gap: ".5rem", marginTop: ".75rem" }}>
-                  <SaveButton eventId={event.id} initialSaved={saved} loggedIn={!!session} />
-                  <AddToCalendar
-                    title={event.title}
-                    description={event.description}
-                    location={locationText}
-                    start={event.startsAt.toISOString()}
-                    end={event.endsAt ? event.endsAt.toISOString() : null}
-                    url={eventUrl}
-                  />
-                </div>
+                  </>
+                )}
 
                 <div style={{ borderTop: "1px solid var(--bdr)", margin: "1.25rem 0 1rem", paddingTop: "1.25rem" }}>
                   <div style={{ fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".1em", color: "var(--mut)", marginBottom: ".6rem" }}>
@@ -473,6 +544,28 @@ export default async function EventDetail({
           </div>
         </div>
       </section>
+
+      {related.length > 0 && (
+        <section className="section home-sec" style={{ background: "var(--bg2)" }}>
+          <div className="container">
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+              <h2 className="hd" style={{ fontSize: "1.6rem" }}>
+                More {eventTypeLabel(event.type).toLowerCase()} events
+              </h2>
+              {typeSlug && (
+                <Link href={`/events/type/${typeSlug}`} className="btn-ghost">
+                  View all <i className="fas fa-arrow-right" />
+                </Link>
+              )}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))", gap: "1.5rem" }}>
+              {related.map((e) => (
+                <EventCard key={e.id} event={e} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <RecentEventsStrip excludeSlug={event.slug} heading="Recently viewed" />
 

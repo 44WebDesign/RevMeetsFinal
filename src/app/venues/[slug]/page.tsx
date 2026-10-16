@@ -12,6 +12,7 @@ import { ReviewSection } from "@/components/ReviewSection";
 import { CalendarSubscribe } from "@/components/CalendarSubscribe";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { EnquiryButton } from "@/components/EnquiryButton";
+import { Breadcrumbs, breadcrumbLd } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { getSavedEventIds } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
@@ -19,19 +20,21 @@ import { parseAmenities } from "@/lib/amenities";
 
 export const dynamic = "force-dynamic";
 
-const getVenue = cache((slug: string) =>
-  prisma.venue.findUnique({
+const getVenue = cache((slug: string) => {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return prisma.venue.findUnique({
     where: { slug },
     include: {
       _count: { select: { follows: true } },
       events: {
-        where: { status: "PUBLISHED" },
+        where: { status: "PUBLISHED", startsAt: { gte: startOfToday } },
         orderBy: { startsAt: "asc" },
         include: { _count: { select: { registrations: true } }, club: { select: { name: true } } },
       },
     },
-  }),
-);
+  });
+});
 
 export async function generateMetadata({
   params,
@@ -141,9 +144,19 @@ export default async function VenueDetail({
       : {}),
   };
 
+  const crumbs = [
+    { label: "Home", href: "/" },
+    { label: "Venues", href: "/venues" },
+    { label: venue.name },
+  ];
+
   return (
     <>
       <JsonLd data={venueLd} />
+      <JsonLd data={breadcrumbLd(crumbs, absoluteUrl)} />
+      <div className="container" style={{ padding: ".9rem 1.5rem 0" }}>
+        <Breadcrumbs items={crumbs} />
+      </div>
       <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
         <Image src={venue.imageUrl || fallback} alt={venue.name} fill priority sizes="100vw" style={{ objectFit: "cover", filter: "brightness(.4)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,8,8,.2), var(--bg))" }} />

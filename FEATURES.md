@@ -56,7 +56,8 @@
 - ✅ **Always-visible result count + removable active-filter chips** (keyword, city, dates, type, each amenity, near-me, include-past) on both views; on mobile the filter fields collapse behind a **Filters** button while the count, sort and view toggle stay put
 - ✅ **Amenity filtering** in event search (collapsible icon-chip panel; matches events offering *all* selected amenities, including those inherited from a venue)
 - ✅ Amenity icon strip on event cards (and venue cards) across list, search and profile views
-- ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel
+- ✅ Event detail pages: hero image, description, location map, organiser/club/venue links, price panel, **breadcrumbs** (with `BreadcrumbList` JSON-LD), and a **"More … events"** related strip (same type, upcoming) for onward discovery
+- ✅ **Finished-event state** — once an event's end (or start) has passed, its page shows a "Finished" badge and a "this event has finished" notice in place of the register/save/calendar actions and urgency cues; reviews and the photo wall stay open
 - ✅ **Register to attend** (one tap), cancel registration, live attendee counts
 - ✅ **Social proof on cards** — average star rating + review count, and a prominent "going" tally, surfaced on every event card
 - ✅ **Honest urgency cues** — date-proximity badges (Today / Tomorrow / This weekend / In N days) and a "only N left" flag when an event with a real capacity is genuinely filling up; shown on cards and above the register button on the event page (derived from real data, never fabricated)
@@ -87,7 +88,7 @@
 - ✅ Public club profiles: description, location, categories, cover image, website, follower count
 - ✅ Club directory (`/clubs`) with search
 - ✅ **Follow / unfollow** clubs (one tap, live counts)
-- ✅ Club's upcoming events listed on its profile
+- ✅ Club's **upcoming** events listed on its profile (past events excluded), with breadcrumbs + `BreadcrumbList` JSON-LD
 - ✅ Owners edit their club from the dashboard
 - ✅ **Paid featured placement** — owners can promote their club (Stripe); featured clubs sort first in the directory, get a gold badge, and can appear in the homepage Spotlight
 - ✅ **Verified badge** — admin-granted trust mark (a real check, never sold as a label) shown on cards and the club page
@@ -98,7 +99,7 @@
 - ✅ **Amenity catalog with icons** (22 options: parking, hot food, alcoholic drinks, kids area, smoking area, EV charging, track access, dyno…) — venues tick what they offer; shown as an icon block on the venue page
 - ✅ Venue directory (`/venues`) with search and **instant amenity filtering** (icon chips, URL-shareable)
 - ✅ **Follow / unfollow** venues
-- ✅ Events held at a venue listed on its profile
+- ✅ **Upcoming** events held at a venue listed on its profile (past events excluded), with breadcrumbs + `BreadcrumbList` JSON-LD
 - ✅ Venue accounts' events default to their own venue location
 - ✅ Owners edit their venue (including click-to-pin location) from the dashboard
 - ✅ **Paid featured placement** — owners can promote their venue (Stripe); featured venues sort first in the directory, get a gold badge, and can appear in the homepage Spotlight
@@ -205,6 +206,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-16 | `547e20c` | **Detail pages review pass:** club & venue profiles now list **upcoming events only** (past no longer counted as "Upcoming"); the **event page gains a finished-event state** (badge + notice replacing register/urgency once it's over), a **"More … events"** related strip, and all three detail pages get **breadcrumbs + `BreadcrumbList` JSON-LD** (new `Breadcrumbs` component). Verified against local Postgres 16 |
 | 2026-10-16 | `9d914ba` | **Map page review pass 2:** the `/map` results list is now **viewport-synced** (shows what's on screen, updates on pan/zoom) in its **own scroll area** beneath the filters, with "N in view · first 40", **richer rows** (thumbnail + type pill + distance), **click-to-focus** the map and an open-arrow; added a **colour legend** under the map, **map-first on mobile**, and a slimmer page header |
 | 2026-10-16 | `06b9119` | **Map page review pass** (same treatment as `/events`): `/map` now shows **upcoming events by default** (with an Include-past toggle), a **Sort** control (soonest / nearest / A–Z), **quick-date chips**, always-visible **active-filter chips**, and a **mobile filter collapse**. `getEventMapPoints` is upcoming-only by default (also de-clutters the homepage map hero) with an `includePast` option; `MapPoint` gains `startsAt`/`isPast`. Verified against local Postgres 16 |
 | 2026-10-16 | `7f62907` | **Events page review pass:** the explorer now shows **upcoming events only by default** (fixes past events appearing, and leading, in the list/map) with an **Include past events** toggle; added a **Sort** control (soonest / nearest / recently added / featured), **quick-date chips** (this weekend / week / month), an always-visible **result count + removable active-filter chips**, a **mobile Filters collapse**, and a "going" count on the map's in-view list. `getExplorerEvents` now fetches upcoming-first + a bounded recent-past set and exposes `isPast`/`createdAt`. Verified against local Postgres 16 |
