@@ -1,8 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { handle, ok, fail } from "@/lib/api";
 import { sendEmail, emailShell, eventButton, emailConfigured } from "@/lib/email";
-import { rankEventsForUser, type DigestCandidate, type DigestPick } from "@/lib/digest";
-import { absoluteUrl } from "@/lib/site";
+import {
+  rankEventsForUser,
+  pickNewsletterEvents,
+  type DigestCandidate,
+  type DigestPick,
+} from "@/lib/digest";
+import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import { formatDate } from "@/lib/utils";
 
 // Weekly "events near you" digest (see vercel.json crons). Emails each opted-in
@@ -14,6 +19,7 @@ export const maxDuration = 60;
 const HORIZON_DAYS = 14;
 const RESEND_GAP_DAYS = 5; // don't email the same person twice within this window
 const MAX_USERS = 400;
+const MAX_NEWSLETTER = 1000; // anonymous "events near you" subscribers per run
 
 export const GET = handle(async (req: Request) => {
   const secret = process.env.CRON_SECRET;
@@ -33,13 +39,14 @@ export const GET = handle(async (req: Request) => {
     where: { status: "PUBLISHED", startsAt: { gte: now, lte: horizon } },
     orderBy: { startsAt: "asc" },
     take: 300,
-    select: { id: true, title: true, slug: true, city: true, lat: true, lng: true, startsAt: true, clubId: true, venueId: true, featured: true, featuredUntil: true },
+    select: { id: true, title: true, slug: true, city: true, region: true, lat: true, lng: true, startsAt: true, clubId: true, venueId: true, featured: true, featuredUntil: true },
   });
   const candidates: DigestCandidate[] = events.map((e) => ({
     id: e.id,
     title: e.title,
     slug: e.slug,
     city: e.city,
+    region: e.region,
     lat: e.lat,
     lng: e.lng,
     startsAt: e.startsAt,
@@ -113,7 +120,49 @@ export const GET = handle(async (req: Request) => {
     await prisma.user.updateMany({ where: { id: { in: updatedIds } }, data: { lastDigestAt: now } });
   }
 
-  return ok({ sent, consideredUsers: users.length, candidateEvents: candidates.length });
+  // --- Anonymous "events near you" newsletter subscribers (no account) ---
+  // Matched to their free-text area, falling back to soonest UK-wide so the
+  // email is never empty. Throttled by the same resend gap.
+  const subs = await prisma.newsletterSignup.findMany({
+    where: { OR: [{ lastSentAt: null }, { lastSentAt: { lt: gapCutoff } }] },
+    take: MAX_NEWSLETTER,
+    select: { id: true, email: true, area: true, token: true },
+  });
+
+  let newsletterSent = 0;
+  const sentSubIds: string[] = [];
+  for (const s of subs) {
+    const picks = pickNewsletterEvents(candidates, s.area, 6);
+    if (picks.length === 0) continue;
+    const area = s.area?.trim();
+    // Backfill a token for any legacy row created before the column existed,
+    // so its unsubscribe link works.
+    let token = s.token;
+    if (!token) {
+      token = crypto.randomUUID();
+      await prisma.newsletterSignup.update({ where: { id: s.id }, data: { token } });
+    }
+    const { sent: didSend } = await sendEmail({
+      to: s.email,
+      subject: `${picks.length} car event${picks.length === 1 ? "" : "s"} coming up${area ? ` near ${area}` : ""}`,
+      html: emailShell("Events coming up near you 🏁", newsletterBody(picks, area ?? null, token)),
+    });
+    if (didSend) {
+      newsletterSent++;
+      sentSubIds.push(s.id);
+    }
+  }
+  if (sentSubIds.length) {
+    await prisma.newsletterSignup.updateMany({ where: { id: { in: sentSubIds } }, data: { lastSentAt: now } });
+  }
+
+  return ok({
+    sent,
+    consideredUsers: users.length,
+    newsletterSent,
+    consideredSubscribers: subs.length,
+    candidateEvents: candidates.length,
+  });
 });
 
 function reasonLabel(p: DigestPick): string {
@@ -140,6 +189,33 @@ function digestBody(picks: DigestPick[]): string {
     <table style="width:100%;border-collapse:collapse">${rows}</table>
     ${eventButton(absoluteUrl("/events"), "Browse all events")}
     <p style="margin:16px 0 0;color:#777;font-size:12px">You're getting this because you opted into the weekly digest. Turn it off any time in your <a href="${absoluteUrl("/account")}" style="color:#FF5F1F">account settings</a>.</p>`;
+}
+
+function newsletterBody(
+  picks: DigestCandidate[],
+  area: string | null,
+  token: string,
+): string {
+  const intro = area
+    ? `Here's what's coming up near ${escapeHtml(area)}:`
+    : "Here's what's coming up across the UK:";
+  const rows = picks
+    .map(
+      (p) => `
+      <tr>
+        <td style="padding:10px 0;border-bottom:1px solid #262626">
+          ${p.featured ? `<span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#FFD700;border:1px solid rgba(255,215,0,.5);border-radius:100px;padding:1px 8px;margin-bottom:4px">★ Featured</span><br/>` : ""}
+          <a href="${absoluteUrl(`/events/${p.slug}`)}" style="color:#fff;font-weight:700;text-decoration:none;font-size:15px">${escapeHtml(p.title)}</a>
+          <div style="color:#aaa;font-size:13px;margin-top:2px">📅 ${formatDate(p.startsAt)} · 📍 ${escapeHtml(p.city)}</div>
+        </td>
+      </tr>`,
+    )
+    .join("");
+  return `
+    <p style="margin:0 0 12px">${intro}</p>
+    <table style="width:100%;border-collapse:collapse">${rows}</table>
+    ${eventButton(absoluteUrl("/events"), "Browse all events")}
+    <p style="margin:16px 0 0;color:#777;font-size:12px">You're getting this because you signed up for "events near you" on ${SITE_NAME}. <a href="${absoluteUrl(`/api/newsletter/unsubscribe?token=${token}`)}" style="color:#FF5F1F">Unsubscribe</a>.</p>`;
 }
 
 function escapeHtml(s: string): string {

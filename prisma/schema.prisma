@@ -313,8 +313,18 @@ model Review {
 // from the homepage without creating an account. Stored regardless of whether
 // Resend is configured (email sending degrades gracefully).
 model NewsletterSignup {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  area      String? // optional town / postcode / region they typed
-  createdAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  email      String    @unique
+  area       String? // optional town / postcode / region they typed
+  // Random token for one-click unsubscribe links in the digest email. Optional
+  // and NOT a DB unique index on purpose: adding a unique constraint to the
+  // already-deployed table would trip `prisma db push`'s data-loss guard (which
+  // the Vercel build relies on), exactly like the Review model. A cuid default
+  // makes collisions effectively impossible, so uniqueness is relied upon, not
+  // enforced. New rows get a token via the default; any legacy null is
+  // backfilled by the digest before it emails that subscriber.
+  token      String?   @default(cuid())
+  // Last time this subscriber was sent the digest (resend-gap throttling).
+  lastSentAt DateTime?
+  createdAt  DateTime  @default(now())
 }

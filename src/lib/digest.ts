@@ -9,6 +9,7 @@ export type DigestCandidate = {
   title: string;
   slug: string;
   city: string;
+  region?: string | null; // used for the area-text match in the newsletter digest
   lat: number;
   lng: number;
   startsAt: Date;
@@ -102,4 +103,35 @@ export function rankEventsForUser(
   const featured = picks.filter((p) => p.reason === "featured").slice(0, maxFeatured);
   const rest = picks.filter((p) => p.reason !== "featured");
   return [...featured, ...rest].slice(0, limit);
+}
+
+// Selection for the anonymous "events near you" newsletter list. Subscribers
+// only give us a free-text area (town / postcode / region), so we match on that
+// text against each event's city/region. When an area is given but matches
+// nothing (or no area at all), we fall back to the soonest events UK-wide so
+// the email is never empty. Featured events sort first (sponsored slot),
+// everything else by soonest date. Pure + synchronous for easy unit testing.
+export function pickNewsletterEvents(
+  candidates: DigestCandidate[],
+  area: string | null | undefined,
+  limit = 6,
+): DigestCandidate[] {
+  const byRank = (a: DigestCandidate, b: DigestCandidate) => {
+    const fa = a.featured ? 0 : 1;
+    const fb = b.featured ? 0 : 1;
+    if (fa !== fb) return fa - fb;
+    return a.startsAt.getTime() - b.startsAt.getTime();
+  };
+
+  const q = area?.trim().toLowerCase() ?? "";
+  if (q) {
+    const matched = candidates.filter((e) => {
+      const hay = `${e.city} ${e.region ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+    if (matched.length > 0) return [...matched].sort(byRank).slice(0, limit);
+  }
+
+  // No area, or nothing matched → soonest UK-wide (featured first).
+  return [...candidates].sort(byRank).slice(0, limit);
 }

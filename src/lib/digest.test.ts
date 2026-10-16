@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { rankEventsForUser, type DigestCandidate, type DigestContext } from "./digest";
+import {
+  rankEventsForUser,
+  pickNewsletterEvents,
+  type DigestCandidate,
+  type DigestContext,
+} from "./digest";
 
 const LONDON = { lat: 51.5074, lng: -0.1278 };
 const READING = { lat: 51.4543, lng: -0.9781 }; // ~60km W of London
@@ -11,6 +16,7 @@ function ev(id: string, coords: { lat: number; lng: number }, extra: Partial<Dig
     title: `Event ${id}`,
     slug: `event-${id}`,
     city: extra.city ?? "Somewhere",
+    region: extra.region ?? null,
     lat: coords.lat,
     lng: coords.lng,
     startsAt: extra.startsAt ?? new Date("2026-09-01T09:00:00Z"),
@@ -89,5 +95,50 @@ describe("rankEventsForUser", () => {
     );
     expect(picks.filter((p) => p.reason === "featured")).toHaveLength(1);
     expect(picks.some((p) => p.id === "plain")).toBe(true);
+  });
+});
+
+describe("pickNewsletterEvents", () => {
+  const soon = new Date("2026-09-01T09:00:00Z");
+  const later = new Date("2026-09-20T09:00:00Z");
+
+  it("matches the subscriber's area against city/region (case-insensitive)", () => {
+    const list = [
+      ev("leeds", LEEDS, { city: "Leeds" }),
+      ev("london", LONDON, { city: "London" }),
+    ];
+    const picks = pickNewsletterEvents(list, "leeds", 6);
+    expect(picks.map((p) => p.id)).toEqual(["leeds"]);
+  });
+
+  it("matches on region text too", () => {
+    const list = [
+      ev("a", LEEDS, { city: "Harrogate", region: "Yorkshire" }),
+      ev("b", LONDON, { city: "London", region: "Greater London" }),
+    ];
+    expect(pickNewsletterEvents(list, "yorkshire", 6).map((p) => p.id)).toEqual(["a"]);
+  });
+
+  it("falls back to soonest UK-wide when the area matches nothing", () => {
+    const list = [
+      ev("late", LONDON, { city: "London", startsAt: later }),
+      ev("early", LEEDS, { city: "Leeds", startsAt: soon }),
+    ];
+    const picks = pickNewsletterEvents(list, "nowhere-ville", 6);
+    expect(picks.map((p) => p.id)).toEqual(["early", "late"]); // soonest first
+  });
+
+  it("with no area, returns soonest UK-wide with featured first", () => {
+    const list = [
+      ev("plain-early", LEEDS, { startsAt: soon }),
+      ev("featured-late", LONDON, { startsAt: later, featured: true } as Partial<DigestCandidate>),
+    ];
+    const picks = pickNewsletterEvents(list, null, 6);
+    expect(picks[0].id).toBe("featured-late"); // featured sponsored slot wins
+  });
+
+  it("respects the limit", () => {
+    const list = [ev("a", LONDON), ev("b", READING), ev("c", LEEDS)];
+    expect(pickNewsletterEvents(list, null, 2)).toHaveLength(2);
   });
 });
