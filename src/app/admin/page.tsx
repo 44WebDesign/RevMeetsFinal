@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverview() {
-  const [users, suspended, events, drafts, clubs, venues, registrations, reviews, openReports, promoRevenue] =
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000);
+  const [users, suspended, events, drafts, clubs, venues, registrations, reviews, openReports, promoRevenue, newsletter, newsletterWeek] =
     await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { suspended: true } }),
@@ -16,6 +17,8 @@ export default async function AdminOverview() {
       prisma.review.count(),
       prisma.report.count({ where: { status: "OPEN" } }),
       prisma.promotion.aggregate({ _sum: { amount: true } }),
+      prisma.newsletterSignup.count(),
+      prisma.newsletterSignup.count({ where: { createdAt: { gte: weekAgo } } }),
     ]);
 
   const revenue = (promoRevenue._sum.amount ?? 0) / 100;
@@ -44,6 +47,7 @@ export default async function AdminOverview() {
         <Stat label="Reviews" value={reviews} icon="fa-star" />
         <Stat label="Open reports" value={openReports} icon="fa-flag" />
         <Stat label="Promo revenue" value={`£${revenue.toFixed(2)}`} icon="fa-receipt" />
+        <Stat label="Newsletter" value={newsletter} sub={newsletterWeek ? `+${newsletterWeek} this week` : undefined} icon="fa-envelope" />
       </div>
     </div>
   );
