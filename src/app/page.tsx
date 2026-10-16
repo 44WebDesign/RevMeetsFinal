@@ -4,6 +4,7 @@ import { EventCard } from "@/components/EventCard";
 import { ClubCard } from "@/components/ClubCard";
 import { VenueCard } from "@/components/VenueCard";
 import { MapHero } from "@/components/MapHero";
+import { HeroMapOverlay } from "@/components/HeroMapOverlay";
 import { HomeMapExplorer } from "@/components/HomeMapExplorer";
 import { RecentEventsStrip } from "@/components/RecentlyViewed";
 import { Spotlight } from "@/components/Spotlight";
@@ -97,6 +98,7 @@ export default async function HomePage({
               "linear-gradient(to bottom,rgba(8,8,8,.4) 0%,rgba(8,8,8,.15) 40%,rgba(8,8,8,.9) 85%,var(--bg) 100%)",
           }}
         />
+        <HeroMapOverlay cards={(soon.length ? soon : events).slice(0, 2)} />
         <div style={{ position: "relative", zIndex: 1, maxWidth: 920, width: "100%" }}>
           <div
             style={{
