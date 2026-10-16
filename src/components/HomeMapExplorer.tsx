@@ -80,6 +80,7 @@ export function HomeMapExplorer({ events }: { events: ExplorerEvent[] }) {
     const toT = to ? new Date(`${to}T23:59:59`).getTime() : null;
 
     let list: (ExplorerEvent & { distance?: number })[] = events.filter((e) => {
+      if (e.isPast) return false; // homepage map shows upcoming events only
       if (type && e.type !== type) return false;
       if (cityQ && !e.city.toLowerCase().includes(cityQ)) return false;
       if (query) {

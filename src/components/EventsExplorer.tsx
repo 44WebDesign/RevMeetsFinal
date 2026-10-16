@@ -19,6 +19,8 @@ import {
 } from "@/lib/enums";
 
 type LatLng = { lat: number; lng: number };
+type SortKey = "soonest" | "nearest" | "newest" | "featured";
+type QuickRange = "weekend" | "week" | "month";
 const RADII = [0, 5, 10, 25, 50, 100];
 
 export type ExplorerInitial = {
@@ -29,6 +31,23 @@ export type ExplorerInitial = {
   to?: string;
   amenities?: string[];
 };
+
+function ymd(d: Date): string {
+  const m = `${d.getMonth() + 1}`.padStart(2, "0");
+  const day = `${d.getDate()}`.padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+const QUICK_LABELS: Record<QuickRange, string> = {
+  weekend: "This weekend",
+  week: "This week",
+  month: "This month",
+};
+
+function prettyAmenity(key: string): string {
+  const s = key.replace(/_/g, " ").toLowerCase();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 export function EventsExplorer({
   events,
@@ -43,8 +62,12 @@ export function EventsExplorer({
   const [type, setType] = useState(initial.type ?? "");
   const [from, setFrom] = useState(initial.from ?? "");
   const [to, setTo] = useState(initial.to ?? "");
+  const [quick, setQuick] = useState<QuickRange | null>(null);
   const [amenities, setAmenities] = useState<string[]>(initial.amenities ?? []);
   const [showAmenities, setShowAmenities] = useState((initial.amenities ?? []).length > 0);
+  const [sort, setSort] = useState<SortKey>("soonest");
+  const [includePast, setIncludePast] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [focus, setFocus] = useState<(LatLng & { zoom?: number }) | null>(null);
@@ -52,7 +75,6 @@ export function EventsExplorer({
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
 
-  // Current visible map viewport — drives the "events on screen" list.
   const [bounds, setBounds] = useState<MapBounds | null>(null);
 
   function locateMe() {
@@ -67,6 +89,7 @@ export function EventsExplorer({
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
         setFocus({ ...loc, zoom: radius && radius <= 10 ? 11 : 9 });
+        setSort("nearest");
         setView("map");
         setLocating(false);
       },
@@ -82,15 +105,49 @@ export function EventsExplorer({
     );
   }
 
+  function clearLocation() {
+    setUserLocation(null);
+    setFocus(null);
+    if (sort === "nearest") setSort("soonest");
+  }
+
+  function clearDates() {
+    setFrom("");
+    setTo("");
+    setQuick(null);
+  }
+
+  function applyQuick(kind: QuickRange) {
+    if (quick === kind) {
+      clearDates();
+      return;
+    }
+    const now = new Date();
+    const dow = now.getDay(); // 0 Sun … 6 Sat
+    let f = new Date(now);
+    let t = new Date(now);
+    if (kind === "weekend") {
+      f.setDate(now.getDate() + ((6 - dow + 7) % 7)); // upcoming Saturday
+      t = new Date(f);
+      t.setDate(f.getDate() + 1); // Sunday
+    } else if (kind === "week") {
+      t.setDate(now.getDate() + (dow === 0 ? 0 : 7 - dow)); // end of this week (Sun)
+    } else {
+      t = new Date(now.getFullYear(), now.getMonth() + 1, 0); // last day of month
+    }
+    setFrom(ymd(f));
+    setTo(ymd(t));
+    setQuick(kind);
+  }
+
   function clearAll() {
     setQ("");
     setCity("");
     setType("");
-    setFrom("");
-    setTo("");
+    clearDates();
     setAmenities([]);
-    setUserLocation(null);
-    setFocus(null);
+    setIncludePast(false);
+    clearLocation();
   }
 
   const filtered = useMemo(() => {
@@ -100,6 +157,7 @@ export function EventsExplorer({
     const toT = to ? new Date(`${to}T23:59:59`).getTime() : null;
 
     let list: (ExplorerEvent & { distance?: number })[] = events.filter((e) => {
+      if (!includePast && e.isPast) return false;
       if (type && e.type !== type) return false;
       if (cityQ && !e.city.toLowerCase().includes(cityQ)) return false;
       if (query) {
@@ -119,10 +177,21 @@ export function EventsExplorer({
         distance: distanceKm(userLocation.lat, userLocation.lng, e.lat, e.lng),
       }));
       if (radius > 0) list = list.filter((e) => (e.distance ?? Infinity) <= radius);
-      list.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
     }
-    return list;
-  }, [events, q, city, type, from, to, amenities, userLocation, radius]);
+
+    const effective: SortKey = sort === "nearest" && !userLocation ? "soonest" : sort;
+    const byDate = (a: ExplorerEvent, b: ExplorerEvent) =>
+      new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
+    return [...list].sort((a, b) => {
+      if (effective === "nearest") return (a.distance ?? Infinity) - (b.distance ?? Infinity);
+      if (effective === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (effective === "featured") {
+        if (!!a.featured !== !!b.featured) return a.featured ? -1 : 1;
+        return byDate(a, b);
+      }
+      return byDate(a, b);
+    });
+  }, [events, q, city, type, from, to, amenities, includePast, userLocation, radius, sort]);
 
   const points: MapPoint[] = useMemo(
     () =>
@@ -155,98 +224,195 @@ export function EventsExplorer({
     );
   }, [filtered, bounds]);
 
-  const activeCount =
-    (q ? 1 : 0) + (city ? 1 : 0) + (type ? 1 : 0) + (from ? 1 : 0) + (to ? 1 : 0) +
-    amenities.length + (userLocation ? 1 : 0);
+  // Active-filter chips (always visible so people can see/undo each one).
+  const chips: { key: string; label: string; onClear: () => void }[] = [];
+  if (q) chips.push({ key: "q", label: `“${q}”`, onClear: () => setQ("") });
+  if (city) chips.push({ key: "city", label: `City: ${city}`, onClear: () => setCity("") });
+  if (type) chips.push({ key: "type", label: eventTypeLabel(type), onClear: () => setType("") });
+  if (from || to) {
+    chips.push({
+      key: "dates",
+      label: quick ? QUICK_LABELS[quick] : `${from || "…"} → ${to || "…"}`,
+      onClear: clearDates,
+    });
+  }
+  amenities.forEach((a) =>
+    chips.push({ key: `am-${a}`, label: prettyAmenity(a), onClear: () => setAmenities(amenities.filter((x) => x !== a)) }),
+  );
+  if (userLocation) chips.push({ key: "loc", label: `Near me${radius ? ` · ${radius}km` : ""}`, onClear: clearLocation });
+  if (includePast) chips.push({ key: "past", label: "Incl. past", onClear: () => setIncludePast(false) });
+
+  const activeCount = chips.length;
 
   return (
     <div>
-      {/* Horizontal filter / search bar */}
+      {/* Filter / search bar */}
       <div className="card-surface" style={{ padding: "1rem", marginBottom: "1.25rem" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: ".75rem", alignItems: "flex-end" }}>
-          <div style={{ flex: "1 1 180px", minWidth: 0 }}>
-            <label className="field-label">Keyword</label>
-            <input className="field-input" placeholder="Search events…" value={q} onChange={(e) => setQ(e.target.value)} />
-          </div>
-          <div style={{ flex: "1 1 140px", minWidth: 0 }}>
-            <label className="field-label">City</label>
-            <input className="field-input" placeholder="Any city" value={city} onChange={(e) => setCity(e.target.value)} />
-          </div>
-          <div style={{ flex: "0 1 140px", minWidth: 0 }}>
-            <label className="field-label">From</label>
-            <input type="date" className="field-input" style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }} value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div style={{ flex: "0 1 140px", minWidth: 0 }}>
-            <label className="field-label">To</label>
-            <input type="date" className="field-input" style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }} value={to} onChange={(e) => setTo(e.target.value)} />
-          </div>
-          <div style={{ flex: "0 0 auto" }}>
-            <label className="field-label">Near me</label>
-            <div style={{ display: "flex", gap: ".4rem" }}>
-              <button
-                onClick={userLocation ? () => { setUserLocation(null); setFocus(null); } : locateMe}
-                disabled={locating}
-                className={userLocation ? "btn-ghost" : "btn-or"}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: ".45rem", whiteSpace: "nowrap" }}
-              >
-                <i className={`fas ${locating ? "fa-spinner fa-spin" : userLocation ? "fa-xmark" : "fa-location-crosshairs"}`} />
-                {locating ? "Locating…" : userLocation ? "Clear" : "Use my location"}
-              </button>
-              {userLocation && (
-                <select className="field-select" style={{ width: "auto" }} value={radius} onChange={(e) => setRadius(Number(e.target.value))}>
-                  {RADII.map((r) => (
-                    <option key={r} value={r}>{r === 0 ? "Any distance" : `${r} km`}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-          </div>
-          <div style={{ flex: "0 0 auto" }}>
-            <label className="field-label" style={{ visibility: "hidden" }}>Amenities</label>
-            <button type="button" onClick={() => setShowAmenities((s) => !s)} className="btn-ghost" aria-expanded={showAmenities} style={{ whiteSpace: "nowrap" }}>
-              <i className={`fas ${showAmenities ? "fa-chevron-up" : "fa-sliders"}`} /> Amenities
-              {amenities.length > 0 && <span style={{ color: "var(--or)", marginLeft: 6, fontWeight: 700 }}>{amenities.length}</span>}
-            </button>
-          </div>
+        {/* Top row: count + sort + view toggle (+ Filters button on mobile) */}
+        <div className="ee-top">
+          <button
+            type="button"
+            className="ee-filters-toggle btn-ghost"
+            onClick={() => setMobileFiltersOpen((o) => !o)}
+            aria-expanded={mobileFiltersOpen}
+          >
+            <i className={`fas ${mobileFiltersOpen ? "fa-chevron-up" : "fa-sliders"}`} /> Filters
+            {activeCount > 0 && <span style={{ color: "var(--or)", marginLeft: 6, fontWeight: 700 }}>{activeCount}</span>}
+          </button>
 
-          {/* Map / List toggle, pushed to the right */}
-          <div style={{ marginLeft: "auto", display: "inline-flex", background: "var(--card2)", border: "1px solid var(--bdr2)", borderRadius: 8, padding: 3, alignSelf: "flex-end" }}>
-            <ToggleBtn active={view === "map"} onClick={() => setView("map")} icon="fa-map-location-dot" label="Map" />
-            <ToggleBtn active={view === "list"} onClick={() => setView("list")} icon="fa-grip" label="List" />
+          <span style={{ fontSize: ".9rem", color: "var(--mut)" }}>
+            <strong style={{ color: "var(--txt)" }}>{filtered.length}</strong>{" "}
+            {filtered.length === 1 ? "event" : "events"}
+            {userLocation && radius > 0 ? ` within ${radius} km` : ""}
+          </span>
+
+          <div style={{ marginLeft: "auto", display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
+            <select
+              className="field-select"
+              style={{ width: "auto", fontSize: ".82rem", padding: ".45rem 1.6rem .45rem .6rem" }}
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              aria-label="Sort events"
+            >
+              <option value="soonest">Soonest first</option>
+              {userLocation && <option value="nearest">Nearest first</option>}
+              <option value="newest">Recently added</option>
+              <option value="featured">Featured first</option>
+            </select>
+            <div style={{ display: "inline-flex", background: "var(--card2)", border: "1px solid var(--bdr2)", borderRadius: 8, padding: 3 }}>
+              <ToggleBtn active={view === "map"} onClick={() => setView("map")} icon="fa-map-location-dot" label="Map" />
+              <ToggleBtn active={view === "list"} onClick={() => setView("list")} icon="fa-grip" label="List" />
+            </div>
           </div>
         </div>
 
-        {/* Event-type pills */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: ".35rem", marginTop: ".85rem" }}>
-          {EVENT_TYPES.map((t) => {
-            const active = type === t;
-            return (
+        {/* Collapsible filter body */}
+        <div className={`ee-body${mobileFiltersOpen ? " open" : ""}`}>
+          <div className="ee-fields">
+            <div style={{ flex: "1 1 180px", minWidth: 0 }}>
+              <label className="field-label">Keyword</label>
+              <input className="field-input" placeholder="Search events…" value={q} onChange={(e) => setQ(e.target.value)} />
+            </div>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
+              <label className="field-label">City</label>
+              <input className="field-input" placeholder="Any city" value={city} onChange={(e) => setCity(e.target.value)} />
+            </div>
+            <div style={{ flex: "0 1 140px", minWidth: 0 }}>
+              <label className="field-label">From</label>
+              <input type="date" className="field-input" style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }} value={from} onChange={(e) => { setFrom(e.target.value); setQuick(null); }} />
+            </div>
+            <div style={{ flex: "0 1 140px", minWidth: 0 }}>
+              <label className="field-label">To</label>
+              <input type="date" className="field-input" style={{ minWidth: 0, fontSize: ".8rem", padding: ".55rem .5rem" }} value={to} onChange={(e) => { setTo(e.target.value); setQuick(null); }} />
+            </div>
+            <div style={{ flex: "0 0 auto" }}>
+              <label className="field-label">Near me</label>
+              <div style={{ display: "flex", gap: ".4rem" }}>
+                <button
+                  onClick={userLocation ? clearLocation : locateMe}
+                  disabled={locating}
+                  className={userLocation ? "btn-ghost" : "btn-or"}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: ".45rem", whiteSpace: "nowrap" }}
+                >
+                  <i className={`fas ${locating ? "fa-spinner fa-spin" : userLocation ? "fa-xmark" : "fa-location-crosshairs"}`} />
+                  {locating ? "Locating…" : userLocation ? "Clear" : "Use my location"}
+                </button>
+                {userLocation && (
+                  <select className="field-select" style={{ width: "auto" }} value={radius} onChange={(e) => setRadius(Number(e.target.value))}>
+                    {RADII.map((r) => (
+                      <option key={r} value={r}>{r === 0 ? "Any distance" : `${r} km`}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+            <div style={{ flex: "0 0 auto" }}>
+              <label className="field-label" style={{ visibility: "hidden" }}>Amenities</label>
+              <button type="button" onClick={() => setShowAmenities((s) => !s)} className="btn-ghost" aria-expanded={showAmenities} style={{ whiteSpace: "nowrap" }}>
+                <i className={`fas ${showAmenities ? "fa-chevron-up" : "fa-sliders"}`} /> Amenities
+                {amenities.length > 0 && <span style={{ color: "var(--or)", marginLeft: 6, fontWeight: 700 }}>{amenities.length}</span>}
+              </button>
+            </div>
+          </div>
+
+          {/* Quick date chips + include-past toggle */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: ".35rem", marginTop: ".85rem", alignItems: "center" }}>
+            <span style={{ fontSize: ".75rem", color: "var(--mut)", marginRight: ".2rem" }}>Quick dates:</span>
+            {(Object.keys(QUICK_LABELS) as QuickRange[]).map((k) => (
               <button
-                key={t}
-                onClick={() => setType(active ? "" : t)}
+                key={k}
+                onClick={() => applyQuick(k)}
                 className="tag"
                 style={{
-                  borderColor: active ? EVENT_TYPE_COLORS[t] : "var(--bdr2)",
-                  color: active ? "#fff" : "var(--mut)",
-                  background: active ? EVENT_TYPE_COLORS[t] + "22" : "transparent",
+                  borderColor: quick === k ? "var(--or)" : "var(--bdr2)",
+                  color: quick === k ? "#fff" : "var(--mut)",
+                  background: quick === k ? "rgba(255,95,31,.18)" : "transparent",
                 }}
               >
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: EVENT_TYPE_COLORS[t], display: "inline-block", marginRight: 5 }} />
-                {EVENT_TYPE_LABELS[t]}
+                {QUICK_LABELS[k]}
               </button>
-            );
-          })}
-          {activeCount > 0 && (
-            <button onClick={clearAll} className="btn-ghost" style={{ padding: ".3rem .7rem", fontSize: ".78rem", marginLeft: "auto" }}>
-              <i className="fas fa-rotate-left" /> Clear all
+            ))}
+            <button
+              onClick={() => setIncludePast((p) => !p)}
+              className="tag"
+              style={{
+                marginLeft: ".4rem",
+                borderColor: includePast ? "var(--or)" : "var(--bdr2)",
+                color: includePast ? "#fff" : "var(--mut)",
+                background: includePast ? "rgba(255,95,31,.18)" : "transparent",
+              }}
+              aria-pressed={includePast}
+            >
+              <i className="fas fa-clock-rotate-left" style={{ marginRight: 4 }} /> Include past events
             </button>
+          </div>
+
+          {/* Event-type pills */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: ".35rem", marginTop: ".6rem" }}>
+            {EVENT_TYPES.map((t) => {
+              const active = type === t;
+              return (
+                <button
+                  key={t}
+                  onClick={() => setType(active ? "" : t)}
+                  className="tag"
+                  style={{
+                    borderColor: active ? EVENT_TYPE_COLORS[t] : "var(--bdr2)",
+                    color: active ? "#fff" : "var(--mut)",
+                    background: active ? EVENT_TYPE_COLORS[t] + "22" : "transparent",
+                  }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: EVENT_TYPE_COLORS[t], display: "inline-block", marginRight: 5 }} />
+                  {EVENT_TYPE_LABELS[t]}
+                </button>
+              );
+            })}
+          </div>
+
+          {showAmenities && (
+            <div style={{ marginTop: ".9rem", paddingTop: ".9rem", borderTop: "1px solid var(--bdr)" }}>
+              <AmenityFilter value={amenities} onChange={setAmenities} />
+            </div>
           )}
         </div>
 
-        {/* Amenities panel (expands under the bar) */}
-        {showAmenities && (
-          <div style={{ marginTop: ".9rem", paddingTop: ".9rem", borderTop: "1px solid var(--bdr)" }}>
-            <AmenityFilter value={amenities} onChange={setAmenities} />
+        {/* Active-filter chips (always visible) */}
+        {activeCount > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: ".4rem", marginTop: ".9rem", paddingTop: ".9rem", borderTop: "1px solid var(--bdr)", alignItems: "center" }}>
+            {chips.map((c) => (
+              <button
+                key={c.key}
+                onClick={c.onClear}
+                className="tag"
+                style={{ borderColor: "var(--bdr2)", color: "var(--txt)", background: "var(--card2)" }}
+                title="Remove filter"
+              >
+                {c.label} <i className="fas fa-xmark" style={{ marginLeft: 4, color: "var(--mut)" }} />
+              </button>
+            ))}
+            <button onClick={clearAll} className="btn-ghost" style={{ padding: ".3rem .7rem", fontSize: ".78rem", marginLeft: ".2rem" }}>
+              <i className="fas fa-rotate-left" /> Clear all
+            </button>
           </div>
         )}
 
@@ -293,6 +459,9 @@ export function EventsExplorer({
                         <div style={{ fontSize: ".72rem", color: "var(--mut)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           <i className="fas fa-calendar-alt" /> {formatDate(e.startsAt)} · {e.city}
                         </div>
+                        <div style={{ fontSize: ".7rem", color: "var(--mut)", marginTop: ".15rem" }}>
+                          <i className="fas fa-users" style={{ color: "var(--or)" }} /> {e.attendees} going
+                        </div>
                       </div>
                     </Link>
                   );
@@ -316,27 +485,37 @@ export function EventsExplorer({
 
       {/* LIST VIEW — card grid */}
       {view === "list" && (
-        <>
-          <div style={{ color: "var(--mut)", fontSize: ".9rem", marginBottom: "1rem" }}>
-            {filtered.length} {filtered.length === 1 ? "event" : "events"}
-            {userLocation && radius > 0 ? ` within ${radius} km` : ""}
+        filtered.length === 0 ? (
+          <div className="card-surface" style={{ padding: "3rem", textAlign: "center", color: "var(--mut)" }}>
+            <i className="fas fa-magnifying-glass" style={{ fontSize: "1.5rem", display: "block", marginBottom: ".75rem" }} />
+            No events match your filters. Try widening them{!includePast ? " or including past events" : ""}.
           </div>
-          {filtered.length === 0 ? (
-            <div className="card-surface" style={{ padding: "3rem", textAlign: "center", color: "var(--mut)" }}>
-              <i className="fas fa-magnifying-glass" style={{ fontSize: "1.5rem", display: "block", marginBottom: ".75rem" }} />
-              No events match your filters. Try widening them.
-            </div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "1.25rem" }}>
-              {filtered.map((e) => (
-                <EventCard key={e.id} event={e} />
-              ))}
-            </div>
-          )}
-        </>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "1.25rem" }}>
+            {filtered.map((e) => (
+              <EventCard key={e.id} event={e} />
+            ))}
+          </div>
+        )
       )}
 
       <style jsx>{`
+        .ee-top {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .ee-filters-toggle {
+          display: none;
+        }
+        .ee-fields {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          align-items: flex-end;
+          margin-top: 0.9rem;
+        }
         .events-map-layout {
           display: grid;
           grid-template-columns: 340px 1fr;
@@ -370,7 +549,16 @@ export function EventsExplorer({
           height: calc(100vh - 230px);
           min-height: 420px;
         }
-        @media (max-width: 860px) {
+        @media (max-width: 760px) {
+          .ee-filters-toggle {
+            display: inline-flex;
+          }
+          .ee-body {
+            display: none;
+          }
+          .ee-body.open {
+            display: block;
+          }
           .events-map-layout {
             grid-template-columns: 1fr;
           }

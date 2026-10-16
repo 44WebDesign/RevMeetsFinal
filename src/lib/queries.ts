@@ -122,24 +122,55 @@ function toEventCard(userId?: string) {
 }
 
 // Full event rows (card data + coordinates) for the client-side events
-// explorer, which filters and maps from a single fetched set.
-export type ExplorerEvent = EventCardData & { lat: number; lng: number };
+// explorer, which filters and maps from a single fetched set. `isPast` /
+// `createdAt` let the client hide past events by default and offer sort options.
+export type ExplorerEvent = EventCardData & {
+  lat: number;
+  lng: number;
+  createdAt: string;
+  isPast: boolean;
+};
 
 export async function getExplorerEvents(userId?: string): Promise<ExplorerEvent[]> {
-  const events = await prisma.event.findMany({
-    where: { status: "PUBLISHED" },
-    orderBy: [{ featured: "desc" }, { startsAt: "asc" }],
-    take: 500,
-    include: {
-      club: { select: { name: true } },
-      venue: { select: { amenities: true } },
-      reviews: { select: { rating: true } },
-      _count: { select: { registrations: true } },
-      ...(userId ? { savedBy: { where: { userId }, select: { id: true } } } : {}),
-    },
-  });
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const include = {
+    club: { select: { name: true } },
+    venue: { select: { amenities: true } },
+    reviews: { select: { rating: true } },
+    _count: { select: { registrations: true } },
+    ...(userId ? { savedBy: { where: { userId }, select: { id: true } } } : {}),
+  } as const;
+
+  // Upcoming events come first (soonest, featured on top). A bounded set of the
+  // most recent past events is also returned so the client's "include past"
+  // toggle has data without a round-trip — but they never crowd out upcoming
+  // ones, since the take caps are separate.
+  const [upcoming, past] = await Promise.all([
+    prisma.event.findMany({
+      where: { status: "PUBLISHED", startsAt: { gte: startOfToday } },
+      orderBy: [{ featured: "desc" }, { startsAt: "asc" }],
+      take: 400,
+      include,
+    }),
+    prisma.event.findMany({
+      where: { status: "PUBLISHED", startsAt: { lt: startOfToday } },
+      orderBy: { startsAt: "desc" },
+      take: 100,
+      include,
+    }),
+  ]);
+
   const map = toEventCard(userId);
-  return events.map((e) => ({ ...map(e), lat: e.lat, lng: e.lng }));
+  const toRow = (e: (typeof upcoming)[number], isPast: boolean): ExplorerEvent => ({
+    ...map(e),
+    lat: e.lat,
+    lng: e.lng,
+    createdAt: e.createdAt.toISOString(),
+    isPast,
+  });
+  return [...upcoming.map((e) => toRow(e, false)), ...past.map((e) => toRow(e, true))];
 }
 
 // ---- Homepage spotlight (paid featured placement) ----
