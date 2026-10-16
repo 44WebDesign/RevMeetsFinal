@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { MapView, type MapPoint } from "./MapView";
+import Image from "next/image";
+import { MapView, type MapPoint, type MapBounds } from "./MapView";
 import { AmenityFilter } from "./AmenityFilter";
+import { FallbackCover } from "./FallbackCover";
 import { hasAllAmenities } from "@/lib/amenities";
 import { distanceKm } from "@/lib/utils";
 import { EVENT_TYPES, EVENT_TYPE_LABELS, EVENT_TYPE_COLORS, eventTypeLabel } from "@/lib/enums";
@@ -12,6 +14,7 @@ type LatLng = { lat: number; lng: number };
 type SortKey = "soonest" | "nearest" | "name";
 type QuickRange = "weekend" | "week" | "month";
 const RADII = [0, 5, 10, 25, 50, 100]; // km; 0 = any distance
+const LIST_CAP = 40;
 
 const QUICK_LABELS: Record<QuickRange, string> = {
   weekend: "This weekend",
@@ -19,11 +22,15 @@ const QUICK_LABELS: Record<QuickRange, string> = {
   month: "This month",
 };
 
-function ymd(d: Date): string {
-  const m = `${d.getMonth() + 1}`.padStart(2, "0");
-  const day = `${d.getDate()}`.padStart(2, "0");
-  return `${d.getFullYear()}-${m}-${day}`;
-}
+// Compact map legend (shown under the map).
+const LEGEND: [string, string][] = [
+  ["Car Show", EVENT_TYPE_COLORS.CAR_SHOW],
+  ["Track Day", EVENT_TYPE_COLORS.TRACK_DAY],
+  ["Cruise", EVENT_TYPE_COLORS.NIGHT_CRUISE],
+  ["Meet", EVENT_TYPE_COLORS.MEET],
+  ["Drift", EVENT_TYPE_COLORS.DRIFT_EVENT],
+  ["Venue", "#00BCD4"],
+];
 
 function prettyAmenity(key: string): string {
   const s = key.replace(/_/g, " ").toLowerCase();
@@ -51,6 +58,7 @@ export function MapExplorer({
   const [radius, setRadius] = useState(25); // km
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
+  const [bounds, setBounds] = useState<MapBounds | null>(null);
 
   function toggleType(t: string) {
     setActiveTypes((prev) => {
@@ -94,7 +102,6 @@ export function MapExplorer({
     if (sort === "nearest") setSort("soonest");
   }
 
-  // Quick-date range (events only) → [fromMs, toMs].
   const dateRange = useMemo<[number, number] | null>(() => {
     if (!quick) return null;
     const now = new Date();
@@ -115,7 +122,7 @@ export function MapExplorer({
     return [f.getTime(), t.getTime()];
   }, [quick]);
 
-  // Filtered + distance-annotated points.
+  // Filtered + distance-annotated + sorted points (drives the map pins).
   const points = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list: (MapPoint & { distance?: number })[] = [];
@@ -166,6 +173,15 @@ export function MapExplorer({
     return list;
   }, [query, activeTypes, amenities, showVenues, showEvents, includePast, dateRange, sort, userLocation, radius, eventPoints, venuePoints]);
 
+  // Results list reflects what's inside the current map viewport (updates on
+  // pan/zoom), so it reads as "what's on screen".
+  const visible = useMemo(() => {
+    if (!bounds) return points;
+    return points.filter(
+      (p) => p.lat <= bounds.north && p.lat >= bounds.south && p.lng <= bounds.east && p.lng >= bounds.west,
+    );
+  }, [points, bounds]);
+
   // Active-filter chips.
   const chips: { key: string; label: string; onClear: () => void }[] = [];
   if (query) chips.push({ key: "q", label: `“${query}”`, onClear: () => setQuery("") });
@@ -210,141 +226,128 @@ export function MapExplorer({
           </button>
         </div>
 
-        <div className={`map-filters${mobileFiltersOpen ? " open" : ""}`}>
-          <div>
-            <label className="field-label">Search</label>
-            <input
-              className="field-input"
-              placeholder="Event, venue or city..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="field-label" style={{ marginBottom: ".5rem" }}>Near me</label>
-            <button
-              onClick={userLocation ? clearLocation : locateMe}
-              disabled={locating}
-              className={userLocation ? "btn-ghost" : "btn-or"}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: ".45rem" }}
-            >
-              <i className={`fas ${locating ? "fa-spinner fa-spin" : userLocation ? "fa-xmark" : "fa-location-crosshairs"}`} />
-              {locating ? "Locating…" : userLocation ? "Clear my location" : "Use my location"}
-            </button>
-            {locateError && (
-              <p style={{ fontSize: ".72rem", color: "#ff6b5e", marginTop: ".4rem" }}>{locateError}</p>
-            )}
-            {userLocation && (
-              <div style={{ marginTop: ".6rem" }}>
-                <label className="field-label" style={{ marginBottom: ".3rem" }}>Within</label>
-                <select className="field-select" value={radius} onChange={(e) => setRadius(Number(e.target.value))}>
-                  {RADII.map((r) => (
-                    <option key={r} value={r}>{r === 0 ? "Any distance" : `${r} km`}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="field-label" style={{ marginBottom: ".3rem" }}>Sort by</label>
-            <select className="field-select" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
-              <option value="soonest">Soonest first</option>
-              {userLocation && <option value="nearest">Nearest first</option>}
-              <option value="name">Name A–Z</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="field-label" style={{ marginBottom: ".5rem" }}>Show on map</label>
-            <div style={{ display: "flex", gap: ".5rem" }}>
-              <ToggleChip active={showEvents} onClick={() => setShowEvents((v) => !v)} color="#FF5F1F">
-                <i className="fas fa-flag-checkered" /> Events
-              </ToggleChip>
-              <ToggleChip active={showVenues} onClick={() => setShowVenues((v) => !v)} color="#00BCD4">
-                <i className="fas fa-warehouse" /> Venues
-              </ToggleChip>
+        <div className="map-filters-scroll">
+          <div className={`map-filters${mobileFiltersOpen ? " open" : ""}`}>
+            <div>
+              <label className="field-label">Search</label>
+              <input className="field-input" placeholder="Event, venue or city..." value={query} onChange={(e) => setQuery(e.target.value)} />
             </div>
-          </div>
 
-          <div>
-            <label className="field-label" style={{ marginBottom: ".5rem" }}>When</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: ".4rem" }}>
-              {(Object.keys(QUICK_LABELS) as QuickRange[]).map((k) => (
-                <button
-                  key={k}
-                  onClick={() => setQuick((cur) => (cur === k ? null : k))}
-                  className="tag"
-                  style={{
-                    borderColor: quick === k ? "var(--or)" : "var(--bdr2)",
-                    color: quick === k ? "#fff" : "var(--mut)",
-                    background: quick === k ? "rgba(255,95,31,.18)" : "transparent",
-                  }}
-                >
-                  {QUICK_LABELS[k]}
-                </button>
-              ))}
+            <div>
+              <label className="field-label" style={{ marginBottom: ".5rem" }}>Near me</label>
               <button
-                onClick={() => setIncludePast((p) => !p)}
-                className="tag"
-                aria-pressed={includePast}
-                style={{
-                  borderColor: includePast ? "var(--or)" : "var(--bdr2)",
-                  color: includePast ? "#fff" : "var(--mut)",
-                  background: includePast ? "rgba(255,95,31,.18)" : "transparent",
-                }}
+                onClick={userLocation ? clearLocation : locateMe}
+                disabled={locating}
+                className={userLocation ? "btn-ghost" : "btn-or"}
+                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: ".45rem" }}
               >
-                <i className="fas fa-clock-rotate-left" style={{ marginRight: 4 }} /> Past
+                <i className={`fas ${locating ? "fa-spinner fa-spin" : userLocation ? "fa-xmark" : "fa-location-crosshairs"}`} />
+                {locating ? "Locating…" : userLocation ? "Clear my location" : "Use my location"}
               </button>
+              {locateError && <p style={{ fontSize: ".72rem", color: "#ff6b5e", marginTop: ".4rem" }}>{locateError}</p>}
+              {userLocation && (
+                <div style={{ marginTop: ".6rem" }}>
+                  <label className="field-label" style={{ marginBottom: ".3rem" }}>Within</label>
+                  <select className="field-select" value={radius} onChange={(e) => setRadius(Number(e.target.value))}>
+                    {RADII.map((r) => (
+                      <option key={r} value={r}>{r === 0 ? "Any distance" : `${r} km`}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
-          </div>
 
-          <div>
-            <label className="field-label" style={{ marginBottom: ".5rem" }}>Event types</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: ".4rem" }}>
-              {EVENT_TYPES.map((t) => {
-                const active = activeTypes.has(t);
-                return (
+            <div>
+              <label className="field-label" style={{ marginBottom: ".3rem" }}>Sort by</label>
+              <select className="field-select" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+                <option value="soonest">Soonest first</option>
+                {userLocation && <option value="nearest">Nearest first</option>}
+                <option value="name">Name A–Z</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="field-label" style={{ marginBottom: ".5rem" }}>Show on map</label>
+              <div style={{ display: "flex", gap: ".5rem" }}>
+                <ToggleChip active={showEvents} onClick={() => setShowEvents((v) => !v)} color="#FF5F1F">
+                  <i className="fas fa-flag-checkered" /> Events
+                </ToggleChip>
+                <ToggleChip active={showVenues} onClick={() => setShowVenues((v) => !v)} color="#00BCD4">
+                  <i className="fas fa-warehouse" /> Venues
+                </ToggleChip>
+              </div>
+            </div>
+
+            <div>
+              <label className="field-label" style={{ marginBottom: ".5rem" }}>When</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: ".4rem" }}>
+                {(Object.keys(QUICK_LABELS) as QuickRange[]).map((k) => (
                   <button
-                    key={t}
-                    onClick={() => toggleType(t)}
+                    key={k}
+                    onClick={() => setQuick((cur) => (cur === k ? null : k))}
                     className="tag"
                     style={{
-                      borderColor: active ? EVENT_TYPE_COLORS[t] : "var(--bdr2)",
-                      color: active ? "#fff" : "var(--mut)",
-                      background: active ? EVENT_TYPE_COLORS[t] + "22" : "transparent",
+                      borderColor: quick === k ? "var(--or)" : "var(--bdr2)",
+                      color: quick === k ? "#fff" : "var(--mut)",
+                      background: quick === k ? "rgba(255,95,31,.18)" : "transparent",
                     }}
                   >
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: EVENT_TYPE_COLORS[t], display: "inline-block", marginRight: 5 }} />
-                    {EVENT_TYPE_LABELS[t]}
+                    {QUICK_LABELS[k]}
                   </button>
-                );
-              })}
+                ))}
+                <button
+                  onClick={() => setIncludePast((p) => !p)}
+                  className="tag"
+                  aria-pressed={includePast}
+                  style={{
+                    borderColor: includePast ? "var(--or)" : "var(--bdr2)",
+                    color: includePast ? "#fff" : "var(--mut)",
+                    background: includePast ? "rgba(255,95,31,.18)" : "transparent",
+                  }}
+                >
+                  <i className="fas fa-clock-rotate-left" style={{ marginRight: 4 }} /> Past
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="field-label" style={{ marginBottom: ".5rem" }}>
-              Amenities{amenities.length > 0 && (
-                <span style={{ color: "var(--or)" }}> · {amenities.length} selected</span>
-              )}
-            </label>
-            <AmenityFilter value={amenities} onChange={setAmenities} />
+            <div>
+              <label className="field-label" style={{ marginBottom: ".5rem" }}>Event types</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: ".4rem" }}>
+                {EVENT_TYPES.map((t) => {
+                  const active = activeTypes.has(t);
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => toggleType(t)}
+                      className="tag"
+                      style={{
+                        borderColor: active ? EVENT_TYPE_COLORS[t] : "var(--bdr2)",
+                        color: active ? "#fff" : "var(--mut)",
+                        background: active ? EVENT_TYPE_COLORS[t] + "22" : "transparent",
+                      }}
+                    >
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: EVENT_TYPE_COLORS[t], display: "inline-block", marginRight: 5 }} />
+                      {EVENT_TYPE_LABELS[t]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className="field-label" style={{ marginBottom: ".5rem" }}>
+                Amenities{amenities.length > 0 && <span style={{ color: "var(--or)" }}> · {amenities.length} selected</span>}
+              </label>
+              <AmenityFilter value={amenities} onChange={setAmenities} />
+            </div>
           </div>
         </div>
 
         {/* Active-filter chips (always visible) */}
         {chips.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: ".4rem", paddingTop: ".75rem", borderTop: "1px solid var(--bdr)" }}>
+          <div className="map-chips">
             {chips.map((c) => (
-              <button
-                key={c.key}
-                onClick={c.onClear}
-                className="tag"
-                style={{ borderColor: "var(--bdr2)", color: "var(--txt)", background: "var(--card2)" }}
-                title="Remove filter"
-              >
+              <button key={c.key} onClick={c.onClear} className="tag" style={{ borderColor: "var(--bdr2)", color: "var(--txt)", background: "var(--card2)" }} title="Remove filter">
                 {c.label} <i className="fas fa-xmark" style={{ marginLeft: 4, color: "var(--mut)" }} />
               </button>
             ))}
@@ -354,45 +357,81 @@ export function MapExplorer({
           </div>
         )}
 
-        {/* Results list */}
-        <div style={{ borderTop: "1px solid var(--bdr)", paddingTop: ".75rem", display: "flex", flexDirection: "column", gap: ".5rem" }}>
-          {points.slice(0, 40).map((p) => (
-            <Link
-              key={`${p.kind}-${p.id}`}
-              href={p.href}
-              style={{ display: "flex", gap: ".6rem", alignItems: "center", padding: ".5rem", borderRadius: 6, textDecoration: "none", color: "inherit", border: "1px solid var(--bdr)" }}
-            >
-              <span style={{ width: 10, height: 10, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-              <span style={{ minWidth: 0, flex: 1 }}>
-                <span style={{ display: "block", fontSize: ".82rem", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {p.title}
-                </span>
-                <span style={{ display: "block", fontSize: ".72rem", color: "var(--mut)" }}>{p.subtitle}</span>
-              </span>
-              {p.distance !== undefined && (
-                <span style={{ fontSize: ".7rem", fontWeight: 700, color: "var(--or)", whiteSpace: "nowrap" }}>
-                  {p.distance < 10 ? p.distance.toFixed(1) : Math.round(p.distance)} km
-                </span>
-              )}
-            </Link>
-          ))}
-          {points.length === 0 && (
+        {/* Results list — reflects the current map viewport */}
+        <div className="map-results">
+          <div className="map-results-head">
+            <span style={{ fontWeight: 700, fontSize: ".82rem" }}>
+              {visible.length} in view{visible.length > LIST_CAP ? ` · first ${LIST_CAP}` : ""}
+            </span>
+            <span style={{ fontSize: ".7rem", color: "var(--mut)" }}>
+              <i className="fas fa-arrows-up-down-left-right" /> Pan / zoom
+            </span>
+          </div>
+          {visible.length === 0 ? (
             <p style={{ fontSize: ".82rem", color: "var(--mut)", textAlign: "center", padding: "1rem 0" }}>
-              Nothing matches these filters{!includePast ? " — try including past events" : ""}.
+              Nothing in view{!includePast ? " — try including past events, or zoom out" : " — zoom out or move the map"}.
             </p>
+          ) : (
+            visible.slice(0, LIST_CAP).map((p) => {
+              const label = p.kind === "venue" ? "Venue" : eventTypeLabel(p.type);
+              return (
+                <div key={`${p.kind}-${p.id}`} className="map-result-row">
+                  <button
+                    type="button"
+                    className="map-result-main"
+                    onClick={() => setFocus({ lat: p.lat, lng: p.lng, zoom: 12 })}
+                    title="Show on map"
+                  >
+                    <span className="map-result-thumb">
+                      {p.imageUrl ? (
+                        <Image src={p.imageUrl} alt="" fill sizes="44px" style={{ objectFit: "cover" }} />
+                      ) : (
+                        <FallbackCover accent={p.color} icon={p.kind === "venue" ? "fa-warehouse" : "fa-calendar-alt"} />
+                      )}
+                    </span>
+                    <span style={{ minWidth: 0, flex: 1 }}>
+                      <span className="pill" style={{ background: p.color, color: "#fff", fontSize: ".54rem", display: "inline-block", marginBottom: ".2rem" }}>
+                        {label}
+                      </span>
+                      <span style={{ display: "block", fontSize: ".82rem", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {p.title}
+                      </span>
+                      <span style={{ display: "block", fontSize: ".72rem", color: "var(--mut)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {p.subtitle}
+                        {p.distance !== undefined ? ` · ${p.distance < 10 ? p.distance.toFixed(1) : Math.round(p.distance)} km` : ""}
+                      </span>
+                    </span>
+                  </button>
+                  <Link href={p.href} className="map-result-open" aria-label={`Open ${p.title}`}>
+                    <i className="fas fa-arrow-right" />
+                  </Link>
+                </div>
+              );
+            })
           )}
         </div>
       </aside>
 
-      {/* Map */}
-      <div>
+      {/* Map + legend */}
+      <div className="map-map">
         <MapView
           points={points}
-          height="calc(100vh - 140px)"
+          height="calc(100vh - 190px)"
           fitToPoints={!userLocation}
           focus={focus}
           userLocation={userLocation}
+          onBoundsChange={setBounds}
         />
+        <div className="map-legend">
+          {LEGEND.map(([label, color]) => (
+            <span key={label} className="map-legend-item">
+              <span style={{ width: 9, height: 9, borderRadius: "50%", background: color, display: "inline-block" }} /> {label}
+            </span>
+          ))}
+          <span className="map-legend-item" style={{ marginLeft: "auto", color: "var(--mut)" }}>
+            <i className="fas fa-circle-info" /> Click a pin for details
+          </span>
+        </div>
       </div>
 
       <style jsx>{`
@@ -401,32 +440,81 @@ export function MapExplorer({
           display: flex;
           flex-direction: column;
           gap: 1rem;
-          max-height: calc(100vh - 140px);
-          overflow: auto;
+          height: calc(100vh - 150px);
+          overflow: hidden;
         }
         .map-sidebar-top {
+          flex: 0 0 auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 0.5rem;
         }
-        .map-filters-toggle {
-          display: none;
+        .map-filters-scroll {
+          flex: 0 1 auto;
+          min-height: 0;
+          overflow-y: auto;
         }
         .map-filters {
           display: flex;
           flex-direction: column;
           gap: 1rem;
         }
+        .map-chips {
+          flex: 0 0 auto;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+          padding-top: 0.75rem;
+          border-top: 1px solid var(--bdr);
+        }
+        .map-results {
+          flex: 1 1 auto;
+          min-height: 140px;
+          overflow-y: auto;
+          padding-top: 0.75rem;
+          border-top: 1px solid var(--bdr);
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .map-results-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          position: sticky;
+          top: 0;
+          background: var(--card);
+          padding-bottom: 0.3rem;
+        }
+        .map-filters-toggle {
+          display: none;
+        }
+        .map-legend {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.4rem 1rem;
+          margin-top: 0.6rem;
+          font-size: 0.75rem;
+          color: var(--txt);
+        }
+        .map-legend-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
         @media (max-width: 860px) {
           .map-explorer {
             grid-template-columns: 1fr !important;
           }
           .map-sidebar {
-            max-height: none;
+            height: auto;
+            overflow: visible;
           }
-          .map-filters-toggle {
-            display: inline-flex;
+          .map-filters-scroll {
+            overflow: visible;
           }
           .map-filters {
             display: none;
@@ -434,6 +522,64 @@ export function MapExplorer({
           .map-filters.open {
             display: flex;
           }
+          .map-results {
+            overflow-y: auto;
+            max-height: 460px;
+          }
+          .map-filters-toggle {
+            display: inline-flex;
+          }
+          .map-map {
+            order: -1;
+          }
+        }
+      `}</style>
+      <style jsx global>{`
+        .map-result-row {
+          display: flex;
+          align-items: stretch;
+          border: 1px solid var(--bdr);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .map-result-row:hover {
+          border-color: var(--bdr2);
+          background: var(--card2);
+        }
+        .map-result-main {
+          display: flex;
+          gap: 0.6rem;
+          align-items: center;
+          flex: 1;
+          min-width: 0;
+          padding: 0.5rem;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          color: inherit;
+        }
+        .map-result-thumb {
+          position: relative;
+          flex: 0 0 44px;
+          width: 44px;
+          height: 44px;
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        .map-result-open {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          flex: 0 0 40px;
+          color: var(--mut);
+          border-left: 1px solid var(--bdr);
+          text-decoration: none;
+        }
+        .map-result-open:hover {
+          color: var(--or);
+          background: rgba(255, 95, 31, 0.08);
         }
       `}</style>
     </div>
