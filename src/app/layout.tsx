@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
@@ -7,16 +7,19 @@ import { JsonLd } from "@/components/JsonLd";
 import { getSession } from "@/lib/auth";
 import { siteUrl, absoluteUrl, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 
-// Self-hosted at build time — no runtime CDN dependency for fonts.
-const bebas = Bebas_Neue({
+// Fonts are self-hosted from committed woff2 files (src/app/fonts) via
+// next/font/local — no network fetch at build OR runtime, so the build can
+// never flake on a Google Fonts outage.
+const bebas = localFont({
+  src: "./fonts/bebas-neue-400.woff2",
   weight: "400",
-  subsets: ["latin"],
   variable: "--font-bebas",
   display: "swap",
 });
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+const inter = localFont({
+  // Variable font covering the 300–800 weights the design uses.
+  src: "./fonts/inter-var.woff2",
+  weight: "100 900",
   variable: "--font-inter",
   display: "swap",
 });

@@ -14,7 +14,7 @@
 - ✅ **Tailwind CSS** + custom design system ported from the original RevMeet home page design
 - ✅ **Zod** validation on every API boundary
 - ✅ **Maps** — real **Google Maps** when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set, otherwise a free **Leaflet + CARTO Voyager** light basemap (same Google-Maps-style look, no key or cost); both share the coloured pins, mini-tile popup card and location picker, so the site works with or without a key
-- ✅ Self-hosted **Bebas Neue / Inter** fonts via `next/font` (no runtime CDN dependency)
+- ✅ Self-hosted **Bebas Neue / Inter** fonts via `next/font/local` from committed `.woff2` files (no CDN fetch at build **or** runtime, so the build can't flake on a Google Fonts outage)
 - ✅ Dark automotive theme (orange `#FF5F1F` accent), fully responsive (mobile nav, collapsing grids)
 - ✅ **Readability & accessibility pass** — secondary text meets the 4.5:1 contrast threshold, cards carry subtle elevation, a keyboard `:focus-visible` ring, and `prefers-reduced-motion` support
 - ✅ **Branded image placeholders** — listings without a photo show an accent-tinted gradient cover (per event type / club / venue) instead of a repeated stock image
@@ -206,6 +206,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-16 | `6754e64` | **CI build fix:** switched fonts from `next/font/google` (fetches Bebas Neue + Inter from Google at build time) to `next/font/local` with committed `.woff2` files, removing the build-time network dependency that transiently failed CI (`next/font` TypeError). No visual change |
 | 2026-10-16 | `547e20c` | **Detail pages review pass:** club & venue profiles now list **upcoming events only** (past no longer counted as "Upcoming"); the **event page gains a finished-event state** (badge + notice replacing register/urgency once it's over), a **"More … events"** related strip, and all three detail pages get **breadcrumbs + `BreadcrumbList` JSON-LD** (new `Breadcrumbs` component). Verified against local Postgres 16 |
 | 2026-10-16 | `9d914ba` | **Map page review pass 2:** the `/map` results list is now **viewport-synced** (shows what's on screen, updates on pan/zoom) in its **own scroll area** beneath the filters, with "N in view · first 40", **richer rows** (thumbnail + type pill + distance), **click-to-focus** the map and an open-arrow; added a **colour legend** under the map, **map-first on mobile**, and a slimmer page header |
 | 2026-10-16 | `06b9119` | **Map page review pass** (same treatment as `/events`): `/map` now shows **upcoming events by default** (with an Include-past toggle), a **Sort** control (soonest / nearest / A–Z), **quick-date chips**, always-visible **active-filter chips**, and a **mobile filter collapse**. `getEventMapPoints` is upcoming-only by default (also de-clutters the homepage map hero) with an `includePast` option; `MapPoint` gains `startsAt`/`isPast`. Verified against local Postgres 16 |
