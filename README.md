@@ -137,6 +137,8 @@ Each of these is off by default and degrades gracefully until configured:
 | Daily reminder cron | Deployed via `vercel.json`; set `CRON_SECRET` to lock it down |
 | Image uploads | Vercel **Storage → Blob** (sets `BLOB_READ_WRITE_TOKEN`) |
 | Demo data | `SEED_TOKEN`, then visit `/api/dev/seed?token=…` once |
+| Error monitoring | `NEXT_PUBLIC_SENTRY_DSN` from [sentry.io](https://sentry.io); optional `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT` for readable stack traces. With no DSN the Sentry SDK and build plugin stay fully dormant |
+| Site analytics | **Vercel Analytics** — no env var; enable it in the Vercel dashboard's Analytics tab (the `<Analytics />` component is already wired, cookieless) |
 
 ## SEO
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
@@ -111,6 +112,9 @@ export default async function RootLayout({
           {children}
         </main>
         <Footer />
+        {/* Cookieless, privacy-friendly page + visitor analytics. No-ops off
+            Vercel, so it's safe in every environment and needs no config. */}
+        <Analytics />
       </body>
     </html>
   );

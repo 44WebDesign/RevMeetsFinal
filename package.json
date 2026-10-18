@@ -22,6 +22,8 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
     "@prisma/client": "^5.22.0",
+    "@sentry/nextjs": "^8.47.0",
+    "@vercel/analytics": "^1.4.1",
     "@vercel/blob": "^2.6.1",
     "bcryptjs": "^2.4.3",
     "jose": "^5.9.6",
