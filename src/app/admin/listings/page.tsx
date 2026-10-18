@@ -4,30 +4,79 @@ import { AdminListingActions } from "@/components/admin/AdminListingActions";
 
 export const dynamic = "force-dynamic";
 
+type SP = { q?: string; kind?: string; verified?: string; featured?: string };
+
 // Admin view for verifying clubs & venues (trust badge) and overriding featured.
-export default async function AdminListings() {
+export default async function AdminListings({ searchParams }: { searchParams: Promise<SP> }) {
+  const sp = await searchParams;
+  const ci = "insensitive" as const;
+
+  const common = (nameField: "name") => {
+    const where: Record<string, unknown> = {};
+    const and: unknown[] = [];
+    if (sp.q) and.push({ OR: [{ [nameField]: { contains: sp.q, mode: ci } }, { owner: { email: { contains: sp.q, mode: ci } } }] });
+    if (sp.verified === "yes") where.verified = true;
+    else if (sp.verified === "no") where.verified = false;
+    if (sp.featured === "yes") where.featured = true;
+    if (and.length) where.AND = and;
+    return where;
+  };
+
+  const showClubs = sp.kind !== "venues";
+  const showVenues = sp.kind !== "clubs";
+
   const [clubs, venues] = await Promise.all([
-    prisma.club.findMany({
-      orderBy: [{ verified: "desc" }, { createdAt: "desc" }],
-      take: 100,
-      include: { owner: { select: { email: true } }, _count: { select: { events: true } } },
-    }),
-    prisma.venue.findMany({
-      orderBy: [{ verified: "desc" }, { createdAt: "desc" }],
-      take: 100,
-      include: { owner: { select: { email: true } }, _count: { select: { events: true } } },
-    }),
+    showClubs
+      ? prisma.club.findMany({
+          where: common("name"),
+          orderBy: [{ verified: "desc" }, { createdAt: "desc" }],
+          take: 100,
+          include: { owner: { select: { email: true } }, _count: { select: { events: true } } },
+        })
+      : Promise.resolve([]),
+    showVenues
+      ? prisma.venue.findMany({
+          where: common("name"),
+          orderBy: [{ verified: "desc" }, { createdAt: "desc" }],
+          take: 100,
+          include: { owner: { select: { email: true } }, _count: { select: { events: true } } },
+        })
+      : Promise.resolve([]),
   ]);
+
+  const hasFilters = !!(sp.q || sp.kind || sp.verified || sp.featured);
 
   return (
     <div>
       <h1 className="hd" style={{ fontSize: "1.9rem", marginBottom: ".5rem" }}>Listings</h1>
-      <p style={{ color: "var(--mut)", fontSize: ".85rem", marginBottom: "1.5rem" }}>
+      <p style={{ color: "var(--mut)", fontSize: ".85rem", marginBottom: "1.25rem" }}>
         Grant the <strong>Verified</strong> badge after a genuine check (a real business, accurate details).
         It&apos;s a trust signal — never sell it for a fee alone.
       </p>
 
+      <form method="get" className="admin-filter-bar">
+        <input name="q" defaultValue={sp.q} className="field-input" placeholder="Search name or owner email…" style={{ flex: "1 1 180px", minWidth: 0 }} />
+        <select name="kind" defaultValue={sp.kind ?? ""} className="field-select" style={{ width: "auto" }}>
+          <option value="">Clubs &amp; venues</option>
+          <option value="clubs">Clubs only</option>
+          <option value="venues">Venues only</option>
+        </select>
+        <select name="verified" defaultValue={sp.verified ?? ""} className="field-select" style={{ width: "auto" }}>
+          <option value="">Any verification</option>
+          <option value="yes">Verified</option>
+          <option value="no">Unverified</option>
+        </select>
+        <select name="featured" defaultValue={sp.featured ?? ""} className="field-select" style={{ width: "auto" }}>
+          <option value="">Featured &amp; not</option>
+          <option value="yes">Featured only</option>
+        </select>
+        <button className="btn-or" style={{ padding: "0 1rem", whiteSpace: "nowrap" }}><i className="fas fa-search" /> Filter</button>
+        {hasFilters && <Link href="/admin/listings" className="btn-ghost" style={{ fontSize: ".82rem" }}>Clear</Link>}
+      </form>
+
+      {showClubs && (
       <Section title={`Clubs (${clubs.length})`}>
+        {clubs.length === 0 && <EmptyRow />}
         {clubs.map((c, i) => (
           <Row
             key={c.id}
@@ -41,8 +90,11 @@ export default async function AdminListings() {
           />
         ))}
       </Section>
+      )}
 
+      {showVenues && (
       <Section title={`Venues (${venues.length})`}>
+        {venues.length === 0 && <EmptyRow />}
         {venues.map((v, i) => (
           <Row
             key={v.id}
@@ -56,8 +108,13 @@ export default async function AdminListings() {
           />
         ))}
       </Section>
+      )}
     </div>
   );
+}
+
+function EmptyRow() {
+  return <div style={{ padding: "1.5rem 1.25rem", textAlign: "center", color: "var(--mut)", fontSize: ".85rem" }}>None match these filters.</div>;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

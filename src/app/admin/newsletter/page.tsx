@@ -20,7 +20,14 @@ export default async function AdminNewsletter() {
 
   return (
     <div>
-      <h1 className="hd" style={{ fontSize: "1.9rem", marginBottom: ".5rem" }}>Newsletter</h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: ".75rem", marginBottom: ".5rem" }}>
+        <h1 className="hd" style={{ fontSize: "1.9rem", margin: 0 }}>Newsletter</h1>
+        {total > 0 && (
+          <a href="/api/admin/newsletter/export" className="btn-ghost" style={{ fontSize: ".82rem" }}>
+            <i className="fas fa-file-csv" /> Export CSV
+          </a>
+        )}
+      </div>
       <p style={{ color: "var(--mut)", fontSize: ".85rem", marginBottom: "1.5rem" }}>
         Anonymous &ldquo;events near you&rdquo; subscribers from the homepage. They&apos;re emailed
         by the weekly digest (events matched to their area, or soonest UK-wide), with a one-click

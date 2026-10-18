@@ -164,11 +164,11 @@
 ## 12. Admin & Moderation
 
 - ✅ **Admin console** (`/admin`, ADMIN role only) with a moderation nav and a platform overview (users, events, clubs, venues, registrations, reviews, open reports, promotion revenue)
-- ✅ **User management** — search users, change role, **suspend/unsuspend** (suspended accounts are blocked from email and Google login), or delete (self-protection: can't suspend/demote/delete your own admin account)
-- ✅ **Event moderation** — search events, hide (draft) / publish / cancel, unfeature, or delete any event
-- ✅ **Listings moderation** (`/admin/listings`) — grant/revoke the **Verified** trust badge on clubs & venues, and override featured placement
+- ✅ **User management** — search + **filter by role and status**, change role, **suspend/unsuspend** (suspended accounts are blocked from email and Google login), or delete (self-protection: can't suspend/demote/delete your own admin account); rows show an admin badge and quick links to the user's club/venue, and the list is **exportable to CSV**
+- ✅ **Event moderation** — search + **filter by type, status, date (upcoming/past) and featured**, hide (draft) / publish / cancel, unfeature, or delete any event (past events flagged)
+- ✅ **Listings moderation** (`/admin/listings`) — **search (name/owner email) + filter by kind, verification and featured**, grant/revoke the **Verified** trust badge on clubs & venues, and override featured placement
 - ✅ **Reporting system** — logged-in users can flag events, reviews **and user-uploaded photos** (reason + detail, de-duplicated); admins get a **reports queue** (Open / Resolved / Dismissed) with target previews (including a photo thumbnail) and one-click resolve / dismiss / delete-target
-- ✅ **Newsletter admin** (`/admin/newsletter`) — subscriber counts (total, how many gave an area, how many have been emailed, new this week) plus the recent subscriber list (email, area, joined, last emailed); the overview also carries a Newsletter stat with weekly growth
+- ✅ **Newsletter admin** (`/admin/newsletter`) — subscriber counts (total, how many gave an area, how many have been emailed, new this week) plus the recent subscriber list (email, area, joined, last emailed), **exportable to CSV**; the overview also carries a Newsletter stat with weekly growth
 - ✅ Admin link in the nav for admins; demo admin account (`admin@revmeet.test`)
 - ✅ **One-time admin bootstrap** — `/api/admin/claim?token=…` (gated by `ADMIN_CLAIM_TOKEN`) promotes the signed-in account to ADMIN and refreshes the session, so the first admin can be created on a live site with no database access
 
@@ -206,6 +206,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-18 | `3b4a8b7` | **Admin filters + CSV export:** added filter bars to the admin **Users** (role, status), **Events** (type, status, upcoming/past, featured) and **Listings** (kind, verified, featured + name/owner-email search) pages, each with result counts and a clear button (shared `adminFilters` where-builders); user rows now show an admin badge + club/venue links; added **CSV export** of users and newsletter subscribers (admin-guarded, honouring the user filters). Verified against local Postgres 16 |
 | 2026-10-16 | `6119a5e` | **Site-wide newsletter + How It Works pass:** added a **compact newsletter signup to the footer** (so "events near you" capture is on every page; `NewsletterSignup` gains a `compact` variant), and gave **`/how-it-works`** breadcrumbs (+ `BreadcrumbList` JSON-LD) and an **FAQ accordion** (+ `FAQPage` JSON-LD) |
 | 2026-10-16 | `6754e64` | **CI build fix:** switched fonts from `next/font/google` (fetches Bebas Neue + Inter from Google at build time) to `next/font/local` with committed `.woff2` files, removing the build-time network dependency that transiently failed CI (`next/font` TypeError). No visual change |
 | 2026-10-16 | `547e20c` | **Detail pages review pass:** club & venue profiles now list **upcoming events only** (past no longer counted as "Upcoming"); the **event page gains a finished-event state** (badge + notice replacing register/urgency once it's over), a **"More … events"** related strip, and all three detail pages get **breadcrumbs + `BreadcrumbList` JSON-LD** (new `Breadcrumbs` component). Verified against local Postgres 16 |

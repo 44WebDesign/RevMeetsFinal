@@ -265,6 +265,13 @@ nav.site-nav {
   margin-bottom: 0.3rem;
   display: block;
 }
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
 .field-input,
 .field-select,
 .field-textarea {
