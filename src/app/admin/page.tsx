@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminOverview() {
   const weekAgo = new Date(Date.now() - 7 * 86_400_000);
-  const [users, suspended, events, drafts, clubs, venues, registrations, reviews, openReports, promoRevenue, newsletter, newsletterWeek] =
+  const [users, suspended, events, drafts, clubs, venues, registrations, reviews, openReports, promoRevenue, newsletter, newsletterWeek, newMessages] =
     await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { suspended: true } }),
@@ -19,6 +19,7 @@ export default async function AdminOverview() {
       prisma.promotion.aggregate({ _sum: { amount: true } }),
       prisma.newsletterSignup.count(),
       prisma.newsletterSignup.count({ where: { createdAt: { gte: weekAgo } } }),
+      prisma.contactMessage.count({ where: { repliedAt: null } }),
     ]);
 
   const revenue = (promoRevenue._sum.amount ?? 0) / 100;
@@ -38,6 +39,17 @@ export default async function AdminOverview() {
         </Link>
       )}
 
+      {newMessages > 0 && (
+        <Link
+          href="/admin/messages?status=new"
+          className="card-surface"
+          style={{ display: "flex", alignItems: "center", gap: ".6rem", padding: "1rem 1.25rem", marginBottom: "1.5rem", borderColor: "rgba(255,95,31,.4)", color: "var(--or)", textDecoration: "none" }}
+        >
+          <i className="fas fa-inbox" />
+          <strong>{newMessages}</strong> new message{newMessages === 1 ? "" : "s"} to reply to →
+        </Link>
+      )}
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: "1rem" }}>
         <Stat label="Users" value={users} sub={suspended ? `${suspended} suspended` : undefined} icon="fa-users" href="/admin/users" subHref={suspended ? "/admin/users?status=suspended" : undefined} />
         <Stat label="Events" value={events} sub={drafts ? `${drafts} drafts` : undefined} icon="fa-calendar" href="/admin/events" subHref={drafts ? "/admin/events?status=DRAFT" : undefined} />
@@ -46,6 +58,7 @@ export default async function AdminOverview() {
         <Stat label="Registrations" value={registrations} icon="fa-ticket" />
         <Stat label="Reviews" value={reviews} icon="fa-star" />
         <Stat label="Open reports" value={openReports} icon="fa-flag" href="/admin/reports" />
+        <Stat label="New messages" value={newMessages} icon="fa-inbox" href="/admin/messages?status=new" />
         <Stat label="Promo revenue" value={`£${revenue.toFixed(2)}`} icon="fa-receipt" />
         <Stat label="Newsletter" value={newsletter} sub={newsletterWeek ? `+${newsletterWeek} this week` : undefined} icon="fa-envelope" href="/admin/newsletter" />
       </div>

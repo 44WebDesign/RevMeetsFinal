@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/events", label: "Events", icon: "fa-calendar" },
   { href: "/admin/listings", label: "Listings", icon: "fa-circle-check" },
   { href: "/admin/users", label: "Users", icon: "fa-users" },
+  { href: "/admin/messages", label: "Messages", icon: "fa-inbox" },
   { href: "/admin/newsletter", label: "Newsletter", icon: "fa-envelope" },
   { href: "/admin/announce", label: "Announce", icon: "fa-bullhorn" },
   { href: "/admin/audit", label: "Audit log", icon: "fa-clipboard-list" },
