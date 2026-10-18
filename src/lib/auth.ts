@@ -133,3 +133,25 @@ export async function verifyPasswordResetToken(
     return null;
   }
 }
+
+// ---- Email verification tokens (7-day signed link; re-clicking is harmless) ----
+export async function createEmailVerifyToken(user: { id: string; email: string }): Promise<string> {
+  return new SignJWT({ purpose: "verify", email: user.email })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(user.id)
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(getSecret());
+}
+
+export async function verifyEmailVerifyToken(token: string): Promise<{ userId: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    if (payload.purpose !== "verify" || !payload.sub) return null;
+    const user = await prisma.user.findUnique({ where: { id: payload.sub as string } });
+    if (!user || user.email !== payload.email) return null; // email changed since issued
+    return { userId: user.id };
+  } catch {
+    return null;
+  }
+}

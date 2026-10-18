@@ -55,11 +55,14 @@ export async function GET(req: Request) {
 
   if (user) {
     if (!user.googleId) {
+      // Linking Google to an existing account — Google verifies the email, so
+      // mark it verified if it wasn't already.
       user = await prisma.user.update({
         where: { id: user.id },
         data: {
           googleId: profile.sub,
           avatarUrl: user.avatarUrl ?? profile.picture ?? null,
+          ...(user.emailVerified ? {} : { emailVerified: new Date() }),
         },
       });
     }
@@ -72,6 +75,7 @@ export async function GET(req: Request) {
         avatarUrl: profile.picture ?? null,
         avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
         role,
+        emailVerified: new Date(), // Google-verified email
       },
     });
     await bootstrapProfileForRole(user.id, role, user.name);

@@ -4,7 +4,9 @@ import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
+import { VerifyBanner } from "@/components/VerifyBanner";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { siteUrl, absoluteUrl, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 
 // Fonts are self-hosted from committed woff2 files (src/app/fonts) via
@@ -67,6 +69,16 @@ export default async function RootLayout({
 }) {
   const session = await getSession();
 
+  // Soft email-verification nudge: show a dismissable banner to logged-in users
+  // whose address isn't confirmed yet. Never blocks any action.
+  let unverified = false;
+  if (session) {
+    const u = await prisma.user
+      .findUnique({ where: { id: session.sub }, select: { emailVerified: true } })
+      .catch(() => null);
+    unverified = !!u && !u.emailVerified;
+  }
+
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -95,6 +107,7 @@ export default async function RootLayout({
         <JsonLd data={websiteLd} />
         <Nav session={session} />
         <main style={{ paddingTop: 64, minHeight: "calc(100vh - 64px)" }}>
+          {unverified && <VerifyBanner />}
           {children}
         </main>
         <Footer />

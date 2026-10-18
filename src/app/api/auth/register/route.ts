@@ -4,6 +4,7 @@ import { registerSchema } from "@/lib/validation";
 import { handle, ok, fail } from "@/lib/api";
 import { bootstrapProfileForRole } from "@/lib/profile";
 import { notifyAdmins } from "@/lib/notifications";
+import { sendVerificationEmail } from "@/lib/verifyEmail";
 import { rateLimited } from "@/lib/rateLimit";
 import { ROLE_LABELS, type Role } from "@/lib/enums";
 
@@ -37,6 +38,9 @@ export const POST = handle(async (req: Request) => {
 
   // Bootstrap an empty club or venue profile so hosts/venues can fill it in.
   await bootstrapProfileForRole(user.id, data.role, data.name);
+
+  // Welcome + email confirmation link.
+  await sendVerificationEmail({ id: user.id, email: user.email, name: user.name });
 
   // Alert admins of the new signup (in-app always, email when configured).
   const roleLabel = ROLE_LABELS[user.role as Role] ?? user.role;

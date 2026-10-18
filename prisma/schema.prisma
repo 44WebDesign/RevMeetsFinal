@@ -30,6 +30,9 @@ model User {
   name         String
   role         String   @default("ENTHUSIAST")
   suspended    Boolean  @default(false) // moderation: blocks login & hides content
+  // Set when the email address is confirmed (null = unverified). Google
+  // sign-ins are trusted as verified automatically.
+  emailVerified DateTime?
   bio          String?
   avatarColor  String   @default("#FF5F1F")
   avatarUrl    String?
