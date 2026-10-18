@@ -39,29 +39,46 @@ export default async function AdminOverview() {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: "1rem" }}>
-        <Stat label="Users" value={users} sub={suspended ? `${suspended} suspended` : undefined} icon="fa-users" />
-        <Stat label="Events" value={events} sub={drafts ? `${drafts} drafts` : undefined} icon="fa-calendar" />
-        <Stat label="Clubs" value={clubs} icon="fa-users-gear" />
-        <Stat label="Venues" value={venues} icon="fa-warehouse" />
+        <Stat label="Users" value={users} sub={suspended ? `${suspended} suspended` : undefined} icon="fa-users" href="/admin/users" subHref={suspended ? "/admin/users?status=suspended" : undefined} />
+        <Stat label="Events" value={events} sub={drafts ? `${drafts} drafts` : undefined} icon="fa-calendar" href="/admin/events" subHref={drafts ? "/admin/events?status=DRAFT" : undefined} />
+        <Stat label="Clubs" value={clubs} icon="fa-users-gear" href="/admin/listings?kind=clubs" />
+        <Stat label="Venues" value={venues} icon="fa-warehouse" href="/admin/listings?kind=venues" />
         <Stat label="Registrations" value={registrations} icon="fa-ticket" />
         <Stat label="Reviews" value={reviews} icon="fa-star" />
-        <Stat label="Open reports" value={openReports} icon="fa-flag" />
+        <Stat label="Open reports" value={openReports} icon="fa-flag" href="/admin/reports" />
         <Stat label="Promo revenue" value={`£${revenue.toFixed(2)}`} icon="fa-receipt" />
-        <Stat label="Newsletter" value={newsletter} sub={newsletterWeek ? `+${newsletterWeek} this week` : undefined} icon="fa-envelope" />
+        <Stat label="Newsletter" value={newsletter} sub={newsletterWeek ? `+${newsletterWeek} this week` : undefined} icon="fa-envelope" href="/admin/newsletter" />
       </div>
     </div>
   );
 }
 
-function Stat({ label, value, sub, icon }: { label: string; value: number | string; sub?: string; icon: string }) {
-  return (
-    <div className="card-surface" style={{ padding: "1.25rem" }}>
+function Stat({ label, value, sub, icon, href, subHref }: { label: string; value: number | string; sub?: string; icon: string; href?: string; subHref?: string }) {
+  // Main area (icon/value/label) links to `href`; the sub links separately to
+  // `subHref` — kept as sibling links so no anchor is ever nested in another.
+  const main = (
+    <>
       <div style={{ color: "var(--or)", fontSize: "1.05rem", marginBottom: ".4rem" }}>
         <i className={`fas ${icon}`} />
       </div>
       <div className="hd" style={{ fontSize: "1.9rem", lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: ".78rem", color: "var(--mut)" }}>{label}</div>
-      {sub && <div style={{ fontSize: ".72rem", color: "var(--or)", marginTop: ".2rem" }}>{sub}</div>}
+    </>
+  );
+  return (
+    <div className="card-surface" style={{ padding: "1.25rem" }}>
+      {href ? (
+        <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>{main}</Link>
+      ) : (
+        main
+      )}
+      {sub && (
+        subHref ? (
+          <Link href={subHref} style={{ fontSize: ".72rem", color: "var(--or)", marginTop: ".2rem", display: "inline-block", textDecoration: "none" }}>{sub} →</Link>
+        ) : (
+          <div style={{ fontSize: ".72rem", color: "var(--or)", marginTop: ".2rem" }}>{sub}</div>
+        )
+      )}
     </div>
   );
 }

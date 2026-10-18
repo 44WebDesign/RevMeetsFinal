@@ -1,29 +1,50 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { AdminEventActions } from "@/components/admin/AdminEventActions";
+import { AdminEventsTable, type AdminEventRow } from "@/components/admin/AdminEventsTable";
+import { Pagination } from "@/components/admin/Pagination";
 import { eventTypeLabel, EVENT_TYPES, EVENT_TYPE_LABELS, EVENT_STATUSES } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { adminEventWhere } from "@/lib/adminFilters";
 
 export const dynamic = "force-dynamic";
 
-type SP = { q?: string; type?: string; status?: string; featured?: string; when?: string };
+const PER = 50;
+type SP = { q?: string; type?: string; status?: string; featured?: string; when?: string; page?: string };
 
 export default async function AdminEvents({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const where = adminEventWhere(sp);
+  const page = Math.max(1, Number(sp.page) || 1);
 
   const [events, total] = await Promise.all([
     prisma.event.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      take: 100,
+      skip: (page - 1) * PER,
+      take: PER,
       include: { organiser: { select: { name: true, email: true } } },
     }),
     prisma.event.count({ where }),
   ]);
 
-  const hasFilters = !!(sp.q || sp.type || sp.status || sp.featured || sp.when);
+  const now = new Date();
+  const rows: AdminEventRow[] = events.map((e) => ({
+    id: e.id,
+    slug: e.slug,
+    title: e.title,
+    typeLabel: eventTypeLabel(e.type),
+    city: e.city,
+    startsAtLabel: formatDate(e.startsAt),
+    organiserName: e.organiser.name,
+    organiserEmail: e.organiser.email,
+    status: e.status,
+    featured: e.featured,
+    isPast: e.startsAt < now,
+  }));
+
+  const filterParams: Record<string, string> = {};
+  for (const k of ["q", "type", "status", "featured", "when"] as const) if (sp[k]) filterParams[k] = sp[k]!;
+  const hasFilters = Object.keys(filterParams).length > 0;
 
   return (
     <div>
@@ -56,31 +77,8 @@ export default async function AdminEvents({ searchParams }: { searchParams: Prom
         {hasFilters && <Link href="/admin/events" className="btn-ghost" style={{ fontSize: ".82rem" }}>Clear</Link>}
       </form>
 
-      <div className="card-surface" style={{ overflow: "hidden" }}>
-        {events.length === 0 ? (
-          <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--mut)" }}>No events match these filters.</div>
-        ) : (
-          events.map((e, i) => (
-            <div key={e.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", padding: "1rem 1.25rem", borderTop: i === 0 ? "none" : "1px solid var(--bdr)", flexWrap: "wrap" }}>
-              <div style={{ minWidth: 220 }}>
-                <div style={{ fontWeight: 600, fontSize: ".9rem" }}>
-                  <Link href={`/events/${e.slug}`} style={{ color: "inherit", textDecoration: "none" }}>{e.title}</Link>
-                  {e.featured && <span className="pill" style={{ marginLeft: ".5rem", background: "rgba(255,215,0,.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,.4)" }}><i className="fas fa-star" /> Featured</span>}
-                  {e.status !== "PUBLISHED" && <span className="pill" style={{ marginLeft: ".5rem", background: "var(--bdr2)", color: "var(--mut)" }}>{e.status}</span>}
-                  {e.startsAt < new Date() && <span className="pill" style={{ marginLeft: ".5rem", background: "rgba(8,8,8,.5)", color: "var(--mut)", border: "1px solid var(--bdr2)" }}>Past</span>}
-                </div>
-                <div style={{ fontSize: ".76rem", color: "var(--mut)" }}>
-                  {eventTypeLabel(e.type)} · {e.city} · {formatDate(e.startsAt)} · by {e.organiser.name} ({e.organiser.email})
-                </div>
-              </div>
-              <AdminEventActions eventId={e.id} status={e.status} featured={e.featured} />
-            </div>
-          ))
-        )}
-      </div>
-      {total > events.length && (
-        <p style={{ color: "var(--mut)", fontSize: ".78rem", marginTop: "1rem" }}>Showing the first {events.length} of {total}. Narrow the filters to see others.</p>
-      )}
+      <AdminEventsTable events={rows} />
+      <Pagination basePath="/admin/events" params={filterParams} page={page} total={total} per={PER} />
     </div>
   );
 }

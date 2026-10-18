@@ -309,6 +309,21 @@ model Review {
   @@index([venueId])
 }
 
+// Admin action log — who did what, for accountability. Additive and index-only
+// (no unique constraint) so `prisma db push` stays data-loss-safe on the live DB.
+model AdminAudit {
+  id         String   @id @default(cuid())
+  adminId    String
+  adminEmail String
+  action     String // e.g. USER_SUSPEND, EVENT_DELETE, LISTING_VERIFY, ANNOUNCE
+  targetType String? // USER | EVENT | CLUB | VENUE | REVIEW | PHOTO | REPORT | BROADCAST
+  targetId   String?
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // Lightweight "events near you" email list — lets anonymous visitors subscribe
 // from the homepage without creating an account. Stored regardless of whether
 // Resend is configured (email sending degrades gracefully).

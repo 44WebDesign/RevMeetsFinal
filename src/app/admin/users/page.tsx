@@ -1,25 +1,29 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { AdminUserActions } from "@/components/admin/AdminUserActions";
+import { AdminUsersTable, type AdminUserRow } from "@/components/admin/AdminUsersTable";
+import { Pagination } from "@/components/admin/Pagination";
 import { ROLES, ROLE_LABELS, type Role } from "@/lib/enums";
 import { formatDate, initials } from "@/lib/utils";
 import { adminUserWhere } from "@/lib/adminFilters";
 
 export const dynamic = "force-dynamic";
 
-type SP = { q?: string; role?: string; status?: string };
+const PER = 50;
+type SP = { q?: string; role?: string; status?: string; page?: string };
 
 export default async function AdminUsers({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const me = await getCurrentUser();
   const where = adminUserWhere(sp);
+  const page = Math.max(1, Number(sp.page) || 1);
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      take: 100,
+      skip: (page - 1) * PER,
+      take: PER,
       include: {
         _count: { select: { events: true } },
         club: { select: { slug: true } },
@@ -29,10 +33,27 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
     prisma.user.count({ where }),
   ]);
 
-  const params = new URLSearchParams();
-  for (const [k, v] of Object.entries(sp)) if (v) params.set(k, v);
-  const qs = params.toString();
-  const hasFilters = !!(sp.q || sp.role || sp.status);
+  const rows: AdminUserRow[] = users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    roleLabel: ROLE_LABELS[u.role as Role] ?? u.role,
+    role: u.role,
+    suspended: u.suspended,
+    avatarColor: u.avatarColor,
+    initials: initials(u.name),
+    eventsCount: u._count.events,
+    joinedLabel: formatDate(u.createdAt),
+    clubSlug: u.club?.slug ?? null,
+    venueSlug: u.venue?.slug ?? null,
+    isSelf: u.id === me?.id,
+    isAdmin: u.role === "ADMIN",
+  }));
+
+  const filterParams: Record<string, string> = {};
+  for (const k of ["q", "role", "status"] as const) if (sp[k]) filterParams[k] = sp[k]!;
+  const qs = new URLSearchParams(filterParams).toString();
+  const hasFilters = Object.keys(filterParams).length > 0;
 
   return (
     <div>
@@ -60,42 +81,8 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
         {hasFilters && <Link href="/admin/users" className="btn-ghost" style={{ fontSize: ".82rem" }}>Clear</Link>}
       </form>
 
-      <div className="card-surface" style={{ overflow: "hidden" }}>
-        {users.length === 0 ? (
-          <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--mut)" }}>No users match these filters.</div>
-        ) : (
-          users.map((u, i) => (
-            <div key={u.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", padding: "1rem 1.25rem", borderTop: i === 0 ? "none" : "1px solid var(--bdr)", flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: ".7rem", minWidth: 220 }}>
-                <span style={{ width: 34, height: 34, borderRadius: "50%", background: u.avatarColor, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: ".72rem", flexShrink: 0 }}>
-                  {initials(u.name)}
-                </span>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: ".9rem" }}>
-                    {u.name}
-                    {u.role === "ADMIN" && <span className="pill" style={{ marginLeft: ".5rem", background: "rgba(255,95,31,.15)", color: "var(--or)", border: "1px solid rgba(255,95,31,.35)" }}>Admin</span>}
-                    {u.suspended && <span className="pill" style={{ marginLeft: ".5rem", background: "rgba(244,67,54,.2)", color: "#ff6b5e" }}>Suspended</span>}
-                    {u.id === me?.id && <span className="pill" style={{ marginLeft: ".5rem", background: "var(--bdr2)", color: "var(--mut)" }}>You</span>}
-                  </div>
-                  <div style={{ fontSize: ".76rem", color: "var(--mut)" }}>
-                    {u.email} · {ROLE_LABELS[u.role as Role] ?? u.role} · {u._count.events} events · joined {formatDate(u.createdAt)}
-                  </div>
-                  {(u.club || u.venue) && (
-                    <div style={{ fontSize: ".74rem", marginTop: ".2rem", display: "flex", gap: ".75rem", flexWrap: "wrap" }}>
-                      {u.club && <Link href={`/clubs/${u.club.slug}`} style={{ color: "var(--or)", textDecoration: "none" }}><i className="fas fa-users-gear" /> View club ↗</Link>}
-                      {u.venue && <Link href={`/venues/${u.venue.slug}`} style={{ color: "#00BCD4", textDecoration: "none" }}><i className="fas fa-warehouse" /> View venue ↗</Link>}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <AdminUserActions userId={u.id} role={u.role} suspended={u.suspended} isSelf={u.id === me?.id} />
-            </div>
-          ))
-        )}
-      </div>
-      {total > users.length && (
-        <p style={{ color: "var(--mut)", fontSize: ".78rem", marginTop: "1rem" }}>Showing the first {users.length} of {total}. Narrow the filters to see others.</p>
-      )}
+      <AdminUsersTable users={rows} />
+      <Pagination basePath="/admin/users" params={filterParams} page={page} total={total} per={PER} />
     </div>
   );
 }

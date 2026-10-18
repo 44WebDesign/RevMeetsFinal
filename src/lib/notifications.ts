@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { sendEmail, emailShell, emailConfigured } from "./email";
 
 // In-app notification helper. Creating a notification never throws into the
 // caller's request path — a failed insert must not break registering for an
@@ -47,5 +48,25 @@ export async function notifyMany(
     });
   } catch (err) {
     console.error("[notifications] createMany failed:", err);
+  }
+}
+
+// Alert every admin, in-app (always) and optionally by email (when Resend is
+// configured). Used for new-signup / new-event alerts. Never throws.
+export async function notifyAdmins(
+  payload: { type: string; message: string; link?: string | null },
+  emailOpts?: { subject: string; html: string },
+): Promise<void> {
+  try {
+    const admins = await prisma.user.findMany({ where: { role: "ADMIN" }, select: { id: true, email: true } });
+    if (admins.length === 0) return;
+    await notifyMany(admins.map((a) => a.id), payload);
+    if (emailOpts && emailConfigured()) {
+      for (const a of admins) {
+        await sendEmail({ to: a.email, subject: emailOpts.subject, html: emailShell(emailOpts.subject, emailOpts.html) });
+      }
+    }
+  } catch (err) {
+    console.error("[notifications] notifyAdmins failed:", err);
   }
 }

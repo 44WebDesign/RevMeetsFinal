@@ -272,6 +272,21 @@ nav.site-nav {
   align-items: center;
   margin-bottom: 1.5rem;
 }
+.admin-bulk-bar {
+  position: sticky;
+  top: 70px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.75rem;
+  background: rgba(255, 95, 31, 0.1);
+  border: 1px solid rgba(255, 95, 31, 0.35);
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+}
 .field-input,
 .field-select,
 .field-textarea {

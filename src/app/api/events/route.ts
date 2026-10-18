@@ -5,7 +5,7 @@ import { handle, ok, fail } from "@/lib/api";
 import { getEvents } from "@/lib/queries";
 import { uniqueSlug, formatDateTime } from "@/lib/utils";
 import { sendEmail, emailShell, eventButton, emailConfigured } from "@/lib/email";
-import { notifyMany } from "@/lib/notifications";
+import { notifyMany, notifyAdmins } from "@/lib/notifications";
 import { absoluteUrl } from "@/lib/site";
 import { parseAmenityParam } from "@/lib/amenities";
 
@@ -138,6 +138,12 @@ export const POST = handle(async (req: Request) => {
       }
     }
   }
+
+  // Alert admins of the new event (in-app always, email when configured).
+  await notifyAdmins(
+    { type: "NEW_EVENT_ADMIN", message: `New event: ${event.title} by ${user.name}`, link: "/admin/events" },
+    { subject: `New RevMeet event: ${event.title}`, html: `<p style="margin:0"><strong>${event.title}</strong> was just created by ${user.name}.</p><p style="margin:8px 0 0;color:#aaa">📍 ${event.city} · ${formatDateTime(event.startsAt)} · ${event.status}</p>` },
+  );
 
   return ok({ id: event.id, slug: event.slug }, 201);
 });
