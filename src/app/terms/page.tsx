@@ -90,9 +90,8 @@ export default function TermsPage() {
 
           <h2>9. Contact</h2>
           <p>
-            Questions about these Terms? Contact us via the email address associated with
-            the Platform. See our <a href="/privacy">Privacy Policy</a> for how we handle
-            your data.
+            Questions about these Terms? Get in touch via our <a href="/contact">contact page</a>.
+            See our <a href="/privacy">Privacy Policy</a> for how we handle your data.
           </p>
         </div>
       </div>

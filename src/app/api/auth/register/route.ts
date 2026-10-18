@@ -4,12 +4,20 @@ import { registerSchema } from "@/lib/validation";
 import { handle, ok, fail } from "@/lib/api";
 import { bootstrapProfileForRole } from "@/lib/profile";
 import { notifyAdmins } from "@/lib/notifications";
+import { rateLimited } from "@/lib/rateLimit";
 import { ROLE_LABELS, type Role } from "@/lib/enums";
 
 const AVATAR_COLORS = ["#FF5F1F", "#E040FB", "#00BCD4", "#4CAF50", "#FFD700", "#2196F3"];
 
 export const POST = handle(async (req: Request) => {
+  const limited = rateLimited(req, "register", 5, 60 * 60 * 1000); // 5/hour/IP
+  if (limited) return limited;
+
   const body = await req.json();
+  // Honeypot — bots fill this hidden field; humans never do. Drop silently.
+  if (typeof body?.company === "string" && body.company.length > 0) {
+    return fail("Something went wrong. Please try again.", 400);
+  }
   const data = registerSchema.parse(body);
 
   const existing = await prisma.user.findUnique({ where: { email: data.email.toLowerCase() } });

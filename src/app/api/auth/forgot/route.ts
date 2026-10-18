@@ -4,8 +4,12 @@ import { forgotSchema } from "@/lib/validation";
 import { handle, ok } from "@/lib/api";
 import { sendEmail, emailShell, eventButton } from "@/lib/email";
 import { appOrigin } from "@/lib/google";
+import { rateLimited } from "@/lib/rateLimit";
 
 export const POST = handle(async (req: Request) => {
+  const limited = rateLimited(req, "forgot", 5, 60 * 60 * 1000); // 5/hour/IP
+  if (limited) return limited;
+
   const { email } = forgotSchema.parse(await req.json());
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
 

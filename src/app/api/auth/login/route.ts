@@ -2,9 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { verifyPassword, createSession } from "@/lib/auth";
 import { loginSchema } from "@/lib/validation";
 import { handle, ok, fail } from "@/lib/api";
+import { rateLimited } from "@/lib/rateLimit";
 import type { Role } from "@/lib/enums";
 
 export const POST = handle(async (req: Request) => {
+  const limited = rateLimited(req, "login", 10, 5 * 60 * 1000); // 10 / 5 min / IP
+  if (limited) return limited;
+
   const body = await req.json();
   const data = loginSchema.parse(body);
 

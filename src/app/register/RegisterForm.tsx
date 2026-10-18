@@ -22,6 +22,7 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [company, setCompany] = useState(""); // honeypot
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -32,7 +33,7 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password, role, company }),
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
@@ -50,6 +51,7 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
 
   return (
     <form onSubmit={submit} className="card-surface" style={{ padding: "2rem" }}>
+      <input type="text" name="company" value={company} onChange={(e) => setCompany(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
       <label className="field-label" style={{ marginBottom: ".6rem" }}>I am a…</label>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: ".6rem", marginBottom: "1.5rem" }} className="role-grid">
         {ROLE_OPTIONS.map((r) => (

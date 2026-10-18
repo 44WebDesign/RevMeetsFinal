@@ -1,28 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/auth";
-import { profileSchema } from "@/lib/validation";
+import { requireUser, destroySession } from "@/lib/auth";
 import { handle, ok } from "@/lib/api";
 
-// Update the signed-in user's own profile.
-export const PATCH = handle(async (req: Request) => {
+export const dynamic = "force-dynamic";
+
+// Self-service account deletion (GDPR right to erasure). Removes the account and
+// cascades to the user's own content, then clears the session.
+export const DELETE = handle(async () => {
   const user = await requireUser();
-  const data = profileSchema.parse(await req.json());
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      name: data.name,
-      bio: data.bio ?? null,
-      ...(data.avatarColor ? { avatarColor: data.avatarColor } : {}),
-      carMake: data.carMake ?? null,
-      carModel: data.carModel ?? null,
-      carYear: data.carYear ?? null,
-      homeCity: data.homeCity ?? null,
-      homeLat: data.homeLat ?? null,
-      homeLng: data.homeLng ?? null,
-      ...(data.digestOptIn !== undefined ? { digestOptIn: data.digestOptIn } : {}),
-    },
-  });
-
+  await prisma.user.delete({ where: { id: user.id } });
+  await destroySession();
   return ok({ ok: true });
 });

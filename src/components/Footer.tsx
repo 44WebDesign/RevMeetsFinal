@@ -125,6 +125,7 @@ export function Footer() {
       >
         <span>© {new Date().getFullYear()} RevMeet. All rights reserved.</span>
         <span style={{ display: "flex", gap: "1.25rem", alignItems: "center", flexWrap: "wrap" }}>
+          <Link href="/contact" style={{ color: "var(--mut)", textDecoration: "none" }}>Contact</Link>
           <Link href="/terms" style={{ color: "var(--mut)", textDecoration: "none" }}>Terms</Link>
           <Link href="/privacy" style={{ color: "var(--mut)", textDecoration: "none" }}>Privacy</Link>
           <span>

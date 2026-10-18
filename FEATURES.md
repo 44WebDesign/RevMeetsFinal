@@ -26,7 +26,9 @@
 - ✅ **"Events near you" newsletter signup** — a distinct accent band on the homepage **plus a compact form in the site-wide footer (on every page)**, capturing email (+ optional town/postcode) to a `NewsletterSignup` table via `/api/newsletter`; stored even when Resend isn't configured. These subscribers are now folded into the **weekly digest cron**: each gets events matched to their area text (city/region), falling back to the soonest UK-wide, with a one-click unsubscribe link (`/api/newsletter/unsubscribe?token=…`) and the same resend-gap throttling as registered users
 - ✅ **Two homepage header layouts** — the classic photo hero, or a **full-screen interactive map with the search overlaid** (showing live event + venue pins). Set the default with the `HOME_LAYOUT` env var; preview either live via `/?home=map` or `/?home=classic`. The map layout hides the redundant mid-page map section
 - ✅ **How It Works page** (`/how-it-works`, linked from the nav) — a full walkthrough for each audience (enthusiasts / organisers & clubs / venues), with illustrative product "screenshots" of the analytics dashboard and admin console, a live interactive-map demo, audience-growth explainers, breadcrumbs, and an **FAQ** accordion; carries `HowTo`, `FAQPage` and `BreadcrumbList` structured data and a sitemap entry
-- ✅ Custom favicon (checkered-flag mark) and 404 page
+- ✅ Custom favicon (checkered-flag mark), **404 page and a branded error boundary** (`error.tsx`, with retry + links home/contact) instead of Next's raw error screen
+- ✅ **Contact page** (`/contact`) — a form that stores every message (`ContactMessage`) and emails it to `SUPPORT_EMAIL` (or all admins) when Resend is configured; honeypot + rate-limited; linked from the footer, Privacy and Terms
+- ✅ **Abuse protection** — best-effort per-IP **rate limiting** on login, register, forgot-password, newsletter, contact and venue enquiries, plus **honeypot** fields on the register, newsletter and contact forms
 
 ## 2. Accounts & Authentication
 
@@ -39,6 +41,7 @@
 - ✅ Login/register pages redirect back to where the user was (`?next=`)
 - ✅ **Password reset** — "Forgot password?" flow with an emailed, 1-hour, single-use signed link (stateless; invalidated once the password changes); logs in automatically after reset
 - ✅ **Account settings** (`/account`) — edit display name, bio, avatar colour, **garage** (car make/model/year) and **home location + weekly-digest opt-in**; change password (Google-only accounts can set one to also log in by email); link to your public member profile
+- ✅ **Self-service account deletion** (GDPR right to erasure) — a "Danger zone" in account settings deletes your account and all your content (cascade), with a type-to-confirm step; also linked from the Privacy Policy
 
 ## 3. Events
 
@@ -209,6 +212,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-18 | `daf81a3` | **Pre-launch hardening:** branded error boundary (`error.tsx`); a **Contact** page + `/api/contact` (stores `ContactMessage`, emails `SUPPORT_EMAIL`/admins, honeypot, rate-limited; linked from footer/Privacy/Terms); **self-service account deletion** (`/api/account` DELETE, type-to-confirm "Danger zone", GDPR erasure with cascade); and best-effort **per-IP rate limiting** + **honeypots** on login/register/forgot/newsletter/contact/enquiry. Verified against local Postgres 16 (additive `db push`, contact write, cascade delete) |
 | 2026-10-18 | `6d08466` | **Admin power-ups:** clickable overview stat tiles (deep-link to filtered lists); **pagination** on users & events; **bulk actions** (users: suspend/unsuspend/delete; events: publish/hide/cancel/unfeature/delete); an **audit log** (`/admin/audit`, new `AdminAudit` model) recording every admin action; an **announcement** broadcaster (`/admin/announce` + `/api/admin/announce`) to member segments / newsletter (in-app + email); and **admin alerts** on new signups & events (`notifyAdmins`). Verified against local Postgres 16 (additive `db push`, audit write, admin-notify, bulk update) |
 | 2026-10-18 | `3b4a8b7` | **Admin filters + CSV export:** added filter bars to the admin **Users** (role, status), **Events** (type, status, upcoming/past, featured) and **Listings** (kind, verified, featured + name/owner-email search) pages, each with result counts and a clear button (shared `adminFilters` where-builders); user rows now show an admin badge + club/venue links; added **CSV export** of users and newsletter subscribers (admin-guarded, honouring the user filters). Verified against local Postgres 16 |
 | 2026-10-16 | `6119a5e` | **Site-wide newsletter + How It Works pass:** added a **compact newsletter signup to the footer** (so "events near you" capture is on every page; `NewsletterSignup` gains a `compact` variant), and gave **`/how-it-works`** breadcrumbs (+ `BreadcrumbList` JSON-LD) and an **FAQ accordion** (+ `FAQPage` JSON-LD) |

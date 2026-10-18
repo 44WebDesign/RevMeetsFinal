@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { AccountForm } from "./AccountForm";
+import { DeleteAccount } from "@/components/DeleteAccount";
 import { ROLE_LABELS } from "@/lib/enums";
 import type { Role } from "@/lib/enums";
 
@@ -35,6 +36,7 @@ export default async function AccountPage() {
             id: user.id,
           }}
         />
+        <DeleteAccount />
       </div>
     </section>
   );

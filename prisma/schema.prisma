@@ -309,6 +309,18 @@ model Review {
   @@index([venueId])
 }
 
+// Contact-form submissions — stored so a message is never lost even if the
+// notification email fails. Additive, index-only (db-push-safe).
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // Admin action log — who did what, for accountability. Additive and index-only
 // (no unique constraint) so `prisma db push` stays data-loss-safe on the live DB.
 model AdminAudit {

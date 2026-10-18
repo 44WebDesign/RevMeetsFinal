@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/map`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/clubs`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/venues`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/contact`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/terms`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.2 },
     // Category landing pages (car-shows, track-days, …)

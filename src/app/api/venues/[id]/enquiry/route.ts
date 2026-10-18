@@ -5,6 +5,7 @@ import { handle, ok, fail } from "@/lib/api";
 import { notify } from "@/lib/notifications";
 import { sendEmail, emailShell } from "@/lib/email";
 import { absoluteUrl } from "@/lib/site";
+import { rateLimited } from "@/lib/rateLimit";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -13,6 +14,9 @@ const schema = z.object({ message: z.string().min(5, "Add a short message").max(
 // Send an enquiry to a venue owner (lead-gen for the venue). Requires login to
 // cut spam; delivers as an in-app notification + email so the owner can reply.
 export const POST = handle(async (req: Request, ctx: Ctx) => {
+  const limited = rateLimited(req, "enquiry", 10, 60 * 60 * 1000); // 10/hour/IP
+  if (limited) return limited;
+
   const user = await requireUser();
   const { id } = await ctx.params;
   const { message } = schema.parse(await req.json());

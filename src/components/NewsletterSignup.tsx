@@ -8,6 +8,7 @@ import { useState } from "react";
 export function NewsletterSignup({ compact = false }: { compact?: boolean }) {
   const [email, setEmail] = useState("");
   const [area, setArea] = useState("");
+  const [company, setCompany] = useState(""); // honeypot
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -20,7 +21,7 @@ export function NewsletterSignup({ compact = false }: { compact?: boolean }) {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, area: area || undefined }),
+        body: JSON.stringify({ email, area: area || undefined, company }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -53,6 +54,7 @@ export function NewsletterSignup({ compact = false }: { compact?: boolean }) {
           </div>
         ) : (
           <form onSubmit={submit} style={{ flex: "1 1 320px", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
+            <input type="text" name="company" value={company} onChange={(e) => setCompany(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
             <input
               type="email"
               required
@@ -133,6 +135,7 @@ export function NewsletterSignup({ compact = false }: { compact?: boolean }) {
               </div>
             ) : (
               <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: ".6rem" }}>
+                <input type="text" name="company" value={company} onChange={(e) => setCompany(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
                 <div style={{ display: "flex", gap: ".6rem", flexWrap: "wrap" }}>
                   <input
                     type="email"

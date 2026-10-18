@@ -85,8 +85,10 @@ export default function PrivacyPage() {
 
           <h2>8. Contact</h2>
           <p>
-            For any privacy questions or requests, contact us via the email address
-            associated with the Platform.
+            For any privacy questions or requests — including to access or delete your data —
+            get in touch via our <a href="/contact">contact page</a>. You can also delete your
+            account and associated data yourself at any time from your{" "}
+            <a href="/account">account settings</a>.
           </p>
         </div>
       </div>
