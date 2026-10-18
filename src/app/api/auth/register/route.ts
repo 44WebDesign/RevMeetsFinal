@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, createSession } from "@/lib/auth";
 import { registerSchema } from "@/lib/validation";
@@ -39,15 +40,17 @@ export const POST = handle(async (req: Request) => {
   // Bootstrap an empty club or venue profile so hosts/venues can fill it in.
   await bootstrapProfileForRole(user.id, data.role, data.name);
 
-  // Welcome + email confirmation link.
-  await sendVerificationEmail({ id: user.id, email: user.email, name: user.name });
-
-  // Alert admins of the new signup (in-app always, email when configured).
+  // Email work runs in the background so sign-up returns immediately rather
+  // than waiting on Resend: the welcome + confirmation link, and the admin
+  // new-signup alert (in-app + email).
   const roleLabel = ROLE_LABELS[user.role as Role] ?? user.role;
-  await notifyAdmins(
-    { type: "NEW_USER", message: `New ${roleLabel} signed up: ${user.name} (${user.email})`, link: "/admin/users" },
-    { subject: `New RevMeet signup: ${user.name}`, html: `<p style="margin:0">A new <strong>${roleLabel}</strong> just joined.</p><p style="margin:8px 0 0;color:#aaa">${user.name} · ${user.email}</p>` },
-  );
+  after(async () => {
+    await sendVerificationEmail({ id: user.id, email: user.email, name: user.name });
+    await notifyAdmins(
+      { type: "NEW_USER", message: `New ${roleLabel} signed up: ${user.name} (${user.email})`, link: "/admin/users" },
+      { subject: `New RevMeet signup: ${user.name}`, html: `<p style="margin:0">A new <strong>${roleLabel}</strong> just joined.</p><p style="margin:8px 0 0;color:#aaa">${user.name} · ${user.email}</p>` },
+    );
+  });
 
   await createSession({
     sub: user.id,

@@ -39,9 +39,9 @@ export function AnnounceForm() {
       }
       setState("done");
       const emailNote = data.emailConfigured
-        ? `${data.emailed} email${data.emailed === 1 ? "" : "s"} sent`
+        ? `${data.emailQueued} email${data.emailQueued === 1 ? "" : "s"} sending in the background`
         : "emails skipped (Resend not configured)";
-      setResult(`Sent to ${data.recipients} recipient${data.recipients === 1 ? "" : "s"} — ${data.inApp} in-app, ${emailNote}.`);
+      setResult(`Queued for ${data.recipients} recipient${data.recipients === 1 ? "" : "s"} — ${data.inApp} in-app, ${emailNote}.`);
       setSubject("");
       setMessage("");
     } catch {

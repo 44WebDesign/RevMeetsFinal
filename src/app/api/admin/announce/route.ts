@@ -2,7 +2,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { handle, ok } from "@/lib/api";
-import { sendEmail, emailShell, emailConfigured } from "@/lib/email";
+import { emailConfigured } from "@/lib/email";
+import { queueBulkEmail } from "@/lib/bulkEmail";
 import { notifyMany } from "@/lib/notifications";
 import { logAdmin } from "@/lib/adminAudit";
 
@@ -47,14 +48,9 @@ export const POST = handle(async (req: Request) => {
     await notifyMany(userIds, { type: "ANNOUNCEMENT", message: subject, link: null });
   }
 
-  // Email (best-effort, only when configured).
-  let emailed = 0;
-  if (emailConfigured()) {
-    for (const to of recipientEmails) {
-      const { sent } = await sendEmail({ to, subject, html: emailShell(subject, bodyHtml) });
-      if (sent) emailed++;
-    }
-  }
+  // Email fan-out runs in the background (after the response is sent) so the
+  // admin isn't left waiting on a loop over thousands of addresses.
+  const emailQueued = queueBulkEmail(recipientEmails, subject, bodyHtml);
 
   await logAdmin(admin, {
     action: "ANNOUNCE",
@@ -67,7 +63,7 @@ export const POST = handle(async (req: Request) => {
     segment,
     recipients: recipientEmails.length,
     inApp: userIds.length,
-    emailed,
+    emailQueued,
     emailConfigured: emailConfigured(),
   });
 });

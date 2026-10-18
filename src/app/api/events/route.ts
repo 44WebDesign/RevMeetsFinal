@@ -4,7 +4,9 @@ import { eventSchema } from "@/lib/validation";
 import { handle, ok, fail } from "@/lib/api";
 import { getEvents } from "@/lib/queries";
 import { uniqueSlug, formatDateTime } from "@/lib/utils";
-import { sendEmail, emailShell, eventButton, emailConfigured } from "@/lib/email";
+import { after } from "next/server";
+import { emailShell, eventButton, emailConfigured } from "@/lib/email";
+import { queuePerRecipientEmail } from "@/lib/bulkEmail";
 import { notifyMany, notifyAdmins } from "@/lib/notifications";
 import { absoluteUrl } from "@/lib/site";
 import { parseAmenityParam } from "@/lib/amenities";
@@ -123,26 +125,33 @@ export const POST = handle(async (req: Request) => {
       user.id,
     );
 
+    // Follower emails fan out in the background so creating an event returns
+    // immediately rather than waiting on up to 500 sends.
     if (emailConfigured()) {
-      for (const f of follows) {
-        await sendEmail({
+      const ev = event;
+      queuePerRecipientEmail(
+        follows.map((f) => ({
           to: f.user.email,
-          subject: `New event from ${f.club.name}: ${event.title}`,
+          subject: `New event from ${f.club.name}: ${ev.title}`,
           html: emailShell(
             `${f.club.name} just announced an event`,
-            `<p style="margin:0 0 8px"><strong>${event.title}</strong></p>
-             <p style="margin:0;color:#aaa">📅 ${formatDateTime(event.startsAt)}<br/>📍 ${event.city}</p>
+            `<p style="margin:0 0 8px"><strong>${ev.title}</strong></p>
+             <p style="margin:0;color:#aaa">📅 ${formatDateTime(ev.startsAt)}<br/>📍 ${ev.city}</p>
              ${eventButton(url)}`,
           ),
-        });
-      }
+        })),
+      );
     }
   }
 
-  // Alert admins of the new event (in-app always, email when configured).
-  await notifyAdmins(
-    { type: "NEW_EVENT_ADMIN", message: `New event: ${event.title} by ${user.name}`, link: "/admin/events" },
-    { subject: `New RevMeet event: ${event.title}`, html: `<p style="margin:0"><strong>${event.title}</strong> was just created by ${user.name}.</p><p style="margin:8px 0 0;color:#aaa">📍 ${event.city} · ${formatDateTime(event.startsAt)} · ${event.status}</p>` },
+  // Alert admins of the new event (in-app always, email when configured) —
+  // deferred off the request path.
+  const ev = event;
+  after(() =>
+    notifyAdmins(
+      { type: "NEW_EVENT_ADMIN", message: `New event: ${ev.title} by ${user.name}`, link: "/admin/events" },
+      { subject: `New RevMeet event: ${ev.title}`, html: `<p style="margin:0"><strong>${ev.title}</strong> was just created by ${user.name}.</p><p style="margin:8px 0 0;color:#aaa">📍 ${ev.city} · ${formatDateTime(ev.startsAt)} · ${ev.status}</p>` },
+    ),
   );
 
   return ok({ id: event.id, slug: event.slug }, 201);
