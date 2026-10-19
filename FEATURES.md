@@ -15,6 +15,8 @@
 - ✅ **Zod** validation on every API boundary
 - ✅ **Maps** — real **Google Maps** when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set, otherwise a free **Leaflet + CARTO Voyager** light basemap (same Google-Maps-style look, no key or cost); both share the coloured pins, mini-tile popup card and location picker, so the site works with or without a key
 - ✅ Self-hosted **Bebas Neue / Inter** fonts via `next/font/local` from committed `.woff2` files (no CDN fetch at build **or** runtime, so the build can't flake on a Google Fonts outage)
+- ✅ Self-hosted **Font Awesome** icons (bundled via `@fortawesome/fontawesome-free`, served from our own origin) — no runtime cdnjs fetch, so icons never vanish behind a firewall/blocker or during a CDN outage
+- ✅ **Installable PWA** — a web manifest (`app/manifest.ts`) with maskable icons, theme colour and standalone display, so the site can be added to a phone's home screen and opens chromeless like an app
 - ✅ Dark automotive theme (orange `#FF5F1F` accent), fully responsive (mobile nav, collapsing grids)
 - ✅ **Readability & accessibility pass** — secondary text meets the 4.5:1 contrast threshold, cards carry subtle elevation, a keyboard `:focus-visible` ring, and `prefers-reduced-motion` support
 - ✅ **Branded image placeholders** — listings without a photo show an accent-tinted gradient cover (per event type / club / venue) instead of a repeated stock image
@@ -45,7 +47,7 @@
 - ✅ **Password reset** — "Forgot password?" flow with an emailed, 1-hour, single-use signed link (stateless; invalidated once the password changes); logs in automatically after reset
 - ✅ **Account settings** (`/account`) — edit display name, bio, avatar colour, **garage** (car make/model/year) and **home location + weekly-digest opt-in**; change password (Google-only accounts can set one to also log in by email); link to your public member profile
 - ✅ **Self-service account deletion** (GDPR right to erasure) — a "Danger zone" in account settings deletes your account and all your content (cascade), with a type-to-confirm step; also linked from the Privacy Policy
-- ✅ **Email verification (soft)** — on sign-up a combined **welcome + "confirm your email"** message is sent (7-day signed link → `/api/auth/verify`). Unverified logged-in users see a dismissable top banner with a **one-click resend** (`/api/auth/resend-verification`, rate-limited 3/15 min). Verification is a nudge, never a gate — no action is blocked — so existing and demo accounts are never locked out. **Google sign-ins are trusted as verified automatically.** Stored in `User.emailVerified` (nullable `DateTime`); degrades gracefully when Resend isn't configured
+- ✅ **Email verification (soft)** — on sign-up a combined **welcome + "confirm your email"** message is sent (7-day signed link → `/api/auth/verify`). Unverified logged-in users see a dismissable top banner with a **one-click resend** (`/api/auth/resend-verification`, rate-limited 3/15 min). Verification is a nudge, never a gate — no action is blocked — so existing and demo accounts are never locked out. **Google sign-ins are trusted as verified automatically.** Stored in `User.emailVerified` (nullable `DateTime`); degrades gracefully when Resend isn't configured. Account settings also shows a **verify-status row** (verified ✓ / not confirmed, with a one-click resend) so the control is always findable
 
 ## 3. Events
 
@@ -72,7 +74,7 @@
 - ✅ **Recently viewed** — a per-browser strip (localStorage, works for anonymous visitors too) on the homepage and event pages, surfacing events you looked at so it's easy to return to them
 - ✅ **Featured / promoted events (paid)** — hosts pay via Stripe Checkout to feature an event (default £9.99 / 30 days); featured events sort first in listings and show a gold "Featured" badge. Promotions auto-expire (daily cron) and can be extended
 - ✅ **Recurring events** — create weekly / fortnightly / monthly series (up to 26 dates) in one go; each occurrence is its own event with its own page and registrations
-- ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event pages
+- ✅ **Add to Calendar** (Google Calendar link + Apple/Outlook `.ics` download) and **share** buttons (native share / WhatsApp / X / Facebook / copy link) on event, **club and venue** pages
 - ✅ **Subscribable calendar feeds (.ics)** — live-updating `webcal://` subscriptions (or one-off download / copy-link) for a club's, a venue's or a city's upcoming events, via `/api/calendar/{club,venue,city,all}/…`; "Subscribe" buttons on club, venue and city pages
 - ✅ **Attendee photo wall** — registered attendees upload photos (with captions) to an event page; everyone can view them in a grid with lightbox; uploaders/admins can delete
 - ✅ Capacity limits — event shows "full" and blocks registration when reached
@@ -149,6 +151,7 @@
 ## 10. SEO & Discoverability
 
 - ✅ Per-page metadata on every event/club/venue: unique titles, descriptions, canonical URLs, Open Graph + Twitter cards
+- ✅ **Dynamic social share images** — a generated, branded 1200×630 card (`ImageResponse`) for every event/club/venue and the homepage (`opengraph-image.tsx` + shared `src/lib/ogCard.tsx`): type/kind pill, title, date·city and the RevMeet wordmark on the type's accent colour, so links shared to WhatsApp/Facebook/iMessage/X always get a rich preview — even listings with no uploaded photo (real cover photos are still used when present)
 - ✅ **Schema.org JSON-LD**: `Event` (dates, geo, address, organiser, offers, aggregate rating), `Organization` (clubs), `Place` (venues, with amenities), site-wide `WebSite` + `SearchAction` (sitelinks search box)
 - ✅ **Category landing pages**: `/events/type/<category>` for all nine types, with unique landing copy, map, `ItemList` markup, cross-links
 - ✅ **City landing pages**: `/events/in/<city>`, generated automatically from cities with published events
@@ -217,6 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-19 | `_____` | **Pre-launch polish set:** self-hosted **Font Awesome** (bundled, no cdnjs — icons can't vanish behind a blocker/outage); **dynamic OG share images** for events/clubs/venues + homepage (`ImageResponse`, branded card even for photo-less listings); **installable PWA** (`manifest.ts` + maskable icons + theme colour); **share buttons on club & venue pages**; **create/edit event form grouped into sections** (Basics · When & where · Amenities · Tickets & media · Location); **email-verify status row** in account settings; and a **privacy-policy update** naming analytics (Vercel), error monitoring (Sentry), maps, payments and image hosting as processors. Verified via tsc + build and live screenshots (OG cards, icons rendering, manifest serving) |
 | 2026-10-18 | `01a8e14` | **Bulk emails off the request path:** follower alerts (`/api/events`), admin announcements (`/api/admin/announce`) and admin new-signup/new-event alerts (`/api/auth/register`, `notifyAdmins`) now fan out via Next.js `after()` through a new `src/lib/bulkEmail.ts` helper, so the triggering request returns immediately instead of waiting on the send loop. In-app notifications still fire synchronously. Announce response/UI now report emails as "sending in the background" (`emailQueued`) |
 | 2026-10-18 | `119c3eb` | **Analytics + error monitoring:** added **Vercel Analytics** (`<Analytics />`, cookieless, zero-config) and **Sentry** (`@sentry/nextjs`) for client/server/edge via `instrumentation.ts` + `onRequestError` + a root `global-error.tsx`. Sentry is fully DSN-gated — with no `NEXT_PUBLIC_SENTRY_DSN` the SDK and build plugin stay dormant, so the default build is unchanged. Verified both the no-DSN and with-DSN build paths; documented the new env vars in `.env.example` + README. Added `.npmrc` (`legacy-peer-deps`) so `npm ci` resolves `@vercel/analytics`'s optional peers consistently |
 | 2026-10-18 | `9eabbfd` | **Email verification (soft):** sign-up now sends a combined welcome + confirm-email link (7-day signed token → `/api/auth/verify`); unverified logged-in users get a dismissable banner with one-click resend (`/api/auth/resend-verification`, rate-limited); Google logins auto-verified. Never gates any action. Added nullable `User.emailVerified` (additive). Verified the production upgrade path (add column to a populated table, no data loss) + verify write against local Postgres 16 |

@@ -58,7 +58,10 @@ export async function generateMetadata({
       ? `${event.description.slice(0, 152)}…`
       : event.description;
   const url = absoluteUrl(`/events/${event.slug}`);
-  const image = event.imageUrl || FALLBACK_EVENT_IMG;
+  // Use the event's own cover photo for the share preview when it has one;
+  // otherwise omit images here so Next falls back to the generated branded
+  // card (opengraph-image.tsx) instead of a generic stock photo.
+  const image = event.imageUrl || null;
 
   return {
     title: `${event.title} — ${event.city}, ${when}`,
@@ -69,13 +72,13 @@ export async function generateMetadata({
       title: event.title,
       description: desc,
       url,
-      images: [{ url: image }],
+      ...(image ? { images: [{ url: image }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: event.title,
       description: desc,
-      images: [image],
+      ...(image ? { images: [image] } : {}),
     },
   };
 }

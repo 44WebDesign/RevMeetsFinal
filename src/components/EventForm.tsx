@@ -177,6 +177,7 @@ export function EventForm({
 
   return (
     <form onSubmit={submit} className="card-surface" style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+      <SectionHeading icon="fa-circle-info" title="Basics" first />
       <Row>
         <Field label="Event title" full>
           <input className="field-input" value={v.title} onChange={(e) => set("title", e.target.value)} required placeholder="e.g. Midlands Tuner Festival" />
@@ -204,6 +205,7 @@ export function EventForm({
         <textarea className="field-textarea" rows={5} value={v.description} onChange={(e) => set("description", e.target.value)} required placeholder="Tell attendees what to expect…" />
       </Field>
 
+      <SectionHeading icon="fa-location-dot" title="When & where" />
       <Row>
         <Field label="Starts at">
           <input type="datetime-local" className="field-input" value={v.startsAt} onChange={(e) => set("startsAt", e.target.value)} required />
@@ -241,6 +243,7 @@ export function EventForm({
         </p>
       </div>
 
+      <SectionHeading icon="fa-list-check" title="Amenities" />
       <div>
         <label className="field-label">Amenities at this event</label>
         <AmenityPicker
@@ -249,6 +252,7 @@ export function EventForm({
         />
       </div>
 
+      <SectionHeading icon="fa-ticket" title="Tickets & media" />
       <Row>
         <Field label="Entry / price info (optional)">
           <input className="field-input" value={v.priceInfo} onChange={(e) => set("priceInfo", e.target.value)} placeholder="Free / £10 on the gate" />
@@ -260,8 +264,9 @@ export function EventForm({
 
       <ImageField label="Cover image (optional)" value={v.imageUrl} onChange={(url) => set("imageUrl", url)} />
 
+      <SectionHeading icon="fa-map-location-dot" title="Pin the exact location" />
       <div>
-        <label className="field-label">Pin the location</label>
+        <label className="field-label">Drag the pin to set where it is</label>
         <LocationPicker lat={v.lat} lng={v.lng} onChange={(lat, lng) => setV((p) => ({ ...p, lat, lng }))} />
         <div style={{ display: "flex", gap: ".75rem", marginTop: ".5rem" }}>
           <Field label="Latitude">
@@ -360,6 +365,26 @@ function Row({ children }: { children: React.ReactNode }) {
           }
         }
       `}</style>
+    </div>
+  );
+}
+
+function SectionHeading({ icon, title, first }: { icon: string; title: string; first?: boolean }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: ".55rem",
+        marginTop: first ? 0 : ".75rem",
+        paddingTop: first ? 0 : "1.25rem",
+        borderTop: first ? "none" : "1px solid var(--bdr2)",
+      }}
+    >
+      <i className={`fas ${icon}`} style={{ color: "var(--or)", fontSize: ".95rem" }} />
+      <span style={{ fontFamily: "var(--font-bebas)", letterSpacing: ".04em", fontSize: "1.15rem", textTransform: "uppercase" }}>
+        {title}
+      </span>
     </div>
   );
 }

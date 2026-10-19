@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },
 };
 
-const UPDATED = "8 August 2026";
+const UPDATED = "19 October 2026";
 
 export default function PrivacyPage() {
   return (
@@ -48,11 +48,19 @@ export default function PrivacyPage() {
           </p>
 
           <h2>4. Sharing</h2>
-          <p>We share data only as needed to run the service, with providers such as:</p>
+          <p>
+            We share data only as needed to run the service, with carefully chosen
+            providers (processors) acting on our instructions:
+          </p>
           <ul>
-            <li>Our hosting and database providers (to store and serve the Platform).</li>
-            <li>Our email provider (to send the service emails described above).</li>
-            <li>Google (only if you choose to sign in with Google).</li>
+            <li><strong>Hosting &amp; database</strong> (Vercel and our database provider) — to store and serve the Platform.</li>
+            <li><strong>Email</strong> (Resend) — to send the account and event emails described above.</li>
+            <li><strong>Analytics</strong> (Vercel Analytics) — privacy-friendly, aggregated page-view and visitor statistics. It does not use cookies and does not track you across other websites.</li>
+            <li><strong>Error monitoring</strong> (Sentry) — if enabled, technical diagnostics (such as error messages and the page an error occurred on) so we can find and fix bugs.</li>
+            <li><strong>Maps</strong> (Google Maps, only where enabled) — to display interactive maps; Google may set its own cookies and receive your IP address when a map loads.</li>
+            <li><strong>Image hosting</strong> (Vercel Blob) — to store photos you upload.</li>
+            <li><strong>Payments</strong> (Stripe, only if you buy a featured-listing promotion) — to process the payment securely. We never see or store your full card details.</li>
+            <li><strong>Google Sign-In</strong> — only if you choose to sign in with Google.</li>
           </ul>
           <p>
             Some information you choose to publish — such as an event, club or venue profile,
@@ -77,10 +85,14 @@ export default function PrivacyPage() {
             complain to the Information Commissioner&apos;s Office (ICO).
           </p>
 
-          <h2>7. Cookies</h2>
+          <h2>7. Cookies &amp; analytics</h2>
           <p>
-            We use a small number of essential cookies, including one to keep you signed in.
-            These are necessary for the Platform to work. We do not use them for advertising.
+            We use a small number of <strong>essential cookies</strong>, including one to keep
+            you signed in. These are necessary for the Platform to work, and we do not use them
+            for advertising. Our analytics (Vercel Analytics) is <strong>cookieless</strong> and
+            measures only aggregated, anonymous usage — it does not profile you or track you
+            across other sites. Where interactive Google Maps are shown, Google may set its own
+            cookies as part of loading the map.
           </p>
 
           <h2>8. Contact</h2>

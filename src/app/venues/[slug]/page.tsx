@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { MapView } from "@/components/MapView";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
+import { ShareBar } from "@/components/ShareBar";
 import { AmenityList } from "@/components/AmenityList";
 import { ReviewSection } from "@/components/ReviewSection";
 import { CalendarSubscribe } from "@/components/CalendarSubscribe";
@@ -181,6 +182,9 @@ export default async function VenueDetail({
                 <i className="fas fa-location-dot" style={{ color: "#00BCD4" }} /> {venue.address}, {venue.city}
                 {venue.postcode ? ` ${venue.postcode}` : ""}
               </p>
+              <div style={{ marginTop: ".9rem" }}>
+                <ShareBar url={absoluteUrl(`/venues/${venue.slug}`)} title={venue.name} />
+              </div>
             </div>
             <FollowButton kind="venue" id={venue.id} initialFollowing={following} initialFollowers={venue._count.follows} loggedIn={!!session} />
           </div>

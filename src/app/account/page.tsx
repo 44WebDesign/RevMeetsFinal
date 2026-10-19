@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { AccountForm } from "./AccountForm";
 import { DeleteAccount } from "@/components/DeleteAccount";
+import { VerifyEmailRow } from "@/components/VerifyEmailRow";
 import { ROLE_LABELS } from "@/lib/enums";
 import type { Role } from "@/lib/enums";
 
@@ -20,6 +21,7 @@ export default async function AccountPage() {
         <p className="sec-sub" style={{ marginBottom: "2rem" }}>
           Signed in as <strong>{user.email}</strong> · {ROLE_LABELS[user.role as Role] ?? user.role}
         </p>
+        <VerifyEmailRow email={user.email} verified={!!user.emailVerified} />
         <AccountForm
           initial={{
             name: user.name,

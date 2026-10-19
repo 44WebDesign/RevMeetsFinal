@@ -1,6 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
+// Self-hosted Font Awesome — bundled into our own build (no runtime CDN fetch),
+// so icons can't vanish behind a firewall/blocker or a cdnjs outage. Same
+// rationale as the self-hosted fonts above.
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
@@ -61,6 +65,14 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
   },
   robots: { index: true, follow: true },
+  // PWA: Next auto-links /manifest.webmanifest (app/manifest.ts) and the
+  // apple-touch-icon (app/apple-icon.png); this adds the standalone app meta.
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: "black-translucent" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0b0b",
+  colorScheme: "dark",
 };
 
 export default async function RootLayout({
@@ -98,12 +110,6 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${bebas.variable} ${inter.variable}`}>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        />
-      </head>
       <body>
         <JsonLd data={websiteLd} />
         <Nav session={session} />

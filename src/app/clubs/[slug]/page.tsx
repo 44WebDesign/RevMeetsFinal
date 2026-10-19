@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { EventCard } from "@/components/EventCard";
 import { FollowButton } from "@/components/FollowButton";
+import { ShareBar } from "@/components/ShareBar";
 import { ReviewSection } from "@/components/ReviewSection";
 import { CalendarSubscribe } from "@/components/CalendarSubscribe";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -177,6 +178,9 @@ export default async function ClubDetail({
                   </>
                 )}
               </p>
+              <div style={{ marginTop: ".9rem" }}>
+                <ShareBar url={absoluteUrl(`/clubs/${club.slug}`)} title={club.name} />
+              </div>
             </div>
             <FollowButton kind="club" id={club.id} initialFollowing={following} initialFollowers={club._count.follows} loggedIn={!!session} />
           </div>
