@@ -1,10 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 
-// Decorative hero layer: a stylised UK map outline with pulsing "event" pins
-// over the photo, plus (on wide screens) a couple of floating mini event cards.
-// Communicates "car events all across the UK" without depending on live map
-// tiles, so it renders identically everywhere. Purely presentational.
+// Hero centrepiece: a glowing stylised UK map with a live "radar" sweep and
+// pulsing event pins, plus floating mini event cards that link to real events.
+// Reads instantly as "live car events all across the UK" without depending on
+// live map tiles, so it renders identically everywhere. The map is decorative;
+// the cards are real, tappable links.
 
 type HeroCard = {
   slug: string;
@@ -40,39 +42,80 @@ const GB: [number, number][] = [
 ];
 
 // Pins at real UK city coordinates (same projection → they land on the map).
-const PINS: [number, number][] = [
-  [51.51, -0.13], [53.48, -2.24], [53.8, -1.55], [55.86, -4.25], [55.95, -3.19],
-  [51.48, -3.18], [52.49, -1.89], [51.45, -2.59], [54.98, -1.62], [57.15, -2.09],
+// A few carry a label so the map reads as real places, not abstract dots.
+const PINS: { lat: number; lng: number; label?: string }[] = [
+  { lat: 51.51, lng: -0.13, label: "London" },
+  { lat: 53.48, lng: -2.24, label: "Manchester" },
+  { lat: 55.95, lng: -3.19, label: "Edinburgh" },
+  { lat: 53.8, lng: -1.55 },
+  { lat: 55.86, lng: -4.25 },
+  { lat: 51.48, lng: -3.18 },
+  { lat: 52.49, lng: -1.89 },
+  { lat: 51.45, lng: -2.59 },
+  { lat: 54.98, lng: -1.62 },
+  { lat: 57.15, lng: -2.09 },
+  { lat: 52.63, lng: 1.3 },
+  { lat: 50.82, lng: -0.14 },
 ];
+
+// Centre of the sweep/glow, roughly the middle of England.
+const [CX, CY] = project(53.0, -1.8);
 
 export function HeroMapOverlay({ cards = [] }: { cards?: HeroCard[] }) {
   const outline = GB.map((p) => project(p[0], p[1]).join(",")).join(" ");
+  const corners = ["tl", "tr", "bl", "br"] as const;
 
   return (
-    <div className="rm-hero-overlay" aria-hidden>
-      <svg className="rm-hero-map" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+    <div className="rm-hero-overlay">
+      <svg className="rm-hero-map" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
+        <defs>
+          <radialGradient id="rmSweep" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(255,95,31,0.35)" />
+            <stop offset="100%" stopColor="rgba(255,95,31,0)" />
+          </radialGradient>
+          <clipPath id="rmClip">
+            <polygon points={outline} />
+          </clipPath>
+        </defs>
+
+        {/* faint concentric "radar" rings behind the landmass */}
+        {[60, 110, 165].map((r) => (
+          <circle key={r} cx={CX} cy={CY} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+        ))}
+
+        {/* rotating sweep wedge, clipped to the UK silhouette */}
+        <g clipPath="url(#rmClip)">
+          <g className="rm-hero-sweep" style={{ transformOrigin: `${CX}px ${CY}px` }}>
+            <path d={`M ${CX} ${CY} L ${CX} ${CY - 220} A 220 220 0 0 1 ${CX + 180} ${CY - 128} Z`} fill="url(#rmSweep)" />
+          </g>
+        </g>
+
         <polygon
           points={outline}
-          fill="rgba(255,95,31,0.05)"
-          stroke="rgba(255,255,255,0.3)"
-          strokeWidth={1.1}
+          fill="rgba(255,95,31,0.06)"
+          stroke="rgba(255,255,255,0.42)"
+          strokeWidth={1.3}
           strokeLinejoin="round"
         />
-        {PINS.map(([lat, lng], i) => {
-          const [x, y] = project(lat, lng);
+
+        {PINS.map((p, i) => {
+          const [x, y] = project(p.lat, p.lng);
           return (
             <g key={i}>
               <circle className="rm-hero-ring" cx={x} cy={y} fill="none" stroke="#FF5F1F" strokeWidth={1} style={{ animationDelay: `${(i % 5) * 0.5}s` }} />
-              <circle cx={x} cy={y} r={2.6} fill="#FF5F1F" />
-              <circle cx={x} cy={y} r={2.6} fill="#FF5F1F" opacity={0.5} className="rm-hero-glow" style={{ animationDelay: `${(i % 5) * 0.5}s` }} />
+              <circle cx={x} cy={y} r={3} fill="#FF5F1F" />
+              <circle cx={x} cy={y} r={3} fill="#FF7A43" opacity={0.6} className="rm-hero-glow" style={{ animationDelay: `${(i % 5) * 0.5}s` }} />
+              {p.label && (
+                <text x={x + 6} y={y + 3} className="rm-hero-pinlabel">{p.label}</text>
+              )}
             </g>
           );
         })}
       </svg>
 
-      {cards.slice(0, 2).map((c, i) => (
-        <div key={c.slug} className={`rm-hero-card rm-hero-card-${i}`}>
-          <div className="rm-hero-card-thumb">
+      {cards.slice(0, 4).map((c, i) => (
+        <Link key={c.slug} href={`/events/${c.slug}`} className={`rm-hero-card rm-hero-card-${corners[i]}`} aria-label={`${c.title} — ${c.city}`}>
+          <div className="rm-hero-card-thumb" style={{ borderColor: c.color || "#FF5F1F" }}>
             {c.imageUrl ? (
               <Image src={c.imageUrl} alt="" fill sizes="64px" style={{ objectFit: "cover" }} />
             ) : (
@@ -82,10 +125,10 @@ export function HeroMapOverlay({ cards = [] }: { cards?: HeroCard[] }) {
           <div style={{ minWidth: 0 }}>
             <div className="rm-hero-card-title">{c.title}</div>
             <div className="rm-hero-card-meta">
-              <i className="fas fa-location-dot" style={{ color: "#FF5F1F" }} /> {c.city} · {formatDate(c.startsAt)}
+              <i className="fas fa-location-dot" style={{ color: c.color || "#FF5F1F" }} /> {c.city} · {formatDate(c.startsAt)}
             </div>
           </div>
-        </div>
+        </Link>
       ))}
 
       <style>{`
@@ -99,45 +142,70 @@ export function HeroMapOverlay({ cards = [] }: { cards?: HeroCard[] }) {
           position: absolute;
           top: 50%;
           left: 50%;
-          height: clamp(360px, 82%, 640px);
+          height: clamp(340px, 86%, 660px);
           width: auto;
           transform: translate(-50%, -52%);
-          opacity: 0.55;
-          filter: drop-shadow(0 0 20px rgba(255, 95, 31, 0.15));
+          opacity: 0.38;
+          filter: drop-shadow(0 0 26px rgba(255, 95, 31, 0.22));
+        }
+        .rm-hero-pinlabel {
+          fill: rgba(255,255,255,0.85);
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          paint-order: stroke;
+          stroke: rgba(0,0,0,0.55);
+          stroke-width: 2px;
         }
         .rm-hero-ring { r: 3; opacity: 0; }
         .rm-hero-glow { filter: blur(2px); }
         @media (prefers-reduced-motion: no-preference) {
           .rm-hero-ring { animation: rmHeroPulse 3s ease-out infinite; }
           .rm-hero-glow { animation: rmHeroGlow 3s ease-in-out infinite; }
+          .rm-hero-sweep { animation: rmHeroSweep 7s linear infinite; }
         }
         @keyframes rmHeroPulse {
-          0% { r: 3; opacity: 0.55; }
+          0% { r: 3; opacity: 0.6; }
           70% { opacity: 0; }
-          100% { r: 11; opacity: 0; }
+          100% { r: 13; opacity: 0; }
         }
         @keyframes rmHeroGlow {
           0%, 100% { opacity: 0.25; }
-          50% { opacity: 0.75; }
+          50% { opacity: 0.8; }
+        }
+        @keyframes rmHeroSweep {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         .rm-hero-card {
           position: absolute;
           display: none;
           align-items: center;
           gap: 0.6rem;
-          width: 210px;
+          width: 212px;
           padding: 0.55rem 0.7rem;
-          background: rgba(13, 13, 13, 0.72);
+          background: rgba(13, 13, 13, 0.74);
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 10px;
           backdrop-filter: blur(6px);
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+          pointer-events: auto;
+          text-decoration: none;
+          transition: transform 0.18s ease, border-color 0.18s ease;
         }
-        .rm-hero-card-0 { top: 20%; left: 3.5%; }
-        .rm-hero-card-1 { bottom: 24%; right: 4%; }
+        .rm-hero-card:hover {
+          border-color: rgba(255, 95, 31, 0.5);
+          transform: translateY(-2px) scale(1.02);
+        }
+        .rm-hero-card-tl { top: 16%; left: 3%; }
+        .rm-hero-card-tr { top: 16%; right: 3%; }
+        .rm-hero-card-bl { bottom: 17%; left: 3%; }
+        .rm-hero-card-br { bottom: 17%; right: 3%; }
         @media (prefers-reduced-motion: no-preference) {
-          .rm-hero-card-0 { animation: rmHeroFloat 6s ease-in-out infinite; }
-          .rm-hero-card-1 { animation: rmHeroFloat 6s ease-in-out infinite 1.5s; }
+          .rm-hero-card-tl { animation: rmHeroFloat 6s ease-in-out infinite; }
+          .rm-hero-card-tr { animation: rmHeroFloat 6s ease-in-out infinite 1s; }
+          .rm-hero-card-bl { animation: rmHeroFloat 6s ease-in-out infinite 2s; }
+          .rm-hero-card-br { animation: rmHeroFloat 6s ease-in-out infinite 3s; }
         }
         @keyframes rmHeroFloat {
           0%, 100% { transform: translateY(0); }
@@ -150,6 +218,7 @@ export function HeroMapOverlay({ cards = [] }: { cards?: HeroCard[] }) {
           height: 48px;
           border-radius: 7px;
           overflow: hidden;
+          border: 2px solid #FF5F1F;
         }
         .rm-hero-card-title {
           font-size: 0.8rem;
@@ -159,17 +228,29 @@ export function HeroMapOverlay({ cards = [] }: { cards?: HeroCard[] }) {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-align: left;
         }
         .rm-hero-card-meta {
           font-size: 0.68rem;
-          color: #bdbdbd;
+          color: #c7c7c7;
           margin-top: 2px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-align: left;
         }
-        @media (min-width: 1200px) {
-          .rm-hero-card { display: flex; }
+        /* Map is a quiet backdrop on phones/tablets (the live strip carries the
+           message there); it grows brighter and the floating cards appear as
+           the viewport widens enough to clear the centred headline + search. */
+        @media (min-width: 768px) {
+          .rm-hero-map { opacity: 0.6; }
+        }
+        @media (min-width: 1024px) {
+          .rm-hero-map { opacity: 0.72; }
+          .rm-hero-card-tl, .rm-hero-card-tr { display: flex; }
+        }
+        @media (min-width: 1440px) {
+          .rm-hero-card-bl, .rm-hero-card-br { display: flex; }
         }
       `}</style>
     </div>

@@ -5,6 +5,7 @@ import { ClubCard } from "@/components/ClubCard";
 import { VenueCard } from "@/components/VenueCard";
 import { MapHero } from "@/components/MapHero";
 import { HeroMapOverlay } from "@/components/HeroMapOverlay";
+import { HeroLiveStrip } from "@/components/HeroLiveStrip";
 import { HomeMapExplorer } from "@/components/HomeMapExplorer";
 import { RecentEventsStrip } from "@/components/RecentlyViewed";
 import { Spotlight } from "@/components/Spotlight";
@@ -22,6 +23,7 @@ import {
   getSpotlight,
 } from "@/lib/queries";
 import { getSession } from "@/lib/auth";
+import { eventTypeColor } from "@/lib/enums";
 
 // Rendered per-request so the build never needs a live database connection.
 export const dynamic = "force-dynamic";
@@ -58,6 +60,17 @@ export default async function HomePage({
 
   const heroPoints = [...mapPoints, ...venuePoints];
 
+  // Real upcoming events for the hero's floating cards (desktop) and the
+  // swipeable "live" strip (mobile), coloured by event type.
+  const heroCards = (soon.length ? soon : events).slice(0, 6).map((e) => ({
+    slug: e.slug,
+    title: e.title,
+    city: e.city,
+    startsAt: e.startsAt,
+    imageUrl: e.imageUrl,
+    color: eventTypeColor(e.type),
+  }));
+
   // Prefer a real event cover for the hero; fall back to a curated stock shot.
   const heroBg =
     heroImage ||
@@ -70,18 +83,26 @@ export default async function HomePage({
       ) : (
       /* HERO */
       <section
+        className="rm-hero"
         style={{
-          minHeight: "82vh",
           position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           textAlign: "center",
-          padding: "80px 1.5rem 4rem",
           overflow: "hidden",
           marginTop: -64,
         }}
       >
+        <style>{`
+          .rm-hero { min-height: 82vh; padding: 80px 1.5rem 4rem; }
+          .rm-hero .rm-hero-sub-extra { }
+          @media (max-width: 767px) {
+            .rm-hero { min-height: auto; padding: 72px 1.5rem 2.25rem; }
+            .rm-hero .rm-hero-sub-extra { display: none; }
+            .rm-hero .rm-hero-scrollcue { display: none; }
+          }
+        `}</style>
         <div
           style={{
             position: "absolute",
@@ -98,7 +119,7 @@ export default async function HomePage({
               "linear-gradient(to bottom,rgba(8,8,8,.4) 0%,rgba(8,8,8,.15) 40%,rgba(8,8,8,.9) 85%,var(--bg) 100%)",
           }}
         />
-        <HeroMapOverlay cards={(soon.length ? soon : events).slice(0, 2)} />
+        <HeroMapOverlay cards={heroCards} />
         <div style={{ position: "relative", zIndex: 1, maxWidth: 920, width: "100%" }}>
           <div
             style={{
@@ -142,8 +163,8 @@ export default async function HomePage({
               marginRight: "auto",
             }}
           >
-            Discover car shows, track days, night cruises, and meetups near you.
-            Connect with the community that lives for the drive.
+            Discover car shows, track days, night cruises, and meetups near you.{" "}
+            <span className="rm-hero-sub-extra">Connect with the community that lives for the drive.</span>
           </p>
           <HeroSearch />
           <div
@@ -170,10 +191,12 @@ export default async function HomePage({
               </Link>
             ))}
           </div>
+          <HeroLiveStrip cards={heroCards} />
         </div>
         <a
           href="#discover"
           aria-label="Scroll to explore"
+          className="rm-hero-scrollcue"
           style={{
             position: "absolute",
             bottom: 20,
