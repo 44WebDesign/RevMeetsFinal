@@ -1,6 +1,6 @@
-# RevMeet — instructions for Claude Code
+# RevMeets — instructions for Claude Code
 
-RevMeet is a car-events platform (Next.js 15 App Router + TypeScript, Prisma +
+RevMeets is a car-events platform (Next.js 15 App Router + TypeScript, Prisma +
 PostgreSQL/Neon, Leaflet maps, JWT cookie auth, Zod validation) deployed on
 Vercel. Production branch: `main`. Owner is non-technical — explain steps
 plainly and prefer solutions that need no local tooling from them.

@@ -19,6 +19,6 @@ export function absoluteUrl(path = "/"): string {
   return `${siteUrl()}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export const SITE_NAME = "RevMeet";
+export const SITE_NAME = "RevMeets";
 export const SITE_DESCRIPTION =
   "Discover car shows, track days, night cruises and meetups near you. The UK's platform for finding and organising car events — search by map or list.";

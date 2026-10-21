@@ -34,8 +34,8 @@ const inter = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "RevMeet — Find Car Events & Meetups Near You",
-    template: "%s · RevMeet",
+    default: "RevMeets — Find Car Events & Meetups Near You",
+    template: "%s · RevMeets",
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
@@ -54,14 +54,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: "RevMeet — Find Car Events & Meetups Near You",
+    title: "RevMeets — Find Car Events & Meetups Near You",
     description: SITE_DESCRIPTION,
     url: siteUrl(),
     locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
-    title: "RevMeet — Find Car Events & Meetups Near You",
+    title: "RevMeets — Find Car Events & Meetups Near You",
     description: SITE_DESCRIPTION,
   },
   robots: { index: true, follow: true },

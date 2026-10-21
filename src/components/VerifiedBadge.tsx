@@ -2,7 +2,7 @@
 export function VerifiedBadge({ size = ".7rem", withLabel = false }: { size?: string; withLabel?: boolean }) {
   return (
     <span
-      title="Verified by RevMeet"
+      title="Verified by RevMeets"
       aria-label="Verified"
       style={{
         display: "inline-flex",

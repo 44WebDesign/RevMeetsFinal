@@ -8,13 +8,13 @@ import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-const DESC = "Get in touch with the RevMeet team — questions, feedback, listing help or anything else.";
+const DESC = "Get in touch with the RevMeets team — questions, feedback, listing help or anything else.";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: DESC,
   alternates: { canonical: "/contact" },
-  openGraph: { title: "Contact RevMeet", description: DESC, url: absoluteUrl("/contact") },
+  openGraph: { title: "Contact RevMeets", description: DESC, url: absoluteUrl("/contact") },
 };
 
 export default async function ContactPage() {

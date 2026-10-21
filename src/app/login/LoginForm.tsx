@@ -77,7 +77,7 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
       </button>
 
       <p style={{ textAlign: "center", fontSize: ".85rem", color: "var(--mut)", marginTop: "1.25rem" }}>
-        New to RevMeet?{" "}
+        New to RevMeets?{" "}
         <Link href="/register" style={{ color: "var(--or)", textDecoration: "none", fontWeight: 600 }}>
           Create an account
         </Link>

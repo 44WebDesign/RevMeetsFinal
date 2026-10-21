@@ -3,7 +3,7 @@ import { ogCard, OG_SIZE, OG_CONTENT_TYPE } from "@/lib/ogCard";
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
-export const alt = "RevMeet venue";
+export const alt = "RevMeets venue";
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -12,7 +12,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     .catch(() => null);
 
   if (!venue) {
-    return ogCard({ eyebrow: "Venue", title: "Venue on RevMeet" });
+    return ogCard({ eyebrow: "Venue", title: "Venue on RevMeets" });
   }
 
   return ogCard({

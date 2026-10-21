@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How RevMeet collects, uses and protects your personal data.",
+  description: "How RevMeets collects, uses and protects your personal data.",
   alternates: { canonical: "/privacy" },
 };
 
@@ -18,7 +18,7 @@ export default function PrivacyPage() {
 
         <div className="legal-body">
           <p>
-            This Privacy Policy explains how RevMeet (&quot;we&quot;) collects, uses and protects
+            This Privacy Policy explains how RevMeets (&quot;we&quot;) collects, uses and protects
             your personal data when you use our platform, in line with UK data protection
             law (UK GDPR and the Data Protection Act 2018).
           </p>

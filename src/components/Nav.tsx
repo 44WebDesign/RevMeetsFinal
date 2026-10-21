@@ -31,7 +31,7 @@ export function Nav({ session }: { session: SessionPayload | null }) {
   return (
     <nav className="site-nav">
       <Link href="/" className="logo">
-        REV<span>MEET</span>
+        REV<span>MEETS</span>
       </Link>
 
       <ul className="nav-links" style={{ display: "none" }} data-desktop>

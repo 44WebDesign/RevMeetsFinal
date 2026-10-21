@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "The terms and conditions for using RevMeet.",
+  description: "The terms and conditions for using RevMeets.",
   alternates: { canonical: "/terms" },
 };
 
@@ -18,18 +18,18 @@ export default function TermsPage() {
 
         <div className="legal-body">
           <p>
-            Welcome to RevMeet. These Terms of Service (&quot;Terms&quot;) govern your use of the
-            RevMeet website and services (the &quot;Platform&quot;). By creating an account or
+            Welcome to RevMeets. These Terms of Service (&quot;Terms&quot;) govern your use of the
+            RevMeets website and services (the &quot;Platform&quot;). By creating an account or
             using the Platform, you agree to these Terms. If you do not agree, please do not
             use the Platform.
           </p>
 
           <h2>1. Who we are</h2>
           <p>
-            RevMeet is an online platform that helps car enthusiasts discover events, and
+            RevMeets is an online platform that helps car enthusiasts discover events, and
             helps event organisers, clubs and venues promote and manage car events across
-            the UK. RevMeet provides the platform only; events are organised by the hosts
-            and venues who list them, not by RevMeet.
+            the UK. RevMeets provides the platform only; events are organised by the hosts
+            and venues who list them, not by RevMeets.
           </p>
 
           <h2>2. Accounts</h2>
@@ -43,8 +43,8 @@ export default function TermsPage() {
           <h2>3. Events, hosts and venues</h2>
           <ul>
             <li>Event organisers are solely responsible for their events, including accuracy of details, safety, permissions, insurance, and compliance with applicable laws.</li>
-            <li>RevMeet does not verify, endorse, or guarantee any event, host or venue, and is not a party to any arrangement between attendees and organisers.</li>
-            <li>Registering for an event through RevMeet expresses interest in attending; it does not create a contract with RevMeet. Any tickets, fees or entry conditions are set by the organiser.</li>
+            <li>RevMeets does not verify, endorse, or guarantee any event, host or venue, and is not a party to any arrangement between attendees and organisers.</li>
+            <li>Registering for an event through RevMeets expresses interest in attending; it does not create a contract with RevMeets. Any tickets, fees or entry conditions are set by the organiser.</li>
             <li>Attendance at any event is at your own risk. Always follow the organiser&apos;s instructions and drive responsibly and legally.</li>
           </ul>
 
@@ -61,7 +61,7 @@ export default function TermsPage() {
           <h2>5. Your content</h2>
           <p>
             You retain ownership of the content you post (event listings, profiles, images,
-            reviews). By posting, you grant RevMeet a non-exclusive, worldwide licence to
+            reviews). By posting, you grant RevMeets a non-exclusive, worldwide licence to
             host and display that content for the purpose of operating the Platform. You are
             responsible for having the rights to any content you upload.
           </p>
@@ -82,7 +82,7 @@ export default function TermsPage() {
 
           <h2>8. Liability</h2>
           <p>
-            To the fullest extent permitted by law, RevMeet is not liable for any loss or
+            To the fullest extent permitted by law, RevMeets is not liable for any loss or
             damage arising from your use of the Platform, from any event you attend or
             organise, or from dealings with other users. Nothing in these Terms excludes
             liability that cannot be excluded under law.

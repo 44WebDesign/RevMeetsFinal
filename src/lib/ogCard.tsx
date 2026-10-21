@@ -75,7 +75,7 @@ export function ogCard({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <span style={{ color: accent, fontSize: 48, fontWeight: 800, letterSpacing: 2 }}>REV</span>
-            <span style={{ color: "#ffffff", fontSize: 48, fontWeight: 800, letterSpacing: 2 }}>MEET</span>
+            <span style={{ color: "#ffffff", fontSize: 48, fontWeight: 800, letterSpacing: 2 }}>MEETS</span>
           </div>
           <div style={{ display: "flex", color: "#8a8a8a", fontSize: 30, fontWeight: 500 }}>
             UK car events &amp; meetups

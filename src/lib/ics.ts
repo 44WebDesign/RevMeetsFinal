@@ -44,7 +44,7 @@ export function buildCalendar(name: string, events: IcsEvent[]): string {
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//RevMeet//Calendar//EN",
+    "PRODID:-//RevMeets//Calendar//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${escapeIcs(name)}`,

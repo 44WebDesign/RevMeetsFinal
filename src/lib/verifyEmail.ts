@@ -13,13 +13,13 @@ export async function sendVerificationEmail(user: { id: string; email: string; n
   const link = absoluteUrl(`/api/auth/verify?token=${token}`);
   return sendEmail({
     to: user.email,
-    subject: "Welcome to RevMeet — confirm your email",
+    subject: "Welcome to RevMeets — confirm your email",
     html: emailShell(
-      "Welcome to RevMeet 🏁",
-      `<p style="margin:0 0 12px">Hi ${escapeHtml(user.name)}, thanks for joining RevMeet — the UK's home for car events.</p>
+      "Welcome to RevMeets 🏁",
+      `<p style="margin:0 0 12px">Hi ${escapeHtml(user.name)}, thanks for joining RevMeets — the UK's home for car events.</p>
        <p style="margin:0 0 12px">Please confirm your email address to finish setting up your account:</p>
        ${eventButton(link, "Confirm my email")}
-       <p style="margin:16px 0 0;color:#777;font-size:12px">This link expires in 7 days. If you didn't create a RevMeet account, you can safely ignore this email.</p>`,
+       <p style="margin:16px 0 0;color:#777;font-size:12px">This link expires in 7 days. If you didn't create a RevMeets account, you can safely ignore this email.</p>`,
     ),
   });
 }

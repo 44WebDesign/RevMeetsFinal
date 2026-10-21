@@ -150,7 +150,7 @@ export const POST = handle(async (req: Request) => {
   after(() =>
     notifyAdmins(
       { type: "NEW_EVENT_ADMIN", message: `New event: ${ev.title} by ${user.name}`, link: "/admin/events" },
-      { subject: `New RevMeet event: ${ev.title}`, html: `<p style="margin:0"><strong>${ev.title}</strong> was just created by ${user.name}.</p><p style="margin:8px 0 0;color:#aaa">📍 ${ev.city} · ${formatDateTime(ev.startsAt)} · ${ev.status}</p>` },
+      { subject: `New RevMeets event: ${ev.title}`, html: `<p style="margin:0"><strong>${ev.title}</strong> was just created by ${user.name}.</p><p style="margin:8px 0 0;color:#aaa">📍 ${ev.city} · ${formatDateTime(ev.startsAt)} · ${ev.status}</p>` },
     ),
   );
 

@@ -9,5 +9,5 @@ export async function GET(_req: Request, ctx: Ctx) {
   const { city } = await ctx.params;
   const name = decodeURIComponent(city);
   const rows = await eventsFeed({ city: { equals: name, mode: "insensitive" } });
-  return calendarResponse(`RevMeet — Events in ${name}`, rows);
+  return calendarResponse(`RevMeets — Events in ${name}`, rows);
 }

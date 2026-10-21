@@ -11,5 +11,5 @@ export async function GET(_req: Request, ctx: Ctx) {
   const club = await prisma.club.findUnique({ where: { slug }, select: { id: true, name: true } });
   if (!club) return new Response("Club not found", { status: 404 });
   const rows = await eventsFeed({ clubId: club.id });
-  return calendarResponse(`RevMeet — ${club.name}`, rows);
+  return calendarResponse(`RevMeets — ${club.name}`, rows);
 }

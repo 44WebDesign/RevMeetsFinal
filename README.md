@@ -1,4 +1,4 @@
-# RevMeet 🏁
+# RevMeets 🏁
 
 The UK's platform for discovering and organising car events — car shows, track
 days, night cruises, drift events and meetups. Built for three audiences:
@@ -29,7 +29,7 @@ Everything lives in one full-stack codebase — no separate API server.
 
 ## Getting started
 
-RevMeet uses **PostgreSQL**. The easiest local database is a free
+RevMeets uses **PostgreSQL**. The easiest local database is a free
 [Neon](https://neon.tech) project (no install) — create one and copy its
 connection string. A local Postgres works too.
 

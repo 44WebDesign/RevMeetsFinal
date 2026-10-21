@@ -1,6 +1,6 @@
-# RevMeet — Feature Inventory & Changelog
+# RevMeets — Feature Inventory & Changelog
 
-> **This document is auto-maintained.** Every change made to RevMeet must be
+> **This document is auto-maintained.** Every change made to RevMeets must be
 > reflected here in the same commit: tick/add the feature in the relevant
 > category below **and** add a row to the [Changelog](#changelog). This rule is
 > enforced via `CLAUDE.md`, which every Claude Code session reads automatically.
@@ -11,7 +11,7 @@
 
 - ✅ **Next.js 15** (App Router, React 18, TypeScript) — one full-stack codebase, no separate API server
 - ✅ **PostgreSQL** via **Prisma ORM** (Neon-backed on Vercel; works with any Postgres)
-- ✅ **Tailwind CSS** + custom design system ported from the original RevMeet home page design
+- ✅ **Tailwind CSS** + custom design system ported from the original RevMeets home page design
 - ✅ **Zod** validation on every API boundary
 - ✅ **Maps** — real **Google Maps** when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set, otherwise a free **Leaflet + CARTO Voyager** light basemap (same Google-Maps-style look, no key or cost); both share the coloured pins, mini-tile popup card and location picker, so the site works with or without a key
 - ✅ Self-hosted **Bebas Neue / Inter** fonts via `next/font/local` from committed `.woff2` files (no CDN fetch at build **or** runtime, so the build can't flake on a Google Fonts outage)
@@ -151,7 +151,7 @@
 ## 10. SEO & Discoverability
 
 - ✅ Per-page metadata on every event/club/venue: unique titles, descriptions, canonical URLs, Open Graph + Twitter cards
-- ✅ **Dynamic social share images** — a generated, branded 1200×630 card (`ImageResponse`) for every event/club/venue and the homepage (`opengraph-image.tsx` + shared `src/lib/ogCard.tsx`): type/kind pill, title, date·city and the RevMeet wordmark on the type's accent colour, so links shared to WhatsApp/Facebook/iMessage/X always get a rich preview — even listings with no uploaded photo (real cover photos are still used when present)
+- ✅ **Dynamic social share images** — a generated, branded 1200×630 card (`ImageResponse`) for every event/club/venue and the homepage (`opengraph-image.tsx` + shared `src/lib/ogCard.tsx`): type/kind pill, title, date·city and the RevMeets wordmark on the type's accent colour, so links shared to WhatsApp/Facebook/iMessage/X always get a rich preview — even listings with no uploaded photo (real cover photos are still used when present)
 - ✅ **Schema.org JSON-LD**: `Event` (dates, geo, address, organiser, offers, aggregate rating), `Organization` (clubs), `Place` (venues, with amenities), site-wide `WebSite` + `SearchAction` (sitelinks search box)
 - ✅ **Category landing pages**: `/events/type/<category>` for all nine types, with unique landing copy, map, `ItemList` markup, cross-links
 - ✅ **City landing pages**: `/events/in/<city>`, generated automatically from cities with published events
@@ -220,6 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-21 | `_____` | **Renamed the product RevMeet → RevMeets** (domain `revmeets.co.uk`): updated `SITE_NAME`, every page title/description, the REV·MEETS wordmark (nav, footer, emails, OG cards, verify/unsubscribe pages), ICS `PRODID`, legal pages, README and `.env.example` (incl. the `NEXT_PUBLIC_SITE_URL` example). Left internal identifiers untouched — the `revmeet_` cookie/storage keys (renaming would log everyone out), the `@revmeet.test` demo-fixture emails (reserved test TLD, tied to existing seed/backfill matchers) and the npm package name. Verified with tsc + build + tests and live screenshots (wordmark, OG card) |
 | 2026-10-19 | `6e6033c` | **Hero rework — car events + map finder on every screen:** made the stylised UK map far more visible (brighter outline, orange glow, a rotating radar sweep, labelled city pins), turned the floating event cards into **real tappable links** and grew them from 2 → **4 corner cards** on wide desktops (2 at ≥1024px), and added a swipeable **"Live across the UK" strip** (`HeroLiveStrip`) of real events + Open-map link for phones/tablets (<1024px), where the floating cards don't fit. Tightened the mobile hero (responsive padding, one-line subhead) so the strip peeks in the fold. Verified across 390 / 900 / 1200 / 1440px with live screenshots |
 | 2026-10-19 | `6f46698` | **Pre-launch polish set:** self-hosted **Font Awesome** (bundled, no cdnjs — icons can't vanish behind a blocker/outage); **dynamic OG share images** for events/clubs/venues + homepage (`ImageResponse`, branded card even for photo-less listings); **installable PWA** (`manifest.ts` + maskable icons + theme colour); **share buttons on club & venue pages**; **create/edit event form grouped into sections** (Basics · When & where · Amenities · Tickets & media · Location); **email-verify status row** in account settings; and a **privacy-policy update** naming analytics (Vercel), error monitoring (Sentry), maps, payments and image hosting as processors. Verified via tsc + build and live screenshots (OG cards, icons rendering, manifest serving) |
 | 2026-10-18 | `01a8e14` | **Bulk emails off the request path:** follower alerts (`/api/events`), admin announcements (`/api/admin/announce`) and admin new-signup/new-event alerts (`/api/auth/register`, `notifyAdmins`) now fan out via Next.js `after()` through a new `src/lib/bulkEmail.ts` helper, so the triggering request returns immediately instead of waiting on the send loop. In-app notifications still fire synchronously. Announce response/UI now report emails as "sending in the background" (`emailQueued`) |

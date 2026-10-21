@@ -39,7 +39,7 @@ export function AddToCalendar(props: Props) {
     const ics = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//RevMeet//EN",
+      "PRODID:-//RevMeets//EN",
       "BEGIN:VEVENT",
       `UID:${icsStamp(props.start)}-${Math.random().toString(36).slice(2)}@revmeet`,
       `DTSTAMP:${icsStamp(new Date().toISOString())}`,

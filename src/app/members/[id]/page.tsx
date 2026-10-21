@@ -37,7 +37,7 @@ export async function generateMetadata({
   if (!member || member.suspended) return { title: "Member not found", robots: { index: false } };
 
   const car = [member.carYear, member.carMake, member.carModel].filter(Boolean).join(" ");
-  const desc = member.bio || (car ? `${member.name} drives a ${car}.` : `${member.name} on RevMeet.`);
+  const desc = member.bio || (car ? `${member.name} drives a ${car}.` : `${member.name} on RevMeets.`);
 
   return {
     title: `${member.name} — Member Profile`,

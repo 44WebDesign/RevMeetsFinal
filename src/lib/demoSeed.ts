@@ -117,7 +117,7 @@ export async function seedDemoData(
   // --- Admin demo user ---
   await upsertUser({
     email: "admin@revmeet.test",
-    name: "RevMeet Admin",
+    name: "RevMeets Admin",
     passwordHash: password,
     role: "ADMIN",
     avatarColor: "#F44336",

@@ -37,7 +37,7 @@ export function Footer() {
       >
         <div>
           <Link href="/" className="logo" style={{ fontSize: "1.5rem" }}>
-            REV<span>MEET</span>
+            REV<span>MEETS</span>
           </Link>
           <p
             style={{
@@ -123,7 +123,7 @@ export function Footer() {
           gap: ".5rem",
         }}
       >
-        <span>© {new Date().getFullYear()} RevMeet. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} RevMeets. All rights reserved.</span>
         <span style={{ display: "flex", gap: "1.25rem", alignItems: "center", flexWrap: "wrap" }}>
           <Link href="/contact" style={{ color: "var(--mut)", textDecoration: "none" }}>Contact</Link>
           <Link href="/terms" style={{ color: "var(--mut)", textDecoration: "none" }}>Terms</Link>

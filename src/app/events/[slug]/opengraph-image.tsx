@@ -5,7 +5,7 @@ import { ogCard, OG_SIZE, OG_CONTENT_TYPE } from "@/lib/ogCard";
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
-export const alt = "RevMeet event";
+export const alt = "RevMeets event";
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -14,7 +14,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     .catch(() => null);
 
   if (!event) {
-    return ogCard({ eyebrow: "Car Event", title: "Event on RevMeet" });
+    return ogCard({ eyebrow: "Car Event", title: "Event on RevMeets" });
   }
 
   const label = EVENT_TYPE_LABELS[event.type as EventType] ?? "Car Event";

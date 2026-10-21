@@ -34,7 +34,7 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
     <hr style="border:none;border-top:1px solid #262626;margin:16px 0" />
     <p style="margin:0;color:#777;font-size:12px">In reply to your message:</p>
     <p style="margin:4px 0 0;color:#777;font-size:12px;white-space:pre-wrap">${escapeHtml(msg.message)}</p>`;
-  const { sent } = await sendEmail({ to: msg.email, subject: "Re: your message to RevMeet", html: emailShell("RevMeet", html) });
+  const { sent } = await sendEmail({ to: msg.email, subject: "Re: your message to RevMeets", html: emailShell("RevMeets", html) });
   if (!sent) return fail("Couldn't send the email — check your Resend configuration.", 502);
 
   await prisma.contactMessage.update({ where: { id }, data: { repliedAt: new Date() } });

@@ -11,13 +11,13 @@ import type { MapPoint } from "@/components/MapView";
 export const dynamic = "force-dynamic";
 
 const DESC =
-  "How RevMeet works — for enthusiasts finding car events near them, for clubs and organisers growing their audience, and for venues getting discovered. Free to browse, free to join.";
+  "How RevMeets works — for enthusiasts finding car events near them, for clubs and organisers growing their audience, and for venues getting discovered. Free to browse, free to join.";
 
 export const metadata: Metadata = {
   title: "How It Works",
   description: DESC,
   alternates: { canonical: "/how-it-works" },
-  openGraph: { title: "How RevMeet Works", description: DESC, url: absoluteUrl("/how-it-works") },
+  openGraph: { title: "How RevMeets Works", description: DESC, url: absoluteUrl("/how-it-works") },
 };
 
 // A few illustrative pins for the live map demo.
@@ -28,7 +28,7 @@ const DEMO_POINTS: MapPoint[] = [
 ];
 
 const FAQS: { q: string; a: string }[] = [
-  { q: "Is RevMeet free?", a: "Yes. Browsing events, clubs and venues is free, and creating an account — as an enthusiast, organiser/club or venue — is free too. Optional paid \"Featured\" placement is the only thing that costs anything." },
+  { q: "Is RevMeets free?", a: "Yes. Browsing events, clubs and venues is free, and creating an account — as an enthusiast, organiser/club or venue — is free too. Optional paid \"Featured\" placement is the only thing that costs anything." },
   { q: "Do I need an account to find events?", a: "No. You can browse the map and lists, filter, and view any event, club or venue without signing in. You only need a free account to register for events, save them, follow clubs/venues, upload photos or leave reviews." },
   { q: "How do I list my event or club?", a: "Register as a host/club, then create events from your dashboard — each gets its own page and registrations. Build a club profile people can follow, and every new event you publish alerts your followers and nearby members automatically." },
   { q: "How does \"events near you\" work?", a: "Add your home location (or subscribe with your town/postcode from any page's footer) and we'll email you a short weekly round-up of upcoming events matched to your area. It's opt-in and you can unsubscribe any time." },
@@ -39,7 +39,7 @@ export default function HowItWorksPage() {
   const howToLd = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    name: "How to find and attend car events on RevMeet",
+    name: "How to find and attend car events on RevMeets",
     description: DESC,
     step: [
       { "@type": "HowToStep", position: 1, name: "Search your area", text: "Browse upcoming car events on the interactive map or list. Filter by type, date, distance and amenities." },
@@ -78,7 +78,7 @@ export default function HowItWorksPage() {
             ONE PLACE FOR THE<br /><span style={{ color: "var(--or)" }}>WHOLE CAR SCENE</span>
           </h1>
           <p style={{ color: "rgba(245,245,245,.75)", fontSize: "1.05rem", maxWidth: 620, margin: "0 auto 1.75rem" }}>
-            RevMeet connects the people who <strong>go</strong> to car events, the clubs and organisers who <strong>run</strong> them,
+            RevMeets connects the people who <strong>go</strong> to car events, the clubs and organisers who <strong>run</strong> them,
             and the venues that <strong>host</strong> them. Browsing is free. Joining is free. Here&apos;s how each side works.
           </p>
           <div style={{ display: "flex", gap: ".75rem", justifyContent: "center", flexWrap: "wrap" }}>

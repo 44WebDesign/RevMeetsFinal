@@ -10,7 +10,7 @@ export default function RegisterPage() {
     <section className="section" style={{ background: "var(--bg)", minHeight: "calc(100vh - 64px)" }}>
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div className="sec-label">Join RevMeet</div>
+          <div className="sec-label">Join RevMeets</div>
           <div className="sec-title" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>CREATE YOUR ACCOUNT</div>
         </div>
         <Suspense fallback={<div className="card-surface" style={{ padding: "2rem" }}>Loading…</div>}>

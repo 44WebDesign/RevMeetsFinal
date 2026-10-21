@@ -20,10 +20,10 @@ export const POST = handle(async (req: Request) => {
     const link = `${appOrigin(req)}/reset-password?token=${token}`;
     const { sent } = await sendEmail({
       to: user.email,
-      subject: "Reset your RevMeet password",
+      subject: "Reset your RevMeets password",
       html: emailShell(
         "Reset your password",
-        `<p style="margin:0 0 8px">We received a request to reset your RevMeet password. This link is valid for one hour.</p>
+        `<p style="margin:0 0 8px">We received a request to reset your RevMeets password. This link is valid for one hour.</p>
          ${eventButton(link, "Reset Password")}
          <p style="margin:16px 0 0;color:#888;font-size:13px">If you didn't request this, you can safely ignore this email.</p>`,
       ),

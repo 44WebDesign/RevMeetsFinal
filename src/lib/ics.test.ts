@@ -28,7 +28,7 @@ describe("foldLine", () => {
 });
 
 describe("buildCalendar", () => {
-  const cal = buildCalendar("RevMeet — Leeds", [
+  const cal = buildCalendar("RevMeets — Leeds", [
     {
       uid: "e1@revmeet",
       title: "Sunday Meet",
@@ -44,7 +44,7 @@ describe("buildCalendar", () => {
     expect(cal.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
     expect(cal.trimEnd().endsWith("END:VCALENDAR")).toBe(true);
     expect(cal).toContain("VERSION:2.0");
-    expect(cal).toContain("X-WR-CALNAME:RevMeet — Leeds");
+    expect(cal).toContain("X-WR-CALNAME:RevMeets — Leeds");
   });
   it("emits a VEVENT with stamps and fields", () => {
     expect(cal).toContain("BEGIN:VEVENT");

@@ -24,7 +24,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { city } = await params;
   const name = cityFromSlug(city);
-  const description = `Upcoming car events in ${name} — car shows, meets, cruises and track days. See dates, locations and who's going, and register free on RevMeet.`;
+  const description = `Upcoming car events in ${name} — car shows, meets, cruises and track days. See dates, locations and who's going, and register free on RevMeets.`;
   return {
     title: `Car Events in ${name}`,
     description,

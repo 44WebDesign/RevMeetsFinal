@@ -4,7 +4,7 @@ import { seedDemoData } from "../src/lib/demoSeed";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding RevMeet…");
+  console.log("Seeding RevMeets…");
   const summary = await seedDemoData(prisma, { reset: true });
   console.log("Seed complete:", summary);
   console.log("Demo logins (password: password123):");

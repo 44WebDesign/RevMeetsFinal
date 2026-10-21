@@ -48,7 +48,7 @@ export const POST = handle(async (req: Request) => {
     await sendVerificationEmail({ id: user.id, email: user.email, name: user.name });
     await notifyAdmins(
       { type: "NEW_USER", message: `New ${roleLabel} signed up: ${user.name} (${user.email})`, link: "/admin/users" },
-      { subject: `New RevMeet signup: ${user.name}`, html: `<p style="margin:0">A new <strong>${roleLabel}</strong> just joined.</p><p style="margin:8px 0 0;color:#aaa">${user.name} · ${user.email}</p>` },
+      { subject: `New RevMeets signup: ${user.name}`, html: `<p style="margin:0">A new <strong>${roleLabel}</strong> just joined.</p><p style="margin:8px 0 0;color:#aaa">${user.name} · ${user.email}</p>` },
     );
   });
 

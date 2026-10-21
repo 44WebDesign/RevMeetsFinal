@@ -22,7 +22,7 @@ function page(title: string, body: string): Response {
   a.btn{display:inline-block;background:#FF5F1F;color:#fff;padding:10px 22px;border-radius:6px;font-weight:700;text-decoration:none}
 </style></head>
 <body><div class="card">
-  <div class="bar"><span>REV<b>MEET</b></span></div>
+  <div class="bar"><span>REV<b>MEETS</b></span></div>
   <div class="body">
     <h1>${title}</h1>
     <p>${body}</p>
