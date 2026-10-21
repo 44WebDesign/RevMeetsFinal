@@ -162,11 +162,22 @@ nav.site-nav {
   justify-content: space-between;
 }
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
   font-family: var(--font-bebas), "Bebas Neue", cursive;
   font-size: 1.75rem;
   color: var(--or);
   letter-spacing: 0.12em;
   text-decoration: none;
+}
+/* Wordmark sits beside the square mark. Keep "REV" orange (inherited) and the
+   nested span ("MEETS") white; the translate nudges the caps' baseline level
+   with the mark (Bebas has little top bearing). */
+.logo .logo-text {
+  color: var(--or);
+  line-height: 1;
+  transform: translateY(0.06em);
 }
 .logo span {
   color: #fff;
