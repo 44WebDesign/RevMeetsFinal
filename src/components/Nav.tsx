@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { SessionPayload } from "@/lib/auth";
 import { NotificationBell } from "./NotificationBell";
-import { LogoMark } from "./LogoMark";
 
 export function Nav({ session }: { session: SessionPayload | null }) {
   const router = useRouter();
@@ -32,8 +31,12 @@ export function Nav({ session }: { session: SessionPayload | null }) {
   return (
     <nav className="site-nav">
       <Link href="/" className="logo" aria-label="RevMeets home">
-        <LogoMark />
-        <span className="logo-text">REV<span>MEETS</span></span>
+        {/* Header logo (trial). Footer + other logos still use the wordmark. */}
+        <img
+          src="/logos/logo-option-1.png"
+          alt="RevMeets"
+          style={{ height: 40, width: "auto", display: "block" }}
+        />
       </Link>
 
       <ul className="nav-links" style={{ display: "none" }} data-desktop>
