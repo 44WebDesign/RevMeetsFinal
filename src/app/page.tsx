@@ -112,6 +112,21 @@ export default async function HomePage({
             filter: "brightness(.3) saturate(.7)",
           }}
         />
+        {/* Semi-transparent map snapshot layered over the photo — the hero reads
+            as "a map of UK car events" while the photo still shows through.
+            `screen` lets the light roads glow over the dark photo. Served from
+            /hero-map.jpg; shows nothing if the file is absent, so it degrades
+            cleanly. */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "url('/hero-map.jpg') center/cover",
+            opacity: 0.5,
+            mixBlendMode: "screen",
+            pointerEvents: "none",
+          }}
+        />
         <div
           style={{
             position: "absolute",
