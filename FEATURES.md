@@ -220,6 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-24 | `_____` | **Hero card stagger:** pulled the two vertically-centred floating cards inward from the screen edges (5.5% inset) so the left/right columns zigzag instead of sitting flush — still clear of the headline/search at ≥1440px |
 | 2026-10-24 | `e4e7cf1` | **Hero search field heights:** gave the hero search controls (Location / Date From / Event Type) a shared explicit height so they line up — normalising the date input's appearance for mobile had left it a different height from the others. Verified on mobile + desktop |
 | 2026-10-24 | `bc98d4c` | **Hero cards + mobile date fix:** the hero's floating event cards now number **up to 6** (was 4) and are **scattered at varied heights with slight rotations** (via a positioned wrapper + rotated card so the float and rotation transforms don't fight), fed by a larger upcoming-events fetch (8); 2 still show at ≥1024px, all 6 at ≥1440px. Also fixed the mobile **Date From** field overflowing its card — native `input[type=date]` on iOS carries an intrinsic min-width, so small screens now strip its appearance and let it shrink. Verified at 390 / 1280 / 1440px |
 | 2026-10-24 | `41ac50d` | **Header logo → white version:** pointed the nav logo at the white-on-transparent variant (`public/logos/logo-option-1-white.png`) so the "REV" and R read clearly on the near-black header (the navy version blended in). Header only; footer unchanged |
