@@ -227,6 +227,23 @@ export default async function HomePage({
         >
           <i className="fas fa-chevron-down" />
         </a>
+        {/* Attribution for the hero map image (Mapbox logo/attribution are off
+            in the static image, so it's shown here instead). */}
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            bottom: 6,
+            right: 10,
+            zIndex: 2,
+            fontSize: "9px",
+            letterSpacing: ".02em",
+            color: "rgba(255,255,255,.3)",
+            pointerEvents: "none",
+          }}
+        >
+          © Mapbox © OpenStreetMap
+        </span>
       </section>
       )}
 
