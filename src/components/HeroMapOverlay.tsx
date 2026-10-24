@@ -76,8 +76,8 @@ const SLOTS: {
 }[] = [
   { pos: { top: "9%", right: "3%" }, rot: 2.5, delay: "0s", dur: "6.5s", tier: 1 },
   { pos: { top: "15%", left: "2.5%" }, rot: -3, delay: "1.3s", dur: "7s", tier: 1 },
-  { pos: { top: "46%", right: "5.5%" }, rot: -2, delay: "2.5s", dur: "6.8s", tier: 2 },
-  { pos: { top: "40%", left: "5.5%" }, rot: 3, delay: "0.7s", dur: "7.3s", tier: 2 },
+  { pos: { top: "46%", right: "9.5%" }, rot: -2, delay: "2.5s", dur: "6.8s", tier: 2 },
+  { pos: { top: "40%", left: "9.5%" }, rot: 3, delay: "0.7s", dur: "7.3s", tier: 2 },
   { pos: { bottom: "10%", right: "4.5%" }, rot: 3, delay: "1.9s", dur: "6.3s", tier: 2 },
   { pos: { bottom: "16%", left: "3%" }, rot: -2.5, delay: "3.1s", dur: "7s", tier: 2 },
 ];
