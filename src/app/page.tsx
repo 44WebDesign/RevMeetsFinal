@@ -122,12 +122,8 @@ export default async function HomePage({
             position: "absolute",
             inset: 0,
             background: "url('/hero-map.jpg') center/cover",
-            opacity: 0.72,
+            opacity: 0.82,
             mixBlendMode: "screen",
-            // Warm the neutral-grey map toward the brand orange so it ties into
-            // the rest of the palette (sepia warms it, hue-rotate nudges the
-            // tone toward #FF5F1F, saturate makes it read as orange not brown).
-            filter: "sepia(0.6) saturate(2.2) hue-rotate(-12deg) brightness(1.05)",
             pointerEvents: "none",
           }}
         />
