@@ -91,6 +91,13 @@ export function HeroSearch() {
         </div>
       </div>
       <style jsx>{`
+        /* Give every control the same height so text, date and select rows
+           line up — the native date input otherwise sizes differently once its
+           appearance is normalised for mobile. */
+        .hero-search-grid :global(.field-input),
+        .hero-search-grid :global(.field-select) {
+          height: 46px;
+        }
         @media (max-width: 720px) {
           .hero-search-grid {
             grid-template-columns: 1fr !important;
