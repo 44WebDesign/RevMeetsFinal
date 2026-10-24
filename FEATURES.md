@@ -220,6 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-24 | `_____` | **Header logo → white version:** pointed the nav logo at the white-on-transparent variant (`public/logos/logo-option-1-white.png`) so the "REV" and R read clearly on the near-black header (the navy version blended in). Header only; footer unchanged |
 | 2026-10-23 | `ef6a320` | **Header logo trial:** swapped the nav (header only) logo for a custom image (`public/logos/logo-option-1.png` — R + speedometer mark with the REVMEETS wordmark). Footer and all other logos still use the `LogoMark` + wordmark while the brand is being decided |
 | 2026-10-21 | `8431e5f` | **Brand mark added to the logo:** the nav and footer logo now pair the checkered-flag icon (same art as the favicon/app icon, new `LogoMark` component) with the REV·MEETS wordmark, vertically aligned (`.logo` is now an inline-flex row). Verified with live screenshots at nav + footer sizes |
 | 2026-10-21 | `ec6becf` | **Renamed the product RevMeet → RevMeets** (domain `revmeets.co.uk`): updated `SITE_NAME`, every page title/description, the REV·MEETS wordmark (nav, footer, emails, OG cards, verify/unsubscribe pages), ICS `PRODID`, legal pages, README and `.env.example` (incl. the `NEXT_PUBLIC_SITE_URL` example). Left internal identifiers untouched — the `revmeet_` cookie/storage keys (renaming would log everyone out), the `@revmeet.test` demo-fixture emails (reserved test TLD, tied to existing seed/backfill matchers) and the npm package name. Verified with tsc + build + tests and live screenshots (wordmark, OG card) |
