@@ -220,7 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-10-24 | `_____` | **Hero map → real London snapshot:** replaced the placeholder with a real dark **Mapbox** map of central London (`/hero-map.jpg`) and added a small "© Mapbox © OpenStreetMap" attribution in the hero corner (logo/attribution were off in the static image) |
+| 2026-10-24 | `0cd81cc` | **Hero map → real London snapshot:** replaced the placeholder with a real dark **Mapbox** map of central London (`/hero-map.jpg`) and added a small "© Mapbox © OpenStreetMap" attribution in the hero corner (logo/attribution were off in the static image) |
 | 2026-10-24 | `109c440` | **Hero backdrop → map snapshot:** removed the stylised UK outline/radar/pins and replaced it with a **semi-transparent map image** (`/hero-map.jpg`) layered over the hero photo (`screen` blend, ~50%), so the photo shows through but a map reads over it. `HeroMapOverlay` now only draws the floating cards. Currently a procedural placeholder map (network policy blocks fetching real map tiles from the build env) — swap `/hero-map.jpg` for a real snapshot. Degrades cleanly if the image is absent |
 | 2026-10-24 | `d7746b8` | **Hero card stagger (more):** moved the two mid-height floating cards further toward centre (5.5% → 9.5% inset) for a more pronounced zigzag; verified still clear of the headline at 1440 / 1536px |
 | 2026-10-24 | `e4514e0` | **Hero card stagger:** pulled the two vertically-centred floating cards inward from the screen edges (5.5% inset) so the left/right columns zigzag instead of sitting flush — still clear of the headline/search at ≥1440px |
