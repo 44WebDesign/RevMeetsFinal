@@ -220,7 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-10-24 | `_____` | **Hero map: dropped the orange, bit stronger:** removed the warm tint (back to neutral grey) and nudged the overlay opacity up (0.72 → 0.82) |
+| 2026-10-24 | `6f76e95` | **Hero map: dropped the orange, bit stronger:** removed the warm tint (back to neutral grey) and nudged the overlay opacity up (0.72 → 0.82) |
 | 2026-10-24 | `4e2f8c4` | **Hero map strengthened + warmed:** bumped the map overlay opacity (0.5 → 0.72) and added a warm **brand-orange tint** (CSS `sepia`/`hue-rotate`/`saturate` filter) so the London map reads clearly and ties into the orange palette |
 | 2026-10-24 | `0cd81cc` | **Hero map → real London snapshot:** replaced the placeholder with a real dark **Mapbox** map of central London (`/hero-map.jpg`) and added a small "© Mapbox © OpenStreetMap" attribution in the hero corner (logo/attribution were off in the static image) |
 | 2026-10-24 | `109c440` | **Hero backdrop → map snapshot:** removed the stylised UK outline/radar/pins and replaced it with a **semi-transparent map image** (`/hero-map.jpg`) layered over the hero photo (`screen` blend, ~50%), so the photo shows through but a map reads over it. `HeroMapOverlay` now only draws the floating cards. Currently a procedural placeholder map (network policy blocks fetching real map tiles from the build env) — swap `/hero-map.jpg` for a real snapshot. Degrades cleanly if the image is absent |
