@@ -324,6 +324,19 @@ nav.site-nav {
 .field-select option {
   background: #111;
 }
+/* Native date inputs carry an intrinsic min-width (the iOS/Safari picker UI)
+   that ignores width:100% and overflows narrow single-column layouts. Strip the
+   native appearance and let them shrink to their container on small screens. */
+input[type="date"].field-input {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 768px) {
+  input[type="date"].field-input {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
 
 /* ---- Badges / tags ---- */
 .tag {

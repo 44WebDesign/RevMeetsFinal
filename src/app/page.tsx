@@ -45,8 +45,9 @@ export default async function HomePage({
   const [events, soon, clubs, venues, stats, mapPoints, heroImage, spotlight, venuePoints, homeEvents] =
     await Promise.all([
       getEvents({ take: 4 }, session?.sub),
-      // Soonest-by-date upcoming events for the "Happening soon" strip.
-      getUpcomingSoon(4, session?.sub),
+      // Soonest-by-date upcoming events — feeds the "Happening soon" strip (4)
+      // and the hero's floating cards / live strip (up to 6).
+      getUpcomingSoon(8, session?.sub),
       getClubs(),
       getVenues(),
       getStats(),
@@ -269,7 +270,7 @@ export default async function HomePage({
               marginTop: "2.5rem",
             }}
           >
-            {soon.map((e) => (
+            {soon.slice(0, 4).map((e) => (
               <EventCard key={e.id} event={e} />
             ))}
           </div>
