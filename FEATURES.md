@@ -220,7 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-10-25 | `_____` | **Hero map a notch stronger:** overlay opacity 0.82 → 0.92 |
+| 2026-10-25 | `5714d08` | **Hero map a notch stronger:** overlay opacity 0.82 → 0.92 |
 | 2026-10-24 | `6f76e95` | **Hero map: dropped the orange, bit stronger:** removed the warm tint (back to neutral grey) and nudged the overlay opacity up (0.72 → 0.82) |
 | 2026-10-24 | `4e2f8c4` | **Hero map strengthened + warmed:** bumped the map overlay opacity (0.5 → 0.72) and added a warm **brand-orange tint** (CSS `sepia`/`hue-rotate`/`saturate` filter) so the London map reads clearly and ties into the orange palette |
 | 2026-10-24 | `0cd81cc` | **Hero map → real London snapshot:** replaced the placeholder with a real dark **Mapbox** map of central London (`/hero-map.jpg`) and added a small "© Mapbox © OpenStreetMap" attribution in the hero corner (logo/attribution were off in the static image) |
