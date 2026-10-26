@@ -220,7 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-10-26 | `_____` | **Hero map eased back:** overlay opacity 1.0 → 0.96 |
+| 2026-10-26 | `e5667f2` | **Hero map eased back:** overlay opacity 1.0 → 0.96 |
 | 2026-10-26 | `08c3c30` | **Hero map to full strength:** overlay opacity 0.92 → 1.0 |
 | 2026-10-25 | `5714d08` | **Hero map a notch stronger:** overlay opacity 0.82 → 0.92 |
 | 2026-10-24 | `6f76e95` | **Hero map: dropped the orange, bit stronger:** removed the warm tint (back to neutral grey) and nudged the overlay opacity up (0.72 → 0.82) |
