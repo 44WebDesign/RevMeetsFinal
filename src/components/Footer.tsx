@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { NewsletterSignup } from "./NewsletterSignup";
-import { LogoMark } from "./LogoMark";
 
 export function Footer() {
   return (
@@ -37,9 +36,8 @@ export function Footer() {
         className="ft-grid"
       >
         <div>
-          <Link href="/" className="logo" style={{ fontSize: "1.5rem" }} aria-label="RevMeets home">
-            <LogoMark />
-            <span className="logo-text">REV<span>MEETS</span></span>
+          <Link href="/" className="logo" aria-label="RevMeets home">
+            <img src="/logos/logo.png" alt="RevMeets" style={{ height: 44, width: "auto", display: "block" }} />
           </Link>
           <p
             style={{

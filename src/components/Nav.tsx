@@ -33,7 +33,7 @@ export function Nav({ session }: { session: SessionPayload | null }) {
       <Link href="/" className="logo" aria-label="RevMeets home">
         {/* Header logo (trial). Footer + other logos still use the wordmark. */}
         <img
-          src="/logos/logo-option-1-white.png"
+          src="/logos/logo.png"
           alt="RevMeets"
           style={{ height: 40, width: "auto", display: "block" }}
         />
