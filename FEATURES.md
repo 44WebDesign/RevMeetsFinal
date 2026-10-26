@@ -220,7 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-10-26 | `_____` | **Hero map to full strength:** overlay opacity 0.92 → 1.0 |
+| 2026-10-26 | `08c3c30` | **Hero map to full strength:** overlay opacity 0.92 → 1.0 |
 | 2026-10-25 | `5714d08` | **Hero map a notch stronger:** overlay opacity 0.82 → 0.92 |
 | 2026-10-24 | `6f76e95` | **Hero map: dropped the orange, bit stronger:** removed the warm tint (back to neutral grey) and nudged the overlay opacity up (0.72 → 0.82) |
 | 2026-10-24 | `4e2f8c4` | **Hero map strengthened + warmed:** bumped the map overlay opacity (0.5 → 0.72) and added a warm **brand-orange tint** (CSS `sepia`/`hue-rotate`/`saturate` filter) so the London map reads clearly and ties into the orange palette |
