@@ -122,7 +122,7 @@ export default async function HomePage({
             position: "absolute",
             inset: 0,
             background: "url('/hero-map.jpg') center/cover",
-            opacity: 0.92,
+            opacity: 1,
             mixBlendMode: "screen",
             pointerEvents: "none",
           }}
