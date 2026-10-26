@@ -52,8 +52,10 @@ export function emailShell(title: string, bodyHtml: string): string {
   return `
   <div style="background:#0b0b0b;padding:32px 16px;font-family:Arial,Helvetica,sans-serif">
     <div style="max-width:560px;margin:0 auto;background:#161616;border:1px solid #262626;border-radius:8px;overflow:hidden">
-      <div style="background:#111;padding:18px 24px;border-bottom:2px solid #FF5F1F">
-        <span style="font-size:20px;font-weight:800;letter-spacing:2px;color:#FF5F1F">REV<span style="color:#fff">MEETS</span></span>
+      <div style="background:#111;padding:16px 24px;border-bottom:2px solid #FF5F1F">
+        <a href="${absoluteUrl("/")}" style="text-decoration:none">
+          <img src="${absoluteUrl("/logos/logo.png")}" alt="RevMeets" width="150" height="75" style="display:block;border:0;width:150px;height:auto" />
+        </a>
       </div>
       <div style="padding:24px;color:#e8e8e8">
         <h1 style="font-size:18px;margin:0 0 12px;color:#fff">${title}</h1>
