@@ -220,7 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-10-26 | `_____` | **Favicon → new mark:** replaced the checkered-flag favicon/app icon with the R+speedometer mark cropped from the new logo, on a dark tile (`app/icon.png`, `app/apple-icon.png`, `public/icon-192/512/512-maskable.png`); removed the old `icon.svg` |
+| 2026-10-26 | `067d4e0` | **Favicon → new mark:** replaced the checkered-flag favicon/app icon with the R+speedometer mark cropped from the new logo, on a dark tile (`app/icon.png`, `app/apple-icon.png`, `public/icon-192/512/512-maskable.png`); removed the old `icon.svg` |
 | 2026-10-26 | `0434ba0` | **New logo in header + footer:** replaced both the nav and footer logos with the new RevMeets logo image (`public/logos/logo.png` — R + speedometer + REVMEETS wordmark); removed the old `LogoMark` component and the earlier trial logo files. (Favicon/app icon + OG/email wordmarks unchanged for now.) |
 | 2026-10-26 | `e5667f2` | **Hero map eased back:** overlay opacity 1.0 → 0.96 |
 | 2026-10-26 | `08c3c30` | **Hero map to full strength:** overlay opacity 0.92 → 1.0 |
