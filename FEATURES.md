@@ -220,7 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
-| 2026-10-26 | `_____` | **New logo in header + footer:** replaced both the nav and footer logos with the new RevMeets logo image (`public/logos/logo.png` — R + speedometer + REVMEETS wordmark); removed the old `LogoMark` component and the earlier trial logo files. (Favicon/app icon + OG/email wordmarks unchanged for now.) |
+| 2026-10-26 | `0434ba0` | **New logo in header + footer:** replaced both the nav and footer logos with the new RevMeets logo image (`public/logos/logo.png` — R + speedometer + REVMEETS wordmark); removed the old `LogoMark` component and the earlier trial logo files. (Favicon/app icon + OG/email wordmarks unchanged for now.) |
 | 2026-10-26 | `e5667f2` | **Hero map eased back:** overlay opacity 1.0 → 0.96 |
 | 2026-10-26 | `08c3c30` | **Hero map to full strength:** overlay opacity 0.92 → 1.0 |
 | 2026-10-25 | `5714d08` | **Hero map a notch stronger:** overlay opacity 0.82 → 0.92 |
