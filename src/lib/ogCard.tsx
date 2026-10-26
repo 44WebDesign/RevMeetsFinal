@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { OG_LOGO } from "./ogLogo";
 
 // Shared 1200×630 social share card. Rendered on the server (cached by Next),
 // so every event/club/venue gets a branded, legible preview on WhatsApp,
@@ -73,10 +74,8 @@ export function ogCard({
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ color: accent, fontSize: 48, fontWeight: 800, letterSpacing: 2 }}>REV</span>
-            <span style={{ color: "#ffffff", fontSize: 48, fontWeight: 800, letterSpacing: 2 }}>MEETS</span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={OG_LOGO} width={172} height={86} alt="RevMeets" />
           <div style={{ display: "flex", color: "#8a8a8a", fontSize: 30, fontWeight: 500 }}>
             UK car events &amp; meetups
           </div>
