@@ -220,6 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-27 | `7958349` | **Header logo trial:** the nav header now uses a trial logo (`public/logos/logo-trial-4.png` — white REV + orange R/speedometer/MEETS); footer, favicon, OG and email logos are unchanged while the header design is being evaluated |
 | 2026-10-26 | `df58f03` | **Emails → logo:** the email header (`emailShell` in `src/lib/email.ts`) now shows the RevMeets logo image (served from an absolute URL) instead of the REVMEETS text wordmark; `RevMeets` alt text is the fallback for clients that block images |
 | 2026-10-26 | `b624cb1` | **OG share cards → logo:** the social share-card renderer (`src/lib/ogCard.tsx`) now draws the RevMeets logo image instead of the REVMEETS text wordmark, inlined as a base64 data URI (`src/lib/ogLogo.ts`) so Satori needs no file/network lookup |
 | 2026-10-26 | `067d4e0` | **Favicon → new mark:** replaced the checkered-flag favicon/app icon with the R+speedometer mark cropped from the new logo, on a dark tile (`app/icon.png`, `app/apple-icon.png`, `public/icon-192/512/512-maskable.png`); removed the old `icon.svg` |
