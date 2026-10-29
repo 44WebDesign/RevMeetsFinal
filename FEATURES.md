@@ -220,6 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-29 | `a209af7` | **Header logo trial #6:** nav header switched to `public/logos/logo-trial-6.png` (orange R/speedometer/MEETS with a widely-spaced ghosted grey REV); footer, favicon, OG and email logos unchanged while the header design is being evaluated |
 | 2026-10-29 | `90b124e` | **Header logo trial #5:** nav header switched to `public/logos/logo-trial-5.png` (orange R/speedometer/MEETS with a ghosted grey REV); footer, favicon, OG and email logos unchanged while the header design is being evaluated |
 | 2026-10-27 | `7958349` | **Header logo trial:** the nav header now uses a trial logo (`public/logos/logo-trial-4.png` — white REV + orange R/speedometer/MEETS); footer, favicon, OG and email logos are unchanged while the header design is being evaluated |
 | 2026-10-26 | `df58f03` | **Emails → logo:** the email header (`emailShell` in `src/lib/email.ts`) now shows the RevMeets logo image (served from an absolute URL) instead of the REVMEETS text wordmark; `RevMeets` alt text is the fallback for clients that block images |
