@@ -220,6 +220,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-10-31 | `d65fbdc` | **Header logo trial #7:** nav header switched to `public/logos/logo-trial-7.png` (glowing render of the R/speedometer/REVMEETS mark); footer, favicon, OG and email logos unchanged while the header design is being evaluated |
 | 2026-10-29 | `a209af7` | **Header logo trial #6:** nav header switched to `public/logos/logo-trial-6.png` (orange R/speedometer/MEETS with a widely-spaced ghosted grey REV); footer, favicon, OG and email logos unchanged while the header design is being evaluated |
 | 2026-10-29 | `90b124e` | **Header logo trial #5:** nav header switched to `public/logos/logo-trial-5.png` (orange R/speedometer/MEETS with a ghosted grey REV); footer, favicon, OG and email logos unchanged while the header design is being evaluated |
 | 2026-10-27 | `7958349` | **Header logo trial:** the nav header now uses a trial logo (`public/logos/logo-trial-4.png` — white REV + orange R/speedometer/MEETS); footer, favicon, OG and email logos are unchanged while the header design is being evaluated |
