@@ -31,9 +31,9 @@ export function Nav({ session }: { session: SessionPayload | null }) {
   return (
     <nav className="site-nav">
       <Link href="/" className="logo" aria-label="RevMeets home">
-        {/* Header logo (trial #7). Footer + other logos still use logo.png. */}
+        {/* Header logo (trial #8). Footer + other logos still use logo.png. */}
         <img
-          src="/logos/logo-trial-7.png"
+          src="/logos/logo-trial-8.png"
           alt="RevMeets"
           style={{ height: 40, width: "auto", display: "block" }}
         />
