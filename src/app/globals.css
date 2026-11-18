@@ -241,15 +241,18 @@ nav.site-nav {
   top: 0;
   left: 0;
   right: 0;
-  height: 14px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    var(--or) 0 2px,
-    transparent 2px 13px
-  );
+  height: 16px;
+  /* Two layers = rev-counter look: short minor ticks every 13px + a taller,
+     wider major tick every 5th (65px). Each layer's band height is set via
+     background-size so the majors stand proud of the minors. */
+  background-image: repeating-linear-gradient(90deg, var(--or) 0 2px, transparent 2px 13px),
+    repeating-linear-gradient(90deg, var(--or) 0 3px, transparent 3px 65px);
+  background-size: auto 8px, auto 16px;
+  background-position: center, center;
+  background-repeat: repeat-x, repeat-x;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 50%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 50%, transparent 100%);
-  opacity: 0.55;
+  opacity: 0.6;
   pointer-events: none;
 }
 .container {
@@ -274,6 +277,21 @@ nav.site-nav {
   height: 0.9em;
   margin-right: 0.5em;
   vertical-align: -0.08em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 30'%3E%3Cg transform='skewX(-22)'%3E%3Crect x='14' width='8' height='30' fill='%23FF5F1F'/%3E%3Crect x='30' width='8' height='30' fill='%23FF5F1F'/%3E%3C/g%3E%3C/svg%3E")
+    no-repeat left center;
+  background-size: contain;
+}
+/* Same speed-slash mark before the footer column headings. */
+.ft-col-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+}
+.ft-col-title::before {
+  content: "";
+  flex: none;
+  width: 1.4em;
+  height: 0.8em;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 30'%3E%3Cg transform='skewX(-22)'%3E%3Crect x='14' width='8' height='30' fill='%23FF5F1F'/%3E%3Crect x='30' width='8' height='30' fill='%23FF5F1F'/%3E%3C/g%3E%3C/svg%3E")
     no-repeat left center;
   background-size: contain;

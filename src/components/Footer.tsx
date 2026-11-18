@@ -147,6 +147,7 @@ function FooterCol({
   return (
     <div>
       <h4
+        className="ft-col-title"
         style={{
           fontSize: ".7rem",
           fontWeight: 700,

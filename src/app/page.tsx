@@ -169,6 +169,24 @@ export default async function HomePage({
             <br />
             <span style={{ color: "var(--or)" }}>CAR EVENT</span>
           </h1>
+          {/* Gauge-tick underline — the speedometer motif from the logo, echoing
+              the site-wide section dividers. */}
+          <div
+            aria-hidden
+            style={{
+              height: 16,
+              width: 280,
+              margin: "0 auto 2rem",
+              backgroundImage:
+                "repeating-linear-gradient(90deg, var(--or) 0 2px, transparent 2px 13px), repeating-linear-gradient(90deg, var(--or) 0 3px, transparent 3px 65px)",
+              backgroundSize: "auto 8px, auto 16px",
+              backgroundPosition: "center, center",
+              backgroundRepeat: "repeat-x, repeat-x",
+              WebkitMaskImage: "linear-gradient(90deg, transparent, #000 50%, transparent)",
+              maskImage: "linear-gradient(90deg, transparent, #000 50%, transparent)",
+              opacity: 0.85,
+            }}
+          />
           <p
             style={{
               fontSize: "1.05rem",
