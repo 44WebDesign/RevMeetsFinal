@@ -19,7 +19,7 @@ export default async function ClubsPage({
   const clubs = await getClubs(q);
 
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)" }}>
       <div className="container">
         <div className="sec-label">Community</div>
         <div className="sec-title">CAR CLUBS</div>

@@ -16,7 +16,7 @@ export default async function MapPage() {
   ]);
 
   return (
-    <section style={{ padding: "1.5rem 1.25rem 2.5rem" }}>
+    <section className="home-sec" style={{ padding: "2.75rem 1.25rem 2.5rem" }}>
       <div style={{ maxWidth: 1400, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: ".75rem", flexWrap: "wrap", marginBottom: ".85rem" }}>
           <h1 className="sec-title" style={{ fontSize: "clamp(1.5rem,3vw,2.1rem)", margin: 0 }}>

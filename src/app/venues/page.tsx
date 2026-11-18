@@ -22,7 +22,7 @@ export default async function VenuesPage({
   const venues = await getVenues(q, parseAmenityParam(amenities));
 
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)" }}>
       <div className="container">
         <div className="sec-label">Locations</div>
         <div className="sec-title">VENUES</div>

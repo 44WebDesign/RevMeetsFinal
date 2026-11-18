@@ -61,7 +61,7 @@ export default async function CityEventsPage({
   };
 
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)" }}>
       <JsonLd data={itemListLd} />
       <div className="container">
         <div className="sec-label">

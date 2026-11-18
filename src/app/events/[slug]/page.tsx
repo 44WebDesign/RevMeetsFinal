@@ -333,7 +333,7 @@ export default async function EventDetail({
         </div>
       </div>
 
-      <section className="section" style={{ paddingTop: "2.5rem" }}>
+      <section className="section home-sec" style={{ paddingTop: "2.5rem" }}>
         <div className="container">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "2.5rem" }} className="detail-grid">
             {/* Main */}

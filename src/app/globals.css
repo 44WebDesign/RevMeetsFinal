@@ -238,7 +238,8 @@ nav.site-nav {
 .home-sec::before {
   content: "";
   position: absolute;
-  top: 0;
+  /* Small gap above the tick row so it isn't jammed against the section edge. */
+  top: 14px;
   left: 0;
   right: 0;
   height: 16px;

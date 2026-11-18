@@ -221,6 +221,7 @@
 
 | Date | Commit | Change |
 | --- | --- | --- |
+| 2026-11-18 | `b7f9b8d` | **Motorsport accents — round 3:** gave the gauge-tick dividers a little spacing above (ticks offset 14px from the section edge) and extended the `.home-sec` divider to the events list, event detail, clubs, venues, events-by-type, events-by-city and map pages, so every listing/event/map page carries the same divider + accents |
 | 2026-11-18 | `c202850` | **Motorsport accents — round 2:** the gauge-tick divider now has taller major ticks every 5th for a rev-counter look; added a matching gauge-tick underline under the homepage hero headline; and the `//` speed-slash now also precedes each footer column heading |
 | 2026-11-18 | `07df1ee` | **Motorsport UI accents (site-wide):** section labels now carry the logo's `//` speed-slash, section dividers became a speedometer gauge-tick sweep, orange/large buttons got a clipped racing-plate corner (with inset focus ring), and event cards gained a type-coloured left accent bar |
 | 2026-11-02 | `339c524` | **Header logo trial #8:** nav header switched to `public/logos/logo-trial-8.png` (clean transparent cut-out — ghosted grey REV, solid orange MEETS); footer, favicon, OG and email logos unchanged while the header design is being evaluated |

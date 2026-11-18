@@ -31,7 +31,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Searc
   const activeType = params.type ? eventTypeLabel(params.type) : null;
 
   return (
-    <section style={{ padding: "1.5rem 1.25rem 2.5rem", background: "var(--bg)" }}>
+    <section className="home-sec" style={{ padding: "2.75rem 1.25rem 2.5rem", background: "var(--bg)" }}>
       <div style={{ maxWidth: 1400, margin: "0 auto" }}>
         <div style={{ marginBottom: "1rem" }}>
           <div className="sec-label">Browse</div>
