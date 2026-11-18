@@ -33,6 +33,12 @@ export function EventCard({ event }: { event: EventCardData }) {
   const left = spacesLeft(event.capacity, event.attendees);
   return (
     <div className="card-surface event-card" style={{ overflow: "hidden", position: "relative", transition: "all .3s" }}>
+      {/* Left accent bar keyed to the event-type colour — a subtle motorsport
+          cue that ties each card to its category. */}
+      <span
+        aria-hidden
+        style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, background: color, zIndex: 3 }}
+      />
       {/* Save button — sibling of the link (valid HTML), stacked above it */}
       <div style={{ position: "absolute", top: ".6rem", right: ".6rem", zIndex: 2 }}>
         <SaveIconButton eventId={event.id} initialSaved={event.saved ?? false} />
