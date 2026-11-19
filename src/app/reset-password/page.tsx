@@ -5,7 +5,7 @@ export const metadata = { title: "Reset Password", robots: { index: false } };
 
 export default function ResetPasswordPage() {
   return (
-    <section className="section" style={{ background: "var(--bg)", minHeight: "calc(100vh - 64px)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)", minHeight: "calc(100vh - 64px)" }}>
       <div style={{ maxWidth: 440, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <div className="sec-label">Almost There</div>

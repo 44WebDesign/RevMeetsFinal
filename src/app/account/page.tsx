@@ -14,7 +14,7 @@ export default async function AccountPage() {
   if (!user) redirect("/login?next=/account");
 
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)" }}>
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <div className="sec-label">Your Account</div>
         <div className="sec-title" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>ACCOUNT SETTINGS</div>

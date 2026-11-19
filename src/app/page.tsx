@@ -288,10 +288,10 @@ export default async function HomePage({
             }}
             className="stats-inner"
           >
-            <Stat n={statNum(stats.events)} l="Events Listed" />
-            <Stat n={statNum(stats.users)} l="Registered Members" />
-            <Stat n={statNum(stats.venues)} l="Clubs & Venues" />
-            <Stat n={statNum(stats.cities)} l="Cities Covered" />
+            <GaugeStat n={statNum(stats.events)} l="Events Listed" fill={0.82} />
+            <GaugeStat n={statNum(stats.users)} l="Registered Members" fill={0.68} />
+            <GaugeStat n={statNum(stats.venues)} l="Clubs & Venues" fill={0.9} />
+            <GaugeStat n={statNum(stats.cities)} l="Cities Covered" fill={0.74} />
           </div>
         </div>
       )}
@@ -546,13 +546,77 @@ function statNum(n: number): string {
   return `${Math.floor(n / 50) * 50}+`;
 }
 
-function Stat({ n, l }: { n: string; l: string }) {
+// Speedometer-style stat: a semicircular gauge (grey track + orange sweep +
+// tick scale) with the figure read out in the dial. `fill` (0–1) is a fixed,
+// decorative needle position — the counts have no natural "max" to scale to.
+function GaugeStat({ n, l, fill }: { n: string; l: string; fill: number }) {
+  const cx = 70;
+  const cy = 66;
+  const r = 54;
+  const pt = (ang: number, rr: number): [number, number] => [
+    cx + rr * Math.cos(ang),
+    cy - rr * Math.sin(ang),
+  ];
+  const aEnd = Math.PI - fill * Math.PI;
+  const [sx, sy] = pt(Math.PI, r);
+  const [ex, ey] = pt(aEnd, r);
+  const N = 10;
+  const ticks = [];
+  for (let i = 0; i <= N; i++) {
+    const ang = Math.PI - (i / N) * Math.PI;
+    const on = i / N <= fill + 0.001;
+    const [x1, y1] = pt(ang, r - 6);
+    const [x2, y2] = pt(ang, r + 1);
+    ticks.push(
+      <line
+        key={i}
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke={on ? "var(--or)" : "#333"}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />,
+    );
+  }
   return (
     <div>
-      <div className="hd" style={{ fontSize: "2.25rem", color: "var(--or)" }}>
-        {n}
+      <svg
+        viewBox="0 0 140 82"
+        style={{ width: "100%", maxWidth: 150, height: "auto", display: "block", margin: "0 auto" }}
+        aria-hidden
+      >
+        <path
+          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+          fill="none"
+          stroke="#242424"
+          strokeWidth={6}
+          strokeLinecap="round"
+        />
+        <path
+          d={`M ${sx} ${sy} A ${r} ${r} 0 0 1 ${ex} ${ey}`}
+          fill="none"
+          stroke="var(--or)"
+          strokeWidth={6}
+          strokeLinecap="round"
+        />
+        {ticks}
+        <text x={cx} y={60} textAnchor="middle" className="hd" fontSize="26" fill="#fff">
+          {n}
+        </text>
+      </svg>
+      <div
+        style={{
+          fontSize: ".75rem",
+          color: "var(--mut)",
+          textAlign: "center",
+          marginTop: ".15rem",
+          letterSpacing: ".04em",
+        }}
+      >
+        {l}
       </div>
-      <div style={{ fontSize: ".8rem", color: "var(--mut)" }}>{l}</div>
     </div>
   );
 }

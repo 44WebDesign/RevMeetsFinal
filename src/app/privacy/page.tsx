@@ -10,7 +10,7 @@ const UPDATED = "19 October 2026";
 
 export default function PrivacyPage() {
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)" }}>
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
         <div className="sec-label">Legal</div>
         <h1 className="sec-title" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>PRIVACY POLICY</h1>

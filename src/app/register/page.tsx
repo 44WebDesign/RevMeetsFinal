@@ -7,7 +7,7 @@ export const metadata = { title: "Sign Up", robots: { index: false, follow: true
 export default function RegisterPage() {
   const googleEnabled = googleConfigured();
   return (
-    <section className="section" style={{ background: "var(--bg)", minHeight: "calc(100vh - 64px)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)", minHeight: "calc(100vh - 64px)" }}>
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <div className="sec-label">Join RevMeets</div>

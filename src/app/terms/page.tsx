@@ -10,7 +10,7 @@ const UPDATED = "8 August 2026";
 
 export default function TermsPage() {
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)" }}>
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
         <div className="sec-label">Legal</div>
         <h1 className="sec-title" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>TERMS OF SERVICE</h1>

@@ -85,7 +85,7 @@ export default async function MemberProfile({
   return (
     <>
       <JsonLd data={personLd} />
-      <section className="section" style={{ background: "var(--bg)" }}>
+      <section className="section home-sec" style={{ background: "var(--bg)" }}>
         <div className="container" style={{ maxWidth: 900 }}>
           <div style={{ display: "flex", gap: "1.25rem", alignItems: "center", flexWrap: "wrap" }}>
             <span

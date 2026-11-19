@@ -24,7 +24,7 @@ export default async function ContactPage() {
   const crumbs = [{ label: "Home", href: "/" }, { label: "Contact" }];
 
   return (
-    <section className="section" style={{ background: "var(--bg)" }}>
+    <section className="section home-sec" style={{ background: "var(--bg)" }}>
       <JsonLd data={breadcrumbLd(crumbs, absoluteUrl)} />
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <Breadcrumbs items={crumbs} />
