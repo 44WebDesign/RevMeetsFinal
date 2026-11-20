@@ -23,10 +23,15 @@ export const POST = handle(async (req: Request) => {
   if (limited) return limited;
 
   const body = await req.json().catch(() => ({}));
-  const data = schema.parse(body);
 
-  // Honeypot tripped → pretend success, drop silently.
-  if (data.company) return ok({ ok: true });
+  // Honeypot — real users never fill this hidden field; bots do. Check it on
+  // the raw body BEFORE validation and return a fake success, so a bot isn't
+  // told it was blocked and the hidden field name isn't leaked in a 422.
+  if (typeof body?.company === "string" && body.company.length > 0) {
+    return ok({ ok: true, message: "Thanks — your message has been sent. We'll get back to you soon." });
+  }
+
+  const data = schema.parse(body);
 
   await prisma.contactMessage.create({
     data: { name: data.name, email: data.email, message: data.message },

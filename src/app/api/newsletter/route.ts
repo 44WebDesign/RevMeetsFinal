@@ -19,8 +19,14 @@ export const POST = handle(async (req: Request) => {
   if (limited) return limited;
 
   const body = await req.json().catch(() => ({}));
-  const { email, area, company } = schema.parse(body);
-  if (company) return ok({ subscribed: true }); // honeypot tripped — drop silently
+
+  // Honeypot — check the raw body BEFORE validation and fake success, so a bot
+  // isn't told it was blocked and the hidden field name isn't leaked in a 422.
+  if (typeof body?.company === "string" && body.company.length > 0) {
+    return ok({ subscribed: true });
+  }
+
+  const { email, area } = schema.parse(body);
   const normalised = email.trim().toLowerCase();
 
   // Idempotent: re-subscribing just refreshes the area, never errors.
