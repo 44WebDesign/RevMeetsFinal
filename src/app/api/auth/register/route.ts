@@ -20,7 +20,11 @@ export const POST = handle(async (req: Request) => {
   if (typeof body?.company === "string" && body.company.length > 0) {
     return fail("Something went wrong. Please try again.", 400);
   }
-  const data = registerSchema.parse(body);
+  // Strip the honeypot before validation: registerSchema is .strict(), so
+  // leaving `company` in the payload makes every real sign-up fail with an
+  // "unrecognized key" error (and empty field-level details).
+  const { company: _honeypot, ...rest } = body ?? {};
+  const data = registerSchema.parse(rest);
 
   const existing = await prisma.user.findUnique({ where: { email: data.email.toLowerCase() } });
   if (existing) return fail("An account with that email already exists", 409);

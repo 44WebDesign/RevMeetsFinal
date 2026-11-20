@@ -40,9 +40,13 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
       router.push("/dashboard");
       router.refresh();
     } else {
+      // Prefer field-level details, but fall back to the top-level error when
+      // details is absent OR an empty object (e.g. form-level validation
+      // errors) so the message is never silently blank.
+      const detailMsgs = data.details ? Object.values(data.details).flat() : [];
       setError(
-        data.details
-          ? Object.values(data.details).flat().join(", ")
+        detailMsgs.length
+          ? detailMsgs.join(", ")
           : data.error ?? "Could not create account",
       );
       setBusy(false);
