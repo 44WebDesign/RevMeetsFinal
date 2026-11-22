@@ -13,6 +13,15 @@ export function emailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
+// Build the From header. If EMAIL_FROM is a bare address (e.g.
+// "noreply@revmeets.co.uk"), mail clients show "noreply" as the sender name —
+// so we prepend the "RevMeets" display name unless one is already present.
+function fromAddress(): string {
+  const raw = process.env.EMAIL_FROM?.trim();
+  if (!raw) return DEFAULT_FROM;
+  return raw.includes("<") ? raw : `RevMeets <${raw}>`;
+}
+
 export async function sendEmail(opts: {
   to: string;
   subject: string;
@@ -30,7 +39,7 @@ export async function sendEmail(opts: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM || DEFAULT_FROM,
+        from: fromAddress(),
         to: [opts.to],
         subject: opts.subject,
         html: opts.html,

@@ -13,16 +13,15 @@ function page(title: string, body: string): Response {
 <style>
   body{margin:0;background:#0b0b0b;color:#e8e8e8;font-family:Arial,Helvetica,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
   .card{max-width:460px;width:100%;background:#161616;border:1px solid #262626;border-radius:12px;overflow:hidden;text-align:center}
-  .bar{background:#111;padding:16px 24px;border-bottom:2px solid #FF5F1F}
-  .bar span{font-size:20px;font-weight:800;letter-spacing:2px;color:#FF5F1F}
-  .bar span b{color:#fff;font-weight:800}
+  .bar{background:#111;padding:16px 24px;border-bottom:2px solid #FF5F1F;text-align:center}
+  .bar img{height:40px;width:auto;display:inline-block;border:0}
   .body{padding:28px 24px}
   h1{font-size:18px;color:#fff;margin:0 0 10px}
   p{color:#aaa;font-size:14px;line-height:1.6;margin:0 0 18px}
   a.btn{display:inline-block;background:#FF5F1F;color:#fff;padding:10px 22px;border-radius:6px;font-weight:700;text-decoration:none}
 </style></head>
 <body><div class="card">
-  <div class="bar"><span>REV<b>MEETS</b></span></div>
+  <div class="bar"><a href="${absoluteUrl("/")}"><img src="${absoluteUrl("/logos/logo.png")}" alt="RevMeets" height="40" /></a></div>
   <div class="body">
     <h1>${title}</h1>
     <p>${body}</p>

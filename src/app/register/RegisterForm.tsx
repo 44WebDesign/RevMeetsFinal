@@ -19,7 +19,8 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
   const [role, setRole] = useState(
     ROLE_OPTIONS.some((r) => r.value === initialRole) ? initialRole : "ENTHUSIAST",
   );
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [company, setCompany] = useState(""); // honeypot
@@ -33,7 +34,7 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role, company }),
+      body: JSON.stringify({ name: `${firstName} ${lastName}`.trim(), email, password, role, company }),
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
@@ -90,9 +91,15 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
         </>
       )}
 
-      <div style={{ marginBottom: "1rem" }}>
-        <label className="field-label">Full name</label>
-        <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your name" />
+      <div style={{ marginBottom: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".75rem" }} className="name-grid">
+        <div>
+          <label className="field-label">First name</label>
+          <input className="field-input" value={firstName} onChange={(e) => setFirstName(e.target.value)} required placeholder="First name" />
+        </div>
+        <div>
+          <label className="field-label">Last name</label>
+          <input className="field-input" value={lastName} onChange={(e) => setLastName(e.target.value)} required placeholder="Last name" />
+        </div>
       </div>
       <div style={{ marginBottom: "1rem" }}>
         <label className="field-label">Email</label>
