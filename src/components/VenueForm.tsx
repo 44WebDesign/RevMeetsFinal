@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LocationPicker } from "./LocationPicker";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 import { ImageField } from "./ImageField";
 import { AmenityPicker } from "./AmenityPicker";
 import { amenityKeys, serializeAmenities } from "@/lib/amenities";
@@ -83,7 +84,21 @@ export function VenueForm({ initial }: { initial: VenueFormValues }) {
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "1rem" }} className="venue-addr">
         <div>
           <label className="field-label">Address</label>
-          <input className="field-input" value={v.address} onChange={(e) => set("address", e.target.value)} required />
+          <AddressAutocomplete
+            mode="address"
+            value={v.address}
+            onChange={(t) => set("address", t)}
+            onSelect={(r) => {
+              set("address", r.label);
+              if (r.city) set("city", r.city);
+              if (r.postcode) set("postcode", r.postcode);
+              if (r.lat != null && r.lng != null) {
+                set("lat", r.lat);
+                set("lng", r.lng);
+              }
+            }}
+            required
+          />
         </div>
         <div>
           <label className="field-label">City</label>

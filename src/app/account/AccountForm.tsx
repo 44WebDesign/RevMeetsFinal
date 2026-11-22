@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initials } from "@/lib/utils";
 import { LocationPicker } from "@/components/LocationPicker";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 
 const COLORS = ["#FF5F1F", "#E040FB", "#00BCD4", "#4CAF50", "#FFD700", "#2196F3", "#F44336", "#9C27B0"];
 
@@ -175,9 +176,21 @@ export function AccountForm({
           </label>
           <div style={{ marginBottom: ".75rem" }}>
             <label className="field-label">Home town / city</label>
-            <input className="field-input" value={homeCity} onChange={(e) => setHomeCity(e.target.value)} placeholder="e.g. Leeds" />
+            <AddressAutocomplete
+              mode="city"
+              value={homeCity}
+              onChange={setHomeCity}
+              onSelect={(r) => {
+                setHomeCity(r.city);
+                if (r.lat != null && r.lng != null) {
+                  setHomeLat(r.lat);
+                  setHomeLng(r.lng);
+                }
+              }}
+              placeholder="Start typing your town…"
+            />
           </div>
-          <label className="field-label">Your location (for “near me” events)</label>
+          <label className="field-label">Fine-tune your location (for “near me” events)</label>
           <LocationPicker
             lat={homeLat ?? 52.4}
             lng={homeLng ?? -1.5}

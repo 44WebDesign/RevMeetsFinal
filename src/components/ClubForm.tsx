@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ImageField } from "./ImageField";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 
 export type ClubFormValues = {
   name: string;
@@ -70,7 +71,17 @@ export function ClubForm({ initial }: { initial: ClubFormValues }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
         <div>
           <label className="field-label">Location</label>
-          <input className="field-input" value={v.location} onChange={(e) => set("location", e.target.value)} required placeholder="Stratford, London E15" />
+          <AddressAutocomplete
+            mode="city"
+            value={v.location}
+            onChange={(t) => set("location", t)}
+            onSelect={(r) => {
+              set("location", r.label || r.city);
+              if (r.region) set("region", r.region);
+            }}
+            required
+            placeholder="Start typing a town…"
+          />
         </div>
         <div>
           <label className="field-label">Region (optional)</label>

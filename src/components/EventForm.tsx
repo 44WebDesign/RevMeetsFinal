@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LocationPicker } from "./LocationPicker";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 import { ImageField } from "./ImageField";
 import { AmenityPicker } from "./AmenityPicker";
 import { amenityKeys, serializeAmenities } from "@/lib/amenities";
@@ -217,7 +218,21 @@ export function EventForm({
 
       <Row>
         <Field label="City / town">
-          <input className="field-input" value={v.city} onChange={(e) => set("city", e.target.value)} required placeholder="Birmingham" />
+          <AddressAutocomplete
+            mode="city"
+            value={v.city}
+            onChange={(t) => set("city", t)}
+            onSelect={(r) => {
+              set("city", r.city);
+              if (r.region) set("region", r.region);
+              if (r.lat != null && r.lng != null) {
+                set("lat", r.lat);
+                set("lng", r.lng);
+              }
+            }}
+            required
+            placeholder="Birmingham"
+          />
         </Field>
         <Field label="Region (optional)">
           <input className="field-input" value={v.region} onChange={(e) => set("region", e.target.value)} placeholder="West Midlands" />
