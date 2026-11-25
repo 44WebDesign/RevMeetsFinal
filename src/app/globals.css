@@ -582,38 +582,6 @@ input[type="date"].field-input {
   text-decoration: underline;
 }
 
-/* ---- Google Places autocomplete dropdown (dark theme) ---- */
-.pac-container {
-  background: #161616;
-  border: 1px solid var(--bdr2);
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
-  font-family: var(--font-inter), "Inter", sans-serif;
-  z-index: 2000;
-}
-.pac-item {
-  border-top: 1px solid var(--bdr);
-  color: var(--mut);
-  padding: 0.45rem 0.7rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-.pac-item:hover,
-.pac-item-selected {
-  background: rgba(255, 95, 31, 0.1);
-}
-.pac-item-query {
-  color: #f5f5f5;
-  font-size: 0.9rem;
-}
-.pac-matched {
-  color: var(--or);
-}
-.pac-icon {
-  filter: grayscale(1) opacity(0.6);
-}
-
 /* ---- Utility ---- */
 .text-mut {
   color: var(--mut);

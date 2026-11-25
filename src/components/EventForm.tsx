@@ -240,7 +240,22 @@ export function EventForm({
       </Row>
 
       <Field label="Address / meeting point (optional)" full>
-        <input className="field-input" value={v.address} onChange={(e) => set("address", e.target.value)} placeholder="Full address or landmark" />
+        <AddressAutocomplete
+          mode="address"
+          value={v.address}
+          onChange={(t) => set("address", t)}
+          onSelect={(r) => {
+            set("address", r.label);
+            // A specific address refines the pin (and fills city/region if blank).
+            if (r.city && !v.city) set("city", r.city);
+            if (r.region && !v.region) set("region", r.region);
+            if (r.lat != null && r.lng != null) {
+              set("lat", r.lat);
+              set("lng", r.lng);
+            }
+          }}
+          placeholder="Full address or landmark"
+        />
       </Field>
 
       <div>
