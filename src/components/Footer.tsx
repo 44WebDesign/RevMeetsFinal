@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { NewsletterSignup } from "./NewsletterSignup";
 
+// Official RevMeets social accounts (footer icons). Update the URL to change a
+// link; remove an entry to drop its icon.
+const SOCIALS = [
+  { icon: "instagram", label: "RevMeets on Instagram", url: "https://instagram.com/revmeets" },
+  { icon: "tiktok", label: "RevMeets on TikTok", url: "https://www.tiktok.com/@revmeetsuk" },
+  { icon: "facebook-f", label: "RevMeets on Facebook", url: "https://facebook.com/revmeets" },
+  { icon: "x-twitter", label: "RevMeets on X", url: "https://x.com/revmeets" },
+];
+
 export function Footer() {
   return (
     <footer
@@ -52,27 +61,31 @@ export function Footer() {
             Built by enthusiasts, for enthusiasts.
           </p>
           <div style={{ display: "flex", gap: ".75rem", marginTop: "1.25rem" }}>
-            {["instagram", "tiktok", "facebook-f", "x-twitter", "youtube"].map(
-              (s) => (
-                <span
-                  key={s}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 6,
-                    background: "var(--bg)",
-                    border: "1px solid var(--bdr2)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "var(--mut)",
-                    fontSize: ".85rem",
-                  }}
-                >
-                  <i className={`fab fa-${s}`} />
-                </span>
-              ),
-            )}
+            {SOCIALS.map((s) => (
+              <a
+                key={s.icon}
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="ft-social"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 6,
+                  background: "var(--bg)",
+                  border: "1px solid var(--bdr2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--mut)",
+                  fontSize: ".85rem",
+                  textDecoration: "none",
+                }}
+              >
+                <i className={`fab fa-${s.icon}`} />
+              </a>
+            ))}
           </div>
         </div>
 
